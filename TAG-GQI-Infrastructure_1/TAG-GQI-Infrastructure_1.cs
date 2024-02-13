@@ -51,11 +51,14 @@ DATE		VERSION		AUTHOR			COMMENTS
 
 namespace TAG_GQI_Infrastructure_1
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Net.Messages;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using Skyline.DataMiner.Analytics.GenericInterface;
+    using Skyline.DataMiner.Automation;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -106,6 +109,12 @@ namespace TAG_GQI_Infrastructure_1
                 new GQIDoubleColumn("CPU"),
                 new GQIDoubleColumn("Temperature"),
                 new GQIStringColumn("Clock Offset"),
+                new GQIStringColumn("Model"),
+                new GQIStringColumn("Memory"),
+                new GQIDoubleColumn("Used Outputs"),
+                new GQIDoubleColumn("Limit Outputs"),
+                new GQIDoubleColumn("Used Channels"),
+                new GQIDoubleColumn("Limit Channels"),
             };
         }
 
@@ -113,33 +122,40 @@ namespace TAG_GQI_Infrastructure_1
         {
             var rows = new List<GQIRow>();
 
-            var mcmRequest = new GetLiteElementInfo
+            try
             {
-                ProtocolName = "TAG Video Systems MCM-9000",
-                ProtocolVersion = "Production",
-            };
-
-            var mcsRequest = new GetLiteElementInfo
-            {
-                ProtocolName = "TAG Video Systems Media control System (MCS)",
-                ProtocolVersion = "Production",
-            };
-
-            var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
-
-            foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
-            {
-                GetMCSRows(rows, response);
-            }
-
-            // if no MCS in the system, gather MCM data
-            if (rows.Count == 0)
-            {
-                var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
-                foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
+                var mcmRequest = new GetLiteElementInfo
                 {
-                    GetMCMRows(rows, response);
+                    ProtocolName = "TAG Video Systems MCM-9000",
+                    ProtocolVersion = "Production",
+                };
+
+                var mcsRequest = new GetLiteElementInfo
+                {
+                    ProtocolName = "TAG Video Systems Media control System (MCS)",
+                    ProtocolVersion = "Production",
+                };
+
+                var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
+
+                foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
+                {
+                    GetMCSRows(rows, response);
                 }
+
+                // if no MCS in the system, gather MCM data
+                if (rows.Count == 0)
+                {
+                    var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
+                    {
+                        GetMCMRows(rows, response);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //CreateDebugRow(rows, $"exception: {e}");
             }
 
             return new GQIPage(rows.ToArray())
@@ -180,9 +196,22 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // CPU
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Temperature
                     new GQICell { Value = "-1", DisplayValue = "N/A" }, // Clock Offset
+                    new GQICell { Value = Convert.ToString(deviceRow[2]) }, // Model
+                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Memory
+                    new GQICell { Value = "N/A" }, // Used Outputs
+                    new GQICell { Value = "N/A" }, // Limit Outputs
+                    new GQICell { Value = "N/A" }, // Used Channels
+                    new GQICell {Value = "N/A"}, // Limit Channels
                 };
 
-                var row = new GQIRow(cells);
+                var elementID = new ElementID(response.DataMinerID, response.ElementID);
+                var elementMetadata = new ObjectRefMetadata { Object = elementID };
+                var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
+
+                var row = new GQIRow(cells)
+                {
+                    Metadata = rowMetadata,
+                };
                 rows.Add(row);
             }
         }
@@ -234,29 +263,73 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = CheckUsage(deviceInfoRow, 14, 15) }, // Outputs
                     new GQICell { Value = CheckUsage(deviceInfoRow, 16, 17) }, // Descramblers
                     new GQICell { Value = CheckUsage(deviceInfoRow, 12, 13) }, // Recordings
-                    new GQICell { Value = Convert.ToDouble(deviceCpuRow[4]), DisplayValue = CheckValue(Convert.ToDouble(deviceCpuRow[4])) + " %" }, // CPU
+                    new GQICell { Value = CheckValue(Convert.ToString(deviceCpuRow[4]), out double cpuValue), DisplayValue = cpuValue == -1 ? "N/A" : cpuValue + " %" }, // CPU
                     new GQICell { Value = temperature, DisplayValue = CheckValue(temperature) }, // Temperature
                     new GQICell { Value = Convert.ToString(deviceInfoRow[4]), DisplayValue = CheckValue(Convert.ToDouble(deviceInfoRow[4])) }, // Clock Offset
+                    new GQICell { Value = Convert.ToString(deviceHardwareRow[4]) }, // Model
+                    new GQICell { Value = CheckUsageModified(deviceCpuRow, 2, 3, 1000) }, // Memory
+                    new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[14]), out double outputsUsed), DisplayValue = outputsUsed == -1 ? "N/A" : Convert.ToString(outputsUsed) }, // Used Outputs
+                    new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[15]), out double outputsLimit), DisplayValue = outputsLimit == -1 ? "N/A" : Convert.ToString(outputsLimit) }, // Limit Outputs
+                    new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[18]), out double channelsUsed), DisplayValue = channelsUsed == -1 ? "N/A" : Convert.ToString(channelsUsed) }, // Used Channels
+                    new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[19]), out double channelsLimit), DisplayValue = channelsLimit == -1 ? "N/A" : Convert.ToString(channelsLimit) }, // Limit Channels
                 };
 
-                var row = new GQIRow(cells);
+                var elementID = new ElementID(response.DataMinerID, response.ElementID);
+                var elementMetadata = new ObjectRefMetadata { Object = elementID };
+                var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
+
+                var row = new GQIRow(cells)
+                {
+                    Metadata = rowMetadata,
+                };
                 rows.Add(row);
             }
         }
 
         private static string CheckUsage(object[] deviceInfoRow, int usedAmountPosition, int limitPosition)
         {
-            return Convert.ToString(deviceInfoRow[usedAmountPosition]) == "-1" ? "N/A" : GetFormattedUsage(deviceInfoRow, usedAmountPosition, limitPosition);
+            return Convert.ToDouble(deviceInfoRow[usedAmountPosition]) < 0 ? "N/A" : GetFormattedUsage(deviceInfoRow, usedAmountPosition, limitPosition);
         }
 
         private static string GetFormattedUsage(object[] deviceInfoRow, int usedAmountPosition, int limitPosition)
         {
-            return Convert.ToString(deviceInfoRow[usedAmountPosition]) + " / " + Convert.ToString(deviceInfoRow[limitPosition]);
+            return Convert.ToInt32(deviceInfoRow[usedAmountPosition]) + " / " + Convert.ToInt32(deviceInfoRow[limitPosition]);
         }
 
-        private static string CheckValue(double temperature)
+        private static string CheckUsageModified(object[] deviceInfoRow, int usedAmountPosition, int limitPosition, int modifier)
         {
-            return temperature == -1 ? "N/A" : Convert.ToString(temperature);
+            return Convert.ToDouble(deviceInfoRow[usedAmountPosition]) < 0 ? "N/A" : GetFormattedUsageModified(deviceInfoRow, usedAmountPosition, limitPosition, modifier);
+        }
+
+        private static string GetFormattedUsageModified(object[] deviceInfoRow, int usedAmountPosition, int limitPosition, int modifier)
+        {
+            var usedAmount = Convert.ToInt32(deviceInfoRow[usedAmountPosition]);
+            var limitAmount = Convert.ToInt32(deviceInfoRow[limitPosition]);
+            if (usedAmount > modifier)
+            {
+                usedAmount /= modifier;
+                limitAmount /= modifier;
+            }
+
+            return usedAmount + " / " + limitAmount;
+        }
+
+        private static double CheckValue(string value, out double returnValue)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                returnValue = -1;
+                return -1;
+            }
+
+            var numericValue = Convert.ToDouble(Regex.Match(value, @"^[+-]?(\d*\.)?\d+$").Value);
+            returnValue = numericValue == -1 ? -1 : numericValue;
+            return returnValue;
+        }
+
+        private static string CheckValue(double value)
+        {
+            return value == -1 ? "N/A" : Convert.ToString(value);
         }
 
         private object[][] GetTable(LiteElementInfoEvent response, int tableId)
@@ -305,6 +378,39 @@ namespace TAG_GQI_Infrastructure_1
             }
 
             return objArray;
+        }
+
+        private static void CreateDebugRow(List<GQIRow> rows, string message)
+        {
+            var debugCells = new[]
+            {
+                new GQICell { Value = message },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null},
+                new GQICell { Value = null},
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null},
+                new GQICell { Value = null},
+                new GQICell { Value = null},
+                new GQICell { Value = null},
+                new GQICell { Value = null},
+            };
+
+            var row = new GQIRow(debugCells);
+            rows.Add(row);
         }
     }
 }
