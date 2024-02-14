@@ -115,6 +115,7 @@ namespace TAG_GQI_Infrastructure_1
                 new GQIDoubleColumn("Limit Outputs"),
                 new GQIDoubleColumn("Used Channels"),
                 new GQIDoubleColumn("Limit Channels"),
+                new GQIStringColumn("Device Key"),
             };
         }
 
@@ -197,11 +198,12 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Temperature
                     new GQICell { Value = "-1", DisplayValue = "N/A" }, // Clock Offset
                     new GQICell { Value = Convert.ToString(deviceRow[2]) }, // Model
-                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Memory
-                    new GQICell { Value = "N/A" }, // Used Outputs
-                    new GQICell { Value = "N/A" }, // Limit Outputs
-                    new GQICell { Value = "N/A" }, // Used Channels
-                    new GQICell {Value = "N/A"}, // Limit Channels
+                    new GQICell { Value = "N/A" }, // Memory
+                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Used Outputs
+                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Limit Outputs
+                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Used Channels
+                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Limit Channels
+                    new GQICell { Value = deviceRow }, // Device Key
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
@@ -272,6 +274,7 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[15]), out double outputsLimit), DisplayValue = outputsLimit == -1 ? "N/A" : Convert.ToString(outputsLimit) }, // Limit Outputs
                     new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[18]), out double channelsUsed), DisplayValue = channelsUsed == -1 ? "N/A" : Convert.ToString(channelsUsed) }, // Used Channels
                     new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[19]), out double channelsLimit), DisplayValue = channelsLimit == -1 ? "N/A" : Convert.ToString(channelsLimit) }, // Limit Channels
+                    new GQICell { Value = Convert.ToString(deviceRow[0]) }, // Device Key
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
@@ -303,15 +306,15 @@ namespace TAG_GQI_Infrastructure_1
 
         private static string GetFormattedUsageModified(object[] deviceInfoRow, int usedAmountPosition, int limitPosition, int modifier)
         {
-            var usedAmount = Convert.ToInt32(deviceInfoRow[usedAmountPosition]);
-            var limitAmount = Convert.ToInt32(deviceInfoRow[limitPosition]);
+            var usedAmount = Convert.ToDouble(deviceInfoRow[usedAmountPosition]);
+            var limitAmount = Convert.ToDouble(deviceInfoRow[limitPosition]);
             if (usedAmount > modifier)
             {
                 usedAmount /= modifier;
                 limitAmount /= modifier;
             }
 
-            return usedAmount + " / " + limitAmount;
+            return Math.Round(usedAmount, 2) + " / " + Math.Round(limitAmount, 2);
         }
 
         private static double CheckValue(string value, out double returnValue)
