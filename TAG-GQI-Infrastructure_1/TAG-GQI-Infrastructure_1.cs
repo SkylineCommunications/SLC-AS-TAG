@@ -203,7 +203,7 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Limit Outputs
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Used Channels
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Limit Channels
-                    new GQICell { Value = deviceRow }, // Device Key
+                    new GQICell { Value = Convert.ToString(deviceRow[0]) }, // Device Key
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
