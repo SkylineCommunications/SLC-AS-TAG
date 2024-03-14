@@ -23,7 +23,7 @@
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties DisLinkedXmlFile="..\TAG_MCS-Layout Position Editor.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
+      <UserProperties DisLinkedXmlFile="..\TAG-IAS-Layout Position Editor.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

@@ -49,7 +49,7 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace TAG_Layout_Position_Editor_1
+namespace TAG_IAS_Layout_Position_Editor_1
 {
     using System;
     using Skyline.DataMiner.Automation;
@@ -61,20 +61,20 @@ namespace TAG_Layout_Position_Editor_1
     /// Represents a DataMiner Automation script.
     /// </summary>
     public class Script
-    {
-        public static readonly int MCMTableId = 240;
-        public static readonly int MCSTableId = 5300;
+	{
+		public static readonly int MCMTableId = 240;
+		public static readonly int MCSTableId = 5300;
 
-        private static string layoutId;
-        private static string position;
-        private static LayoutEditDialog layoutEditor;
+		private static string layoutId;
+		private static string position;
+		private static LayoutEditor layoutEditor;
 
-        /// <summary>
-        /// The script entry point.
-        /// </summary>
-        /// <param name="engine">Link with SLAutomation process.</param>
-        public static void Run(IEngine engine)
-        {
+		/// <summary>
+		/// The script entry point.
+		/// </summary>
+		/// <param name="engine">Link with SLAutomation process.</param>
+		public static void Run(IEngine engine)
+		{
             // DO NOT REMOVE THIS COMMENTED-OUT CODE OR THE SCRIPT WON'T RUN!
             // DataMiner evaluates if the script needs to launch in interactive mode.
             // This is determined by a simple string search looking for "engine.ShowUI" in the source code.
@@ -90,7 +90,7 @@ namespace TAG_Layout_Position_Editor_1
                 var action = engine.GetScriptParam("Action").Value;
 
                 var controller = new InteractiveController(engine);
-                layoutEditor = new LayoutEditDialog(engine);
+                layoutEditor = new LayoutEditor(engine);
 
                 var elementData = elementId.Split('/');
                 if (elementData.Length < 2)
@@ -124,7 +124,7 @@ namespace TAG_Layout_Position_Editor_1
             }
         }
 
-        private static void UpdateLayoutChannel(Element element, int tablePid, string value)
+		private static void UpdateLayoutChannel(Element element, int tablePid, string value)
         {
             element.SetParameterByPrimaryKey(tablePid, $"{layoutId}/{position}", value);
         }

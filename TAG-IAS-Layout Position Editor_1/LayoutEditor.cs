@@ -49,23 +49,23 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace TAG_Layout_Position_Editor_1
+namespace TAG_IAS_Layout_Position_Editor_1
 {
-	using System;
-	using System.Collections.Generic;
-	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Core.DataMinerSystem.Common;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+    using System;
+    using System.Collections.Generic;
+    using Skyline.DataMiner.Automation;
+    using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
-	public enum Monitored
+    public enum Monitored
     {
         No = 0,
         Yes = 1,
     }
 
-	internal class LayoutEditDialog : Dialog
+    internal class LayoutEditor : Dialog
     {
-        public LayoutEditDialog(IEngine engine) : base(engine)
+        public LayoutEditor(IEngine engine) : base(engine)
         {
             Title = "Edit Layout Position";
 
