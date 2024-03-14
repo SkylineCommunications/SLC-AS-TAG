@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Skyline.DataMiner.Analytics.GenericInterface.QueryBuilder;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -29,16 +28,16 @@
             CancelButton = new Button("Cancel");
 
             AddWidget(Label, 0, 0);
-            AddWidget(ChannelsDropDown, 0, 1);
+            AddWidget(ChannelsDropDown, 0, 1, 1, 2);
             AddWidget(UpdateButton, 1, 1, HorizontalAlignment.Right);
-            AddWidget(CancelButton, 2, 1, HorizontalAlignment.Right);
+            AddWidget(CancelButton, 1, 2, HorizontalAlignment.Left);
 
             Label.Width = 150;
             ChannelsDropDown.Width = 400;
-            UpdateButton.Width = 100;
-            CancelButton.Width = 100;
+            UpdateButton.Width = 110;
+            CancelButton.Width = 110;
 
-            Label.Style = TextStyle.Heading;
+            Label.Style = TextStyle.None;
         }
 
         public Label Label { get; private set; }
