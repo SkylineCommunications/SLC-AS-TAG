@@ -55,23 +55,20 @@
             if (element.Protocol.Name.Contains("MCM"))
             {
                 var tableData = element.GetTable(MCMChannelStatusTableId).GetData();
-                foreach (var row in tableData.Values)
-                {
-                    if (Convert.ToInt32(row[14 /* Monitored */]) == (int)Monitored.Yes)
-                    {
-                        channelsList.Add(Convert.ToString(row[12 /* Name */]));
-                    }
-                }
+                var channelsToAdd = tableData.Values
+                    .Where(row => Convert.ToInt32(row[14 /* Monitored */]) == (int)Monitored.Yes)
+                    .Select(row => Convert.ToString(row[12 /* Name */])).ToList();
+                channelsList.AddRange(channelsToAdd);
             }
             else
             {
                 foreach (var tableId in MCSChannelsTableIds)
                 {
                     var channelsTableData = element.GetTable(tableId).GetData();
-                    foreach (var row in channelsTableData.Values)
-                    {
-                        channelsList.Add(Convert.ToString(row[1 /* Label */]));
-                    }
+                    var channelsToAdd = channelsTableData.Values
+                        .Where(row => !Convert.ToString(row[6 /* Device */]).Equals("Not Set"))
+                        .Select(row => Convert.ToString(row[1 /* Label */])).ToList();
+                    channelsList.AddRange(channelsToAdd);
                 }
             }
 
