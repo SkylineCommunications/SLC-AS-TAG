@@ -52,6 +52,8 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 namespace TAG_IAS_Layout_Position_Editor_1
 {
     using System;
+    using System.Collections.Generic;
+    using Newtonsoft.Json;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
@@ -62,8 +64,8 @@ namespace TAG_IAS_Layout_Position_Editor_1
     /// </summary>
     public class Script
 	{
-		public static readonly int MCMTableId = 240;
-		public static readonly int MCSTableId = 5300;
+		private const int MCMLayoutsTableId = 10353;
+		private const int MCSLayoutsTableId = 5653;
 
 		private static string layoutId;
 		private static string position;
@@ -81,13 +83,14 @@ namespace TAG_IAS_Layout_Position_Editor_1
             // However, because of the toolkit NuGet package, this string cannot be found here.
             // So this comment is here as a workaround.
             //// engine.ShowUI();
+            engine.SetFlag(RunTimeFlags.NoCheckingSets);
 
             try
             {
-                var elementId = engine.GetScriptParam("Element ID").Value;
-                layoutId = engine.GetScriptParam("Layout ID").Value;
-                position = engine.GetScriptParam("Position").Value;
-                var action = engine.GetScriptParam("Action").Value;
+                var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                layoutId = GetOneDeserializedValue(engine.GetScriptParam("Layout ID").Value);
+                position = GetOneDeserializedValue(engine.GetScriptParam("Position").Value);
+                var action = GetOneDeserializedValue(engine.GetScriptParam("Action").Value);
 
                 var controller = new InteractiveController(engine);
                 layoutEditor = new LayoutEditor(engine);
@@ -100,33 +103,61 @@ namespace TAG_IAS_Layout_Position_Editor_1
                 }
 
                 var dms = engine.GetDms();
-                var dmsElement = dms.GetElement(elementId);
+                var dmsElement = dms.GetElement(new DmsElementId(Convert.ToInt32(elementData[0]), Convert.ToInt32(elementData[1])));
                 var element = engine.FindElementByKey(elementId);
+                var tablePid = GetTablePidByElement(dmsElement);
 
                 if (action.ToUpperInvariant().Equals("EDIT"))
                 {
                     layoutEditor.GetLayoutsFromElement(dmsElement);
 
-                    layoutEditor.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(element, MCMTableId, layoutEditor.ChannelsDropDown.Selected);
-                    layoutEditor.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Safe Close");
+                    layoutEditor.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, tablePid, layoutEditor.ChannelsDropDown.Selected);
+                    layoutEditor.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
 
                     controller.Run(layoutEditor);
                 }
                 else
                 {
-                    UpdateLayoutChannel(element, MCSTableId, "None");
+                    UpdateLayoutChannel(engine, element, tablePid, "None");
                 }
+            }
+            catch (ScriptAbortException)
+            {
+                // no action
             }
             catch (Exception ex)
             {
                 engine.GenerateInformation($"Exception thrown: {ex}");
-                throw;
             }
         }
 
-		private static void UpdateLayoutChannel(Element element, int tablePid, string value)
+		private static void UpdateLayoutChannel(IEngine engine, Element element, int tablePid, string value)
         {
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                engine.GenerateInformation($"Value to set on layout with ID {layoutId} and position {position} is null or empty.");
+                return;
+            }
+
             element.SetParameterByPrimaryKey(tablePid, $"{layoutId}/{position}", value);
+            engine.ExitSuccess("Layout Title updated");
+        }
+
+		private static int GetTablePidByElement(IDmsElement element)
+        {
+            return element.Protocol.Name.Contains("MCM") ? MCMLayoutsTableId : MCSLayoutsTableId;
+        }
+
+		private static string GetOneDeserializedValue(string scriptParam) // [ "value" , "value" ]
+        {
+            if (scriptParam.Contains("[") && scriptParam.Contains("]"))
+            {
+                return JsonConvert.DeserializeObject<List<string>>(scriptParam)[0];
+            }
+            else
+            {
+                return scriptParam;
+            }
         }
     }
 }
