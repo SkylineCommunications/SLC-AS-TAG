@@ -64,19 +64,13 @@ namespace TAG_GQI_Retrieve_Layouts_1
     /// Represents a DataMiner Automation script.
     /// </summary>
     [GQIMetaData(Name = "Get TAG All Layouts")]
-    public class GetTAGInfrastructure : IGQIDataSource, IGQIOnInit
+    public class GetTagLayouts : IGQIDataSource, IGQIOnInit
     {
+        private readonly int mcsAllLayoutTable = 5600;
+
+        private readonly int mcmAllLayoutTable = 10300;
+
         private GQIDMS _dms;
-
-        public enum MCSTableId
-        {
-            DeviceAllLayout = 5600,
-        }
-
-        public enum MCMTableId
-        {
-            DeviceAllLayout = 10300,
-        }
 
         public OnInitOutputArgs OnInit(OnInitInputArgs args)
         {
@@ -116,28 +110,28 @@ namespace TAG_GQI_Retrieve_Layouts_1
                     ProtocolVersion = "Production",
                 };
 
-                var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
+                var mcsResponses = _dms.SendMessages(mcsRequest);
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var allLayoutsTable = GetTable(response, (int)MCSTableId.DeviceAllLayout);
+                    var allLayoutsTable = GetTable(response, mcsAllLayoutTable);
                     GetAllLayoutsTableRows(rows, response, allLayoutsTable);
                 }
 
                 // if no MCS in the system, gather MCM data
                 if (rows.Count == 0)
                 {
-                    var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    var mcmResponses = _dms.SendMessages(mcmRequest);
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var allLayoutsTable = GetTable(response, (int)MCMTableId.DeviceAllLayout);
+                        var allLayoutsTable = GetTable(response, mcmAllLayoutTable);
                         GetAllLayoutsTableRows(rows, response, allLayoutsTable);
                     }
                 }
             }
             catch (Exception e)
             {
-                //CreateDebugRow(rows, $"exception: {e}");
+                CreateDebugRow(rows, $"exception: {e}");
             }
 
             return new GQIPage(rows.ToArray())
@@ -198,7 +192,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
             }
         }
 
-        private static object[][] BuildRows(ParameterValue[] columns)
+        private object[][] BuildRows(ParameterValue[] columns)
         {
             int length1 = columns.Length;
             int length2 = 0;
@@ -226,7 +220,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
             return objArray;
         }
 
-        private static void CreateDebugRow(List<GQIRow> rows, string message)
+        private void CreateDebugRow(List<GQIRow> rows, string message)
         {
             var debugCells = new[]
             {
@@ -244,15 +238,15 @@ namespace TAG_GQI_Retrieve_Layouts_1
                 new GQICell { Value = null },
                 new GQICell { Value = null },
                 new GQICell { Value = null },
-                new GQICell { Value = null},
-                new GQICell { Value = null},
                 new GQICell { Value = null },
                 new GQICell { Value = null },
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
             };
 
             var row = new GQIRow(debugCells);
