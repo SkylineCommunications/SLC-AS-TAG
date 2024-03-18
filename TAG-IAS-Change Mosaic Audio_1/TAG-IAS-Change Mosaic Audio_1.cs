@@ -85,8 +85,13 @@ namespace TAG_IAS_Change_Mosaic_Audio_1
                 dialog.SetValues(elementId, outputId, layoutId);
                 dialog.ChannelOutputDropDown.Changed += (sender, args) => dialog.UpdateChannelAudioEncoderOptions();
                 dialog.ChangeAudioButton.Pressed += (sender, args) => dialog.ChangeAudio();
+                dialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Changed Audio Canceled by User");
 
                 controller.Run(dialog);
+            }
+            catch (ScriptAbortException)
+            {
+                // no action
             }
             catch (Exception ex)
             {

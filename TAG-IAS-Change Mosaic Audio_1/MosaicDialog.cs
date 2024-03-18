@@ -44,6 +44,7 @@
             ChannelAudioEncodingLabel = new Label("Channel Audio Encoding:");
             ChannelAudioEncodingDropDown = new DropDown();
             ChangeAudioButton = new Button("Change Audio");
+            CancelButton = new Button("Cancel");
 
             AddWidget(MonitoringTagLabel, 0, 0);
             AddWidget(MonitoringTagValue, 0, 1);
@@ -54,6 +55,7 @@
             AddWidget(ChannelAudioEncodingLabel, 3, 0);
             AddWidget(ChannelAudioEncodingDropDown, 3, 1);
             AddWidget(ChangeAudioButton, 4, 1, HorizontalAlignment.Right);
+            AddWidget(CancelButton, 4, 0, HorizontalAlignment.Left);
 
             MonitoringTagLabel.Width = 150;
             MonitoringTagValue.Width = 300;
@@ -64,6 +66,7 @@
             ChannelAudioEncodingLabel.Width = 150;
             ChannelAudioEncodingDropDown.Width = 300;
             ChangeAudioButton.Width = 150;
+            CancelButton.Width = 150;
         }
 
         public Label MonitoringTagLabel { get; private set; }
@@ -83,6 +86,8 @@
         public DropDown ChannelAudioEncodingDropDown { get; private set; }
 
         public Button ChangeAudioButton { get; private set; }
+
+        public Button CancelButton { get; private set; }
 
         internal void ChangeAudio()
         {
