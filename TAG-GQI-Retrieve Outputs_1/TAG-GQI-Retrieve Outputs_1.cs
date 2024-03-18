@@ -65,23 +65,9 @@ namespace TAG_GQI_Retrieve_Outputs_1
     /// Represents a DataMiner Automation script.
     /// </summary>
     [GQIMetaData(Name = "Get TAG All Outputs")]
-    public class GetTAGInfrastructure : IGQIDataSource, IGQIOnInit
+    public class GetTagOutputs : IGQIDataSource, IGQIOnInit
     {
-        private GQIDMS _dms;
-
-        public enum MCSTableId
-        {
-            DeviceOutputConfig = 3100,
-            OutputLayouts = 3400,
-        }
-
-        public enum MCMTableId
-        {
-            DeviceEncoderConfig = 1500,
-            DeviceOverview = 1000,
-        }
-
-        private Dictionary<string,string> ResolutionDict = new Dictionary<string, string> 
+        private readonly Dictionary<string, string> resolutionDict = new Dictionary<string, string>
         {
             {"0","1920x1080"},
             {"1","1080x1920 (90deg)"},
@@ -93,7 +79,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
             {"7","2160x3840 (90deg)"},
         };
 
-        private Dictionary<string, string> FrameRateDict = new Dictionary<string, string>
+        private readonly Dictionary<string, string> frameRateDict = new Dictionary<string, string>
         {
             {"1","1/25 fps"},
             {"2","2/25 fps"},
@@ -109,6 +95,20 @@ namespace TAG_GQI_Retrieve_Outputs_1
             {"12","59.94 fps"},
             {"13","60 fps"},
         };
+
+        private GQIDMS _dms;
+
+        public enum McsTableId
+        {
+            DeviceOutputConfig = 3100,
+            OutputLayouts = 3400,
+        }
+
+        public enum McmTableId
+        {
+            DeviceEncoderConfig = 1500,
+            DeviceOverview = 1000,
+        }
 
         public OnInitOutputArgs OnInit(OnInitInputArgs args)
         {
@@ -153,8 +153,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var outputConfigTable = GetTable(response, (int)MCSTableId.DeviceOutputConfig);
-                    GetOutputMCSTableRows(rows, response, outputConfigTable);
+                    var outputConfigTable = GetTable(response, (int)McsTableId.DeviceOutputConfig);
+                    GetOutputMcsTableRows(rows, response, outputConfigTable);
                 }
 
                 // if no MCS in the system, gather MCM data
@@ -163,14 +163,14 @@ namespace TAG_GQI_Retrieve_Outputs_1
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var encoderConfigTable = GetTable(response, (int)MCMTableId.DeviceEncoderConfig);
-                        GetOutputMCMTableRows(rows, response, encoderConfigTable);
+                        var encoderConfigTable = GetTable(response, (int)McmTableId.DeviceEncoderConfig);
+                        GetOutputMcmTableRows(rows, response, encoderConfigTable);
                     }
                 }
             }
             catch (Exception e)
             {
-                //CreateDebugRow(rows, $"exception: {e}");
+                CreateDebugRow(rows, $"exception: {e}");
             }
 
             return new GQIPage(rows.ToArray())
@@ -179,9 +179,9 @@ namespace TAG_GQI_Retrieve_Outputs_1
             };
         }
 
-        private void GetOutputMCSTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] outputConfigTable)
+        private void GetOutputMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] outputConfigTable)
         {
-            var outputLayoutsTable = GetTable(response, (int)MCSTableId.OutputLayouts);
+            var outputLayoutsTable = GetTable(response, (int)McsTableId.OutputLayouts);
 
             for (int i = 0; i < outputConfigTable.Length; i++)
             {
@@ -204,8 +204,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                     new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
                     new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
                     new GQICell { Value = outputName }, // Output
-                    new GQICell { Value = ResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                    new GQICell { Value = FrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                    new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                    new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
                     new GQICell { Value = layoutName }, // Layout
                     new GQICell { Value = layoutId }, // Layout ID
                 };
@@ -238,16 +238,16 @@ namespace TAG_GQI_Retrieve_Outputs_1
             return layoutsInOutput;
         }
 
-        private void GetOutputMCMTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] encoderConfigTable)
+        private void GetOutputMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] encoderConfigTable)
         {
-            var deviceOverviewTable = GetTable(response, (int)MCMTableId.DeviceOverview);
+            var deviceOverviewTable = GetTable(response, (int)McmTableId.DeviceOverview);
             var deviceRows = deviceOverviewTable.Where(x => Convert.ToString(x[1]).Equals("Cloud License"));
             for (int i = 0; i < encoderConfigTable.Length; i++)
             {
                 var deviceEncoderConfigRow = encoderConfigTable[i];
                 var filteredDeviceRow = deviceRows.First(x => Convert.ToString(x[8]).Equals(Convert.ToString(deviceEncoderConfigRow[4])));
                 var deviceName = string.Empty;
-                deviceName = filteredDeviceRow == null ? deviceName = "N/A" : deviceName = Convert.ToString(filteredDeviceRow[0]);
+                deviceName = filteredDeviceRow == null ? "N/A" : Convert.ToString(filteredDeviceRow[0]);
                 var cells = new[]
                 {
                     new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
