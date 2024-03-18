@@ -55,6 +55,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{5718
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-IAS-Layout Position Editor_1", "TAG-IAS-Layout Position Editor_1\TAG-IAS-Layout Position Editor_1.csproj", "{5168E575-0212-4206-90A0-B7F00DCDF77D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TAG-IAS-Modify Output Layout", "TAG-IAS-Modify Output Layout", "{44286B7D-AAB6-42D9-BFAA-F32E75107753}"
+	ProjectSection(SolutionItems) = preProject
+		TAG-IAS-Modify Output Layout.xml = TAG-IAS-Modify Output Layout.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{7B3A5CCC-8D95-4D69-8A49-E4DBDA0BC8EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-IAS-Modify Output Layout_1", "TAG-IAS-Modify Output Layout_1\TAG-IAS-Modify Output Layout_1.csproj", "{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +78,10 @@ Global
 		{5168E575-0212-4206-90A0-B7F00DCDF77D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5168E575-0212-4206-90A0-B7F00DCDF77D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5168E575-0212-4206-90A0-B7F00DCDF77D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,6 +95,9 @@ Global
 		{C1C1CCD5-6256-48F7-984E-5B97D51E5426} = {82876D1A-BF8E-42F5-B21F-68270190C345}
 		{57184193-D0C1-4E84-865F-0311ED012B90} = {C1C1CCD5-6256-48F7-984E-5B97D51E5426}
 		{5168E575-0212-4206-90A0-B7F00DCDF77D} = {57184193-D0C1-4E84-865F-0311ED012B90}
+		{44286B7D-AAB6-42D9-BFAA-F32E75107753} = {82876D1A-BF8E-42F5-B21F-68270190C345}
+		{7B3A5CCC-8D95-4D69-8A49-E4DBDA0BC8EE} = {44286B7D-AAB6-42D9-BFAA-F32E75107753}
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2} = {7B3A5CCC-8D95-4D69-8A49-E4DBDA0BC8EE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7A356EBC-DCA5-45C1-88F9-EA3577E6920E}

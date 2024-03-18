@@ -13,12 +13,12 @@
         Yes = 1,
     }
 
-    internal class LayoutEditor : Dialog
+    internal class LayoutDialog : Dialog
     {
         private const int MCMChannelStatusTableId = 240;
         private static readonly List<int> MCSChannelsTableIds = new List<int> { 2100, 2200 };
 
-        public LayoutEditor(IEngine engine) : base(engine)
+        public LayoutDialog(IEngine engine) : base(engine)
         {
             Title = "Edit Layout Position";
 
@@ -50,7 +50,7 @@
 
         public void GetLayoutsFromElement(IDmsElement element)
         {
-            var channelsList = new List<string> { "None", "Reserved" };
+            var channelsList = new List<string> { "< None >" };
 
             if (element.Protocol.Name.Contains("MCM"))
             {

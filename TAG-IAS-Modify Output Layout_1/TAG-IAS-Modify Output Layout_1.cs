@@ -49,33 +49,33 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace TAG_IAS_Layout_Position_Editor_1
+namespace TAG_IAS_Modify_Output_Layout_1
 {
-    using System;
-    using System.Collections.Generic;
-    using Newtonsoft.Json;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Newtonsoft.Json;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
-    /// <summary>
-    /// Represents a DataMiner Automation script.
-    /// </summary>
-    public class Script
+	/// <summary>
+	/// Represents a DataMiner Automation script.
+	/// </summary>
+	public class Script
 	{
-		private const int MCMLayoutsTableId = 10353;
-		private const int MCSLayoutsTableId = 5653;
+        private const int MCMEncoderConfigTableId = 1500;
+        public const int MCSOutputsLayoutsTableId = 3400;
 
-		private static string layoutId;
-		private static string position;
-		private static LayoutDialog layoutDialog;
+        private const int MCMLayoutsTableId = 1560;
+        private const int MCSLayoutsTableIds = 3600;
 
-		/// <summary>
-		/// The script entry point.
-		/// </summary>
-		/// <param name="engine">Link with SLAutomation process.</param>
-		public static void Run(IEngine engine)
+        /// <summary>
+        /// The script entry point.
+        /// </summary>
+        /// <param name="engine">Link with SLAutomation process.</param>
+        public static void Run(IEngine engine)
 		{
             // DO NOT REMOVE THIS COMMENTED-OUT CODE OR THE SCRIPT WON'T RUN!
             // DataMiner evaluates if the script needs to launch in interactive mode.
@@ -88,12 +88,9 @@ namespace TAG_IAS_Layout_Position_Editor_1
             try
             {
                 var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                layoutId = GetOneDeserializedValue(engine.GetScriptParam("Layout ID").Value);
-                position = GetOneDeserializedValue(engine.GetScriptParam("Position").Value);
-                var action = GetOneDeserializedValue(engine.GetScriptParam("Action").Value);
+                var outputId = GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
 
                 var controller = new InteractiveController(engine);
-                layoutDialog = new LayoutDialog(engine);
 
                 var elementData = elementId.Split('/');
                 if (elementData.Length < 2)
@@ -107,19 +104,15 @@ namespace TAG_IAS_Layout_Position_Editor_1
                 var element = engine.FindElementByKey(elementId);
                 var tablePid = GetTablePidByElement(dmsElement);
 
-                if (action.ToUpperInvariant().Equals("EDIT"))
-                {
-                    layoutDialog.GetLayoutsFromElement(dmsElement);
+                var layoutsList = GetLayoutsFromElement(dmsElement);
+                var layoutsPerOutput = GetLayoutsCount(dmsElement, outputId);
 
-                    layoutDialog.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, tablePid, layoutDialog.ChannelsDropDown.Selected);
-                    layoutDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
+                var outputDialog = new OutputDialog(engine, layoutsPerOutput, layoutsList);
 
-                    controller.Run(layoutDialog);
-                }
-                else
-                {
-                    UpdateLayoutChannel(engine, element, tablePid, "None");
-                }
+                outputDialog.UpdateButton.Pressed += (sender, args) => engine.GenerateInformation("Update requested");
+                outputDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
+
+                controller.Run(outputDialog);
             }
             catch (ScriptAbortException)
             {
@@ -131,29 +124,41 @@ namespace TAG_IAS_Layout_Position_Editor_1
             }
         }
 
-		private static void UpdateLayoutChannel(IEngine engine, Element element, int tablePid, string value)
+        private static List<string> GetLayoutsFromElement(IDmsElement element)
         {
-            if (String.IsNullOrWhiteSpace(value))
+            var layoutsList = new List<string>();
+
+            if (element.Protocol.Name.Contains("MCM"))
             {
-                engine.GenerateInformation($"Value to set on layout with ID {layoutId} and position {position} is null or empty.");
-                return;
+                var tableData = element.GetTable(MCMLayoutsTableId).GetData();
+                var layoutsToAdd = tableData.Values.Select(row => Convert.ToString(row[1 /* Title */])).ToList();
+                layoutsList.AddRange(layoutsToAdd);
+            }
+            else
+            {
+                var tableData = element.GetTable(MCSLayoutsTableIds).GetData();
+                var layoutsToAdd = tableData.Values.Select(row => Convert.ToString(row[1 /* Title */])).ToList();
+                layoutsList.AddRange(layoutsToAdd);
             }
 
-            if (value.StartsWith("<"))
-            {
-                value = value.Replace("<", String.Empty).Replace(">", String.Empty).Trim();
-            }
-
-            element.SetParameterByPrimaryKey(tablePid, $"{layoutId}/{position}", value);
-            engine.ExitSuccess("Layout Title updated");
+            layoutsList.Sort();
+            return layoutsList.Distinct().ToList();
         }
 
-		private static int GetTablePidByElement(IDmsElement element)
+        private static List<object[]> GetLayoutsCount(IDmsElement element, string outputId)
         {
-            return element.Protocol.Name.Contains("MCM") ? MCMLayoutsTableId : MCSLayoutsTableId;
+            var outputsLayoutsTableData = element.GetTable(Script.MCSOutputsLayoutsTableId);
+            var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 3403, Value = outputId } };
+            var matchedOutputs = outputsLayoutsTableData.QueryData(filter).ToList();
+            return matchedOutputs;
         }
 
-		private static string GetOneDeserializedValue(string scriptParam) // [ "value" , "value" ]
+        private static int GetTablePidByElement(IDmsElement element)
+        {
+            return element.Protocol.Name.Contains("MCM") ? MCMEncoderConfigTableId : MCSOutputsLayoutsTableId;
+        }
+
+        private static string GetOneDeserializedValue(string scriptParam) // [ "value" , "value" ]
         {
             if (scriptParam.Contains("[") && scriptParam.Contains("]"))
             {
