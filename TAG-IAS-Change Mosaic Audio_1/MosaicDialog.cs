@@ -115,20 +115,22 @@
             engine.ExitSuccess("Script completed");
         }
 
-        internal void SetValues(string elementId, string outputName, string layoutName)
+        internal void SetValues(string elementId, string outputId, string layoutId)
         {
             dms = engine.GetDms();
             var tagElement = dms.GetElement(new DmsElementId(elementId));
             var tagElementName = tagElement.Name;
             var tagType = tagElement.Protocol.Name;
-
+            string outputName;
             this.MonitoringTagValue.Text = tagElementName;
             if (tagType.Contains("MCS"))
             {
                 var pidsOverviewTableData = tagElement.GetTable(2500).GetData();
                 var allLayoutsTableData = tagElement.GetTable(5600).GetData();
-                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutName);
+                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId);
                 audioPidList = CreateMcsAudioPidList(pidsOverviewTableData);
+                var outputTable = tagElement.GetTable(3100).GetData(); // replace with the actual TAG MCS Data.
+                outputName = GetOutputNameById(outputTable, outputId);
             }
             else
             {
@@ -136,11 +138,14 @@
 
                 var pidsOverviewTable = tagElement.GetTable(1200).GetData();
                 var allLayoutsTableData = tagElement.GetTable(10300).GetData();
-                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutName);
+                var enconderTable = tagElement.GetTable(1500).GetData();
+
+                outputName = GetOutputNameById(enconderTable, outputId);
+                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId);
                 audioPidList = CreateMcmAudioPidList(pidsOverviewTable);
             }
 
-            outputList = new List<OutputConfigData> { new OutputConfigData { OutputLabel = outputName, Layout = layoutName } };
+            outputList = new List<OutputConfigData> { new OutputConfigData { OutputLabel = outputName} };
             this.OutputEncoderValue.Text = outputList[0].OutputLabel;
 
             if (listChannelsPerLayout.Count > 0)
@@ -174,6 +179,19 @@
             }
         }
 
+        private string GetOutputNameById(IDictionary<string, object[]> enconderTable, string outputId)
+        {
+            foreach (var row in enconderTable.Values)
+            {
+                if (Convert.ToString(row[0]).Equals(outputId))
+                {
+                    return Convert.ToString(row[1]);
+                }
+            }
+
+            return string.Empty;
+        }
+
         internal void UpdateChannelAudioEncoderOptions()
         {
             var selectedChannelOutput = this.ChannelOutputDropDown.Selected;
@@ -198,11 +216,12 @@
             }
         }
 
-        private static List<string> CreateAllLayoutsList(IDictionary<string, object[]> allLayoutsTableData, string selectedLayout)
+        private static List<string> CreateAllLayoutsList(IDictionary<string, object[]> allLayoutsTableData, string selectedLayoutID)
         {
             var channelsInLayout = new List<string>();
             foreach (var row in allLayoutsTableData.Values)
             {
+                var layoutId = Convert.ToString(row[3]);
                 var layoutName = Convert.ToString(row[4 /*Layout*/]);
                 var channel = Convert.ToString(row[2 /*Title*/]);
                 if (channel.Equals("0" /*None*/) || channel.Equals("Reserved"))
@@ -210,7 +229,7 @@
                     continue;
                 }
 
-                if (!channelsInLayout.Contains(layoutName) && layoutName.Equals(selectedLayout))
+                if (!channelsInLayout.Contains(layoutName) && layoutId.Equals(selectedLayoutID))
                 {
                     channelsInLayout.Add(channel);
                 }

@@ -78,11 +78,11 @@ namespace TAG_IAS_Change_Mosaic_Audio_1
             try
             {
                 var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                var outputName = GetOneDeserializedValue(engine.GetScriptParam("Output").Value);
-                var layoutName = GetOneDeserializedValue(engine.GetScriptParam("Layout").Value);
+                var outputId = GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
+                var layoutId = GetOneDeserializedValue(engine.GetScriptParam("Layout ID").Value);
                 var controller = new InteractiveController(engine);
                 var dialog = new MosaicDialog(engine);
-                dialog.SetValues(elementId, outputName, layoutName);
+                dialog.SetValues(elementId, outputId, layoutId);
                 dialog.ChannelOutputDropDown.Changed += (sender, args) => dialog.UpdateChannelAudioEncoderOptions();
                 dialog.ChangeAudioButton.Pressed += (sender, args) => dialog.ChangeAudio();
 
