@@ -65,7 +65,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
     /// Represents a DataMiner Automation script.
     /// </summary>
     [GQIMetaData(Name = "Get TAG All Outputs")]
-    public class GetTagOutputs : IGQIDataSource, IGQIOnInit
+    public class GetTagOutputs : IGQIDataSource, IGQIOnInit, IGQIInputArguments
     {
         private readonly Dictionary<string, string> resolutionDict = new Dictionary<string, string>
         {
@@ -95,6 +95,9 @@ namespace TAG_GQI_Retrieve_Outputs_1
             {"12","59.94 fps"},
             {"13","60 fps"},
         };
+
+        private readonly GQIBooleanArgument individualRowsLayout = new GQIBooleanArgument("Individual Rows Per Layout") { IsRequired = true };
+        private bool isIndividualRowsLayout;
 
         private GQIDMS _dms;
 
@@ -129,6 +132,18 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 new GQIStringColumn("Layout"),
                 new GQIStringColumn("Layout ID"),
             };
+        }
+
+        public GQIArgument[] GetInputArguments()
+        {
+            return new GQIArgument[] { individualRowsLayout };
+        }
+
+        public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+        {
+            isIndividualRowsLayout = args.GetArgumentValue(individualRowsLayout);
+
+            return new OnArgumentsProcessedOutputArgs();
         }
 
         public GQIPage GetNextPage(GetNextPageInputArgs args)
@@ -189,37 +204,60 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 var outputName = Convert.ToString(deviceOutputConfigRow[1]);
                 var layoutsInOutput = GetLayoutInOutput(outputLayoutsTable, outputName);
 
-                var layoutId = "None";
-                var layoutName = "None";
-
-                if (layoutsInOutput.Count > 0)
-                {
-                    layoutId = String.Join(";",layoutsInOutput.Select(x => x.LayoutId));
-                    layoutName = String.Join(";", layoutsInOutput.Select(x => x.LayoutName));
-                }
-
-                var cells = new[]
-                {
-                    new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                    new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
-                    new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
-                    new GQICell { Value = outputName }, // Output
-                    new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                    new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
-                    new GQICell { Value = layoutName }, // Layout
-                    new GQICell { Value = layoutId }, // Layout ID
-                };
+                GQICell[] cells = null;
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
                 var elementMetadata = new ObjectRefMetadata { Object = elementID };
                 var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
 
-                var row = new GQIRow(cells)
+                if (!isIndividualRowsLayout)
                 {
-                    Metadata = rowMetadata,
-                };
+                    var layoutId = String.Join(";", layoutsInOutput.Select(x => x.LayoutId));
+                    var layoutName = String.Join(";", layoutsInOutput.Select(x => x.LayoutName));
 
-                rows.Add(row);
+                    cells = new[]
+                    {
+                        new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
+                        new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
+                        new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
+                        new GQICell { Value = outputName }, // Output
+                        new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                        new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                        new GQICell { Value = layoutName }, // Layout
+                        new GQICell { Value = layoutId }, // Layout ID
+                    };
+
+                    var row = new GQIRow(cells)
+                    {
+                        Metadata = rowMetadata,
+                    };
+
+                    rows.Add(row);
+                }
+                else
+                {
+                    foreach (var layout in layoutsInOutput)
+                    {
+                        cells = new[]
+                        {
+                        new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
+                        new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
+                        new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
+                        new GQICell { Value = outputName }, // Output
+                        new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                        new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                        new GQICell { Value = layout.LayoutName }, // Layout
+                        new GQICell { Value = layout.LayoutId }, // Layout ID
+                        };
+
+                        var row = new GQIRow(cells)
+                        {
+                            Metadata = rowMetadata,
+                        };
+
+                        rows.Add(row);
+                    }
+                }
             }
         }
 
@@ -231,7 +269,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 var outputLayoutRow = outputLayoutsTable[i];
                 if (Convert.ToString(outputLayoutRow[3 /*Output*/]).Equals(outputName))
                 {
-                    layoutsInOutput.Add(new Layout {LayoutId = Convert.ToString(outputLayoutRow[4]) , LayoutName = Convert.ToString(outputLayoutRow[5]) } );
+                    layoutsInOutput.Add(new Layout { LayoutId = Convert.ToString(outputLayoutRow[4]), LayoutName = Convert.ToString(outputLayoutRow[5]) });
                 }
             }
 
