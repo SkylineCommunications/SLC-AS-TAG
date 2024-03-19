@@ -240,14 +240,14 @@ namespace TAG_GQI_Retrieve_Outputs_1
                     {
                         cells = new[]
                         {
-                        new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                        new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
-                        new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
-                        new GQICell { Value = outputName }, // Output
-                        new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                        new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
-                        new GQICell { Value = layout.LayoutName }, // Layout
-                        new GQICell { Value = layout.LayoutId }, // Layout ID
+                            new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
+                            new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
+                            new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
+                            new GQICell { Value = outputName }, // Output
+                            new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                            new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                            new GQICell { Value = layout.LayoutName }, // Layout
+                            new GQICell { Value = layout.LayoutId }, // Layout ID
                         };
 
                         var row = new GQIRow(cells)
@@ -279,35 +279,67 @@ namespace TAG_GQI_Retrieve_Outputs_1
         private void GetOutputMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] encoderConfigTable)
         {
             var deviceOverviewTable = GetTable(response, (int)McmTableId.DeviceOverview);
-            var deviceRows = deviceOverviewTable.Where(x => Convert.ToString(x[1]).Equals("Cloud License"));
+            var deviceRows = deviceOverviewTable.Where(x => !Convert.ToString(x[1]).Equals("Cloud License"));
             for (int i = 0; i < encoderConfigTable.Length; i++)
             {
                 var deviceEncoderConfigRow = encoderConfigTable[i];
                 var filteredDeviceRow = deviceRows.First(x => Convert.ToString(x[8]).Equals(Convert.ToString(deviceEncoderConfigRow[4])));
                 var deviceName = string.Empty;
                 deviceName = filteredDeviceRow == null ? "N/A" : Convert.ToString(filteredDeviceRow[0]);
-                var cells = new[]
-                {
-                    new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                    new GQICell { Value = Convert.ToString(deviceName) }, // Device
-                    new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[23]) }, // Output ID
-                    new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                    new GQICell { Value = deviceEncoderConfigRow[14] }, // Resolution
-                    new GQICell { Value = deviceEncoderConfigRow[9] }, // Frame Rate
-                    new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[11]) }, // Layout
-                    new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[12]) }, // Layout ID
-                };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
                 var elementMetadata = new ObjectRefMetadata { Object = elementID };
                 var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
 
-                var row = new GQIRow(cells)
+                GQICell[] cells = null;
+                if (!isIndividualRowsLayout)
                 {
-                    Metadata = rowMetadata,
-                };
+                    cells = new[]
+                    {
+                        new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
+                        new GQICell { Value = Convert.ToString(deviceName) }, // Device
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[23]) }, // Output ID
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
+                        new GQICell { Value = deviceEncoderConfigRow[14] }, // Resolution
+                        new GQICell { Value = deviceEncoderConfigRow[9] }, // Frame Rate
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[11]) }, // Layout
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[12]) }, // Layout ID
+                    };
 
-                rows.Add(row);
+                    var row = new GQIRow(cells)
+                    {
+                        Metadata = rowMetadata,
+                    };
+
+                    rows.Add(row);
+                }
+                else
+                {
+                    var layoutNameList = Convert.ToString(deviceEncoderConfigRow[11]).Split(';').ToList();
+                    var layoutIdList = Convert.ToString(deviceEncoderConfigRow[12]).Split(';').ToList();
+
+                    for (int j = 0; j < layoutIdList.Count; j++)
+                    {
+                        cells = new[]
+                        {
+                            new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
+                            new GQICell { Value = Convert.ToString(deviceName) }, // Device
+                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[23]) }, // Output ID
+                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
+                            new GQICell { Value = deviceEncoderConfigRow[14] }, // Resolution
+                            new GQICell { Value = deviceEncoderConfigRow[9] }, // Frame Rate
+                            new GQICell { Value = Convert.ToString(layoutNameList[j]) }, // Layout
+                            new GQICell { Value = Convert.ToString(layoutIdList[j]) }, // Layout ID
+                        };
+
+                        var row = new GQIRow(cells)
+                        {
+                            Metadata = rowMetadata,
+                        };
+
+                        rows.Add(row);
+                    }
+                }
             }
         }
 
