@@ -51,25 +51,21 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_IAS_Modify_Output_Layout_1
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Newtonsoft.Json;
-	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-	using Skyline.DataMiner.Core.DataMinerSystem.Common;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+    using SharedMethods;
+    using Skyline.DataMiner.Automation;
+    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+    using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	/// <summary>
-	/// Represents a DataMiner Automation script.
-	/// </summary>
-	public class Script
+    /// <summary>
+    /// Represents a DataMiner Automation script.
+    /// </summary>
+    public class Script
 	{
-        private const int MCMEncoderConfigTableId = 1500;
-        public const int MCSOutputsLayoutsTableId = 3400;
-
-        private const int MCMLayoutsTableId = 1560;
-        private const int MCSLayoutsTableIds = 3600;
+        private static string elementType;
 
         /// <summary>
         /// The script entry point.
@@ -87,8 +83,8 @@ namespace TAG_IAS_Modify_Output_Layout_1
 
             try
             {
-                var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                var outputId = GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
+                var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                var outputId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
 
                 var controller = new InteractiveController(engine);
 
@@ -102,12 +98,13 @@ namespace TAG_IAS_Modify_Output_Layout_1
                 var dms = engine.GetDms();
                 var dmsElement = dms.GetElement(new DmsElementId(Convert.ToInt32(elementData[0]), Convert.ToInt32(elementData[1])));
                 var element = engine.FindElementByKey(elementId);
-                var tablePid = GetTablePidByElement(dmsElement);
+                elementType = GetElementType(element.Protocol.Name);
+                var tablePid = GetTablePidByElement(elementType);
 
                 var layoutsList = GetLayoutsFromElement(dmsElement);
-                var layoutsPerOutput = GetLayoutsCount(dmsElement, outputId);
+                var layoutsPerOutput = GetLayoutsCount(dmsElement, tablePid, outputId);
 
-                var outputDialog = new OutputDialog(engine, layoutsPerOutput, layoutsList);
+                var outputDialog = new OutputDialog(engine, layoutsPerOutput, layoutsList, elementType);
 
                 outputDialog.UpdateButton.Pressed += (sender, args) => engine.GenerateInformation("Update requested");
                 outputDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
@@ -124,19 +121,24 @@ namespace TAG_IAS_Modify_Output_Layout_1
             }
         }
 
+        private static void SendLayoutUpdate(Element element, int columnPid, string key, string value)
+        {
+            element.SetParameterByPrimaryKey(columnPid, key, value);
+        }
+
         private static List<string> GetLayoutsFromElement(IDmsElement element)
         {
             var layoutsList = new List<string>();
 
-            if (element.Protocol.Name.Contains("MCM"))
+            if (elementType.Equals("MCM"))
             {
-                var tableData = element.GetTable(MCMLayoutsTableId).GetData();
+                var tableData = element.GetTable(MCM_TablesIDs.LayoutsTableId).GetData();
                 var layoutsToAdd = tableData.Values.Select(row => Convert.ToString(row[1 /* Title */])).ToList();
                 layoutsList.AddRange(layoutsToAdd);
             }
             else
             {
-                var tableData = element.GetTable(MCSLayoutsTableIds).GetData();
+                var tableData = element.GetTable(MCS_TablesIDs.LayoutsTableIds).GetData();
                 var layoutsToAdd = tableData.Values.Select(row => Convert.ToString(row[1 /* Title */])).ToList();
                 layoutsList.AddRange(layoutsToAdd);
             }
@@ -145,29 +147,33 @@ namespace TAG_IAS_Modify_Output_Layout_1
             return layoutsList.Distinct().ToList();
         }
 
-        private static List<object[]> GetLayoutsCount(IDmsElement element, string outputId)
+        private static List<object[]> GetLayoutsCount(IDmsElement element, int tablePid, string outputId)
         {
-            var outputsLayoutsTableData = element.GetTable(Script.MCSOutputsLayoutsTableId);
-            var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 3403, Value = outputId } };
-            var matchedOutputs = outputsLayoutsTableData.QueryData(filter).ToList();
-            return matchedOutputs;
-        }
-
-        private static int GetTablePidByElement(IDmsElement element)
-        {
-            return element.Protocol.Name.Contains("MCM") ? MCMEncoderConfigTableId : MCSOutputsLayoutsTableId;
-        }
-
-        private static string GetOneDeserializedValue(string scriptParam) // [ "value" , "value" ]
-        {
-            if (scriptParam.Contains("[") && scriptParam.Contains("]"))
+            List<object[]> matchedOutputs;
+            if (elementType.Equals("MCM"))
             {
-                return JsonConvert.DeserializeObject<List<string>>(scriptParam)[0];
+                var encoderConfigTable = element.GetTable(tablePid);
+                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 11524, Value = outputId } };
+                matchedOutputs = encoderConfigTable.QueryData(filter).ToList();
             }
             else
             {
-                return scriptParam;
+                var outputsLayoutsTable = element.GetTable(tablePid);
+                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 3403, Value = outputId } };
+                matchedOutputs = outputsLayoutsTable.QueryData(filter).ToList();
             }
+
+            return matchedOutputs;
+        }
+
+        private static int GetTablePidByElement(string protocolName)
+        {
+            return protocolName.Equals("MCM") ? MCM_TablesIDs.EncoderConfigTableId : MCS_TablesIDs.OutputsLayoutsTableId;
+        }
+
+        private static string GetElementType(string protocolName)
+        {
+            return protocolName.Contains("MCM") ? "MCM" : "MCS";
         }
     }
 }

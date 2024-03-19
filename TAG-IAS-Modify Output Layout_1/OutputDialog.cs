@@ -7,12 +7,12 @@
 
 	internal class OutputDialog : Dialog
     {
-        public OutputDialog(IEngine engine, List<object[]> layoutsPerOutput, List<string> layoutsList) : base(engine)
+        public OutputDialog(IEngine engine, List<object[]> layoutsPerOutput, List<string> layoutsList, string elementType) : base(engine)
         {
             Layouts = new List<Section>();
             foreach (var layout in layoutsPerOutput)
             {
-                var defaultLayout = Convert.ToString(layout[5 /* Layout */]);
+                var defaultLayout = elementType.Equals("MCM") ? Convert.ToString(layout[11 /* Layouts */]) : Convert.ToString(layout[5 /* Layout */]);
                 var layoutPanel = new LayoutsPanel(defaultLayout, layoutsList);
                 Layouts.Add(layoutPanel);
             }

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using SharedMethods;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -15,9 +16,6 @@
 
     internal class LayoutDialog : Dialog
     {
-        private const int MCMChannelStatusTableId = 240;
-        private static readonly List<int> MCSChannelsTableIds = new List<int> { 2100, 2200 };
-
         public LayoutDialog(IEngine engine) : base(engine)
         {
             Title = "Edit Layout Position";
@@ -54,21 +52,19 @@
 
             if (element.Protocol.Name.Contains("MCM"))
             {
-                var tableData = element.GetTable(MCMChannelStatusTableId).GetData();
-                var channelsToAdd = tableData.Values
-                    .Where(row => Convert.ToInt32(row[14 /* Monitored */]) == (int)Monitored.Yes)
-                    .Select(row => Convert.ToString(row[12 /* Name */])).ToList();
-                channelsList.AddRange(channelsToAdd);
+                var channelsTableData = element.GetTable(MCM_TablesIDs.ChannelStatusTableId);
+                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 256, Value = Convert.ToString((int)Monitored.Yes) } };
+                var matchedChannels = channelsTableData.QueryData(filter).ToList();
+                channelsList.AddRange(matchedChannels.Select(row => Convert.ToString(row[12 /* Name */])));
             }
             else
             {
-                foreach (var tableId in MCSChannelsTableIds)
+                foreach (var tableId in MCS_TablesIDs.ChannelsTableIds)
                 {
-                    var channelsTableData = element.GetTable(tableId).GetData();
-                    var channelsToAdd = channelsTableData.Values
-                        .Where(row => !Convert.ToString(row[6 /* Device */]).Equals("Not Set"))
-                        .Select(row => Convert.ToString(row[1 /* Label */])).ToList();
-                    channelsList.AddRange(channelsToAdd);
+                    var channelsTableData = element.GetTable(tableId);
+                    var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.NotEqual, Pid = 2107, Value = "Not Set" } };
+                    var matchedChannels = channelsTableData.QueryData(filter).ToList();
+                    channelsList.AddRange(matchedChannels.Select(row => Convert.ToString(row[1 /* Label */])));
                 }
             }
 

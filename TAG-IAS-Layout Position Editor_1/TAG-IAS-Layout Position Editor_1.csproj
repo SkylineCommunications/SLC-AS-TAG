@@ -27,4 +27,5 @@
       <UserProperties DisLinkedXmlFile="..\TAG-IAS-Layout Position Editor.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="..\Common\Common.projitems" Label="Shared" />
 </Project>

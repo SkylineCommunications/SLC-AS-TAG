@@ -52,8 +52,7 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 namespace TAG_IAS_Layout_Position_Editor_1
 {
     using System;
-    using System.Collections.Generic;
-    using Newtonsoft.Json;
+    using SharedMethods;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
@@ -64,9 +63,6 @@ namespace TAG_IAS_Layout_Position_Editor_1
     /// </summary>
     public class Script
 	{
-		private const int MCMLayoutsTableId = 10353;
-		private const int MCSLayoutsTableId = 5653;
-
 		private static string layoutId;
 		private static string position;
 		private static LayoutDialog layoutDialog;
@@ -87,10 +83,10 @@ namespace TAG_IAS_Layout_Position_Editor_1
 
             try
             {
-                var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                layoutId = GetOneDeserializedValue(engine.GetScriptParam("Layout ID").Value);
-                position = GetOneDeserializedValue(engine.GetScriptParam("Position").Value);
-                var action = GetOneDeserializedValue(engine.GetScriptParam("Action").Value);
+                var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                layoutId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Layout ID").Value);
+                position = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Position").Value);
+                var action = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Action").Value);
 
                 var controller = new InteractiveController(engine);
                 layoutDialog = new LayoutDialog(engine);
@@ -98,6 +94,7 @@ namespace TAG_IAS_Layout_Position_Editor_1
                 var elementData = elementId.Split('/');
                 if (elementData.Length < 2)
                 {
+                    engine.ShowUI("Element ID format not supported. Please check the incoming data. [Format: DMA ID/Element ID]");
                     engine.GenerateInformation("Element ID format not supported. Please check the incoming data. [Format: DMA ID/Element ID]");
                     return;
                 }
@@ -105,20 +102,20 @@ namespace TAG_IAS_Layout_Position_Editor_1
                 var dms = engine.GetDms();
                 var dmsElement = dms.GetElement(new DmsElementId(Convert.ToInt32(elementData[0]), Convert.ToInt32(elementData[1])));
                 var element = engine.FindElementByKey(elementId);
-                var tablePid = GetTablePidByElement(dmsElement);
+                var columnPid = GetColumnPidByElement(dmsElement);
 
                 if (action.ToUpperInvariant().Equals("EDIT"))
                 {
                     layoutDialog.GetLayoutsFromElement(dmsElement);
 
-                    layoutDialog.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, tablePid, layoutDialog.ChannelsDropDown.Selected);
+                    layoutDialog.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, columnPid, layoutDialog.ChannelsDropDown.Selected);
                     layoutDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
 
                     controller.Run(layoutDialog);
                 }
                 else
                 {
-                    UpdateLayoutChannel(engine, element, tablePid, "None");
+                    UpdateLayoutChannel(engine, element, columnPid, "None");
                 }
             }
             catch (ScriptAbortException)
@@ -131,7 +128,7 @@ namespace TAG_IAS_Layout_Position_Editor_1
             }
         }
 
-		private static void UpdateLayoutChannel(IEngine engine, Element element, int tablePid, string value)
+		private static void UpdateLayoutChannel(IEngine engine, Element element, int columnPid, string value)
         {
             if (String.IsNullOrWhiteSpace(value))
             {
@@ -144,25 +141,13 @@ namespace TAG_IAS_Layout_Position_Editor_1
                 value = value.Replace("<", String.Empty).Replace(">", String.Empty).Trim();
             }
 
-            element.SetParameterByPrimaryKey(tablePid, $"{layoutId}/{position}", value);
+            element.SetParameterByPrimaryKey(columnPid, $"{layoutId}/{position}", value);
             engine.ExitSuccess("Layout Title updated");
         }
 
-		private static int GetTablePidByElement(IDmsElement element)
+		private static int GetColumnPidByElement(IDmsElement element)
         {
-            return element.Protocol.Name.Contains("MCM") ? MCMLayoutsTableId : MCSLayoutsTableId;
-        }
-
-		private static string GetOneDeserializedValue(string scriptParam) // [ "value" , "value" ]
-        {
-            if (scriptParam.Contains("[") && scriptParam.Contains("]"))
-            {
-                return JsonConvert.DeserializeObject<List<string>>(scriptParam)[0];
-            }
-            else
-            {
-                return scriptParam;
-            }
+            return element.Protocol.Name.Contains("MCM") ? MCM_TablesIDs.AllLayoutsTable_TitlePid : MCS_TablesIDs.AllLayoutsTable_TitlePid;
         }
     }
 }
