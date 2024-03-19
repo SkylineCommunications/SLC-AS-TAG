@@ -46,6 +46,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{1767
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-GQI-Infrastructure_1", "TAG-GQI-Infrastructure_1\TAG-GQI-Infrastructure_1.csproj", "{9C0FA662-45D5-4788-9E34-D1277A9DE4E6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TAG-IAS-Change Mosaic Audio", "TAG-IAS-Change Mosaic Audio", "{4070E247-518C-491B-A2BA-324B1D6A8C97}"
+	ProjectSection(SolutionItems) = preProject
+		TAG-IAS-Change Mosaic Audio.xml = TAG-IAS-Change Mosaic Audio.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{155EEA76-17B6-4BB9-8828-0313BE957BE5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-IAS-Change Mosaic Audio_1", "TAG-IAS-Change Mosaic Audio_1\TAG-IAS-Change Mosaic Audio_1.csproj", "{DE49297F-923C-4728-B5DB-4F1CDE488FD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +65,10 @@ Global
 		{9C0FA662-45D5-4788-9E34-D1277A9DE4E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C0FA662-45D5-4788-9E34-D1277A9DE4E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C0FA662-45D5-4788-9E34-D1277A9DE4E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE49297F-923C-4728-B5DB-4F1CDE488FD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE49297F-923C-4728-B5DB-4F1CDE488FD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE49297F-923C-4728-B5DB-4F1CDE488FD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE49297F-923C-4728-B5DB-4F1CDE488FD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +79,9 @@ Global
 		{B48CAEAA-E9F3-49B9-B2BB-80C63B6ED386} = {82876D1A-BF8E-42F5-B21F-68270190C345}
 		{1767C290-B990-41C9-B599-ADCEBCD9E5E0} = {B48CAEAA-E9F3-49B9-B2BB-80C63B6ED386}
 		{9C0FA662-45D5-4788-9E34-D1277A9DE4E6} = {1767C290-B990-41C9-B599-ADCEBCD9E5E0}
+		{4070E247-518C-491B-A2BA-324B1D6A8C97} = {82876D1A-BF8E-42F5-B21F-68270190C345}
+		{155EEA76-17B6-4BB9-8828-0313BE957BE5} = {4070E247-518C-491B-A2BA-324B1D6A8C97}
+		{DE49297F-923C-4728-B5DB-4F1CDE488FD2} = {155EEA76-17B6-4BB9-8828-0313BE957BE5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7A356EBC-DCA5-45C1-88F9-EA3577E6920E}

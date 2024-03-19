@@ -64,7 +64,7 @@ namespace TAG_GQI_Infrastructure_1
     /// Represents a DataMiner Automation script.
     /// </summary>
     [GQIMetaData(Name = "Get TAG Infrastructure")]
-    public class GetPeacockProvision : IGQIDataSource, IGQIOnInit
+    public class GetTAGInfrastructure : IGQIDataSource, IGQIOnInit
     {
         private GQIDMS _dms;
 
