@@ -51,14 +51,14 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_IAS_Modify_Output_Layout_1
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using SharedMethods;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -66,7 +66,6 @@ namespace TAG_IAS_Modify_Output_Layout_1
     public class Script
 	{
         private static string elementType;
-        private static string outputId;
 
         /// <summary>
         /// The script entry point.
@@ -85,7 +84,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
             try
             {
                 var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                outputId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
+                var outputId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
 
                 var controller = new InteractiveController(engine);
 
