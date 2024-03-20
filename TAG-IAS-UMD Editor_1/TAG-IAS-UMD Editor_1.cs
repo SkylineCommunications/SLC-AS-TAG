@@ -83,6 +83,11 @@ namespace TAG_IAS_UMD_Editor_1
                 var dialog = new UmdDialog(engine);
 
                 dialog.UmdFilterButtons.TextFormatButton.Pressed += (sender, args) => dialog.TextFormatButtonPressed();
+                dialog.UmdFilterButtons.SpecialValuesButton.Pressed += (sender, args) => dialog.SpecialValuestButtonPressed();
+                dialog.UmdFilterButtons.TallyAndUmdButton.Pressed += (sender, args) => dialog.TallyAndUmdButtonPressed();
+                dialog.UmdFilterButtons.AlarmButton.Pressed += (sender, args) => dialog.AlarmButtonPressed();
+                dialog.UmdFilterButtons.AllButton.Pressed += (sender, args) => dialog.AllButtonPressed();
+
                 dialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("UMD Editor Canceled");
                 controller.Run(dialog);
             }

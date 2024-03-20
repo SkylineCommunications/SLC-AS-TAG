@@ -10,22 +10,7 @@
     {
         public UmdDialog(IEngine engine) : base(engine)
         {
-            InitializeUI();
-        }
-
-        public enum StartRowSectionPosition
-        {
-            StaticTopPanel = 0,
-            UmdFilterButtons = 3,
-            InitialFilteredSection = 9,
-            TextFormat = 9,
-            SpecialValuesSection = 18,
-            TallySection = 22,
-            AlarmSection = 37,
-        }
-
-        private void InitializeUI()
-        {
+            Width = 1400;
             Clear();
             Title = "UMD Editor";
 
@@ -37,37 +22,34 @@
             TallyAndUmdSection = new TallyAndUmdSection();
             AlarmsSection = new AlarmSection();
 
-            UmdFilterButtons.AllButton.IsEnabled = false; // Default selected option
+            UmdFilterButtons.TextFormatButton.IsEnabled = false; // Default selected option
 
-            AddSection(CheckBoxPanel, new SectionLayout(0, 0));
+            AddSection(CheckBoxPanel, new SectionLayout((int)StartRowSectionPosition.CheckBoxSection, 0));
             AddSection(StaticTopPanel, new SectionLayout((int)StartRowSectionPosition.StaticTopPanel, 1));
             AddSection(UmdFilterButtons, new SectionLayout((int)StartRowSectionPosition.UmdFilterButtons, 1));
             AddSection(TextFormatSection, new SectionLayout((int)StartRowSectionPosition.TextFormat, 1));
-            AddSection(SpecialValuesSection, new SectionLayout((int)StartRowSectionPosition.SpecialValuesSection, 1));
-            AddSection(TallyAndUmdSection, new SectionLayout((int)StartRowSectionPosition.TallySection, 1));
-            AddSection(AlarmsSection, new SectionLayout((int)StartRowSectionPosition.AlarmSection, 1));
-            AddWidget(CancelButton, 150, 0, HorizontalAlignment.Left);
-
-            //AddSection(DetailsPanel, new SectionLayout(0, 0));
-            //int position = DetailsPanel.RowCount;
-            //foreach (var slotDefintion in SlotDefinitions)
-            //{
-            //    AddSection(slotDefintion, new SectionLayout(position, 0));
-            //    position++;
-            //}
-
-            //AddWidget(AddButton, position++, 0);
-            //AddWidget(new WhiteSpace(), position++, 0);
-            //AddSection(BottomPanel, position, 0);
+            AddWidget(CancelButton, 100, 0, HorizontalAlignment.Left, VerticalAlignment.Bottom);
         }
 
-        public void TextFormatButtonPressed()
+        public enum StartRowSectionPosition
         {
-            UmdFilterButtons.TextFormatButton.IsEnabled = false;
-            UmdFilterButtons.AllButton.IsEnabled = true;
-            UmdFilterButtons.SpecialValuesButton.IsEnabled = true;
-            UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
-            UmdFilterButtons.AlarmButton.IsEnabled = true;
+            CheckBoxSection = 0,
+            StaticTopPanel = 0,
+            UmdFilterButtons = 3,
+            InitialFilteredSection = 9,
+            TextFormat = 9,
+            SpecialValuesSection = 18,
+            TallySection = 22,
+            AlarmSection = 37,
+        }
+
+        public enum FilteredBy
+        {
+            TextFormat,
+            SpecialValue,
+            TallyAndUmd,
+            Alarm,
+            All,
         }
 
         public UmdCheckPanel CheckBoxPanel { get; private set; }
@@ -85,6 +67,93 @@
         public TallyAndUmdSection TallyAndUmdSection { get; set; }
 
         public AlarmSection AlarmsSection { get; set; }
+
+        public void TextFormatButtonPressed()
+        {
+            UmdFilterButtons.TextFormatButton.IsEnabled = false;
+            UmdFilterButtons.AllButton.IsEnabled = true;
+            UmdFilterButtons.SpecialValuesButton.IsEnabled = true;
+            UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
+            UmdFilterButtons.AlarmButton.IsEnabled = true;
+            InitializeUI(FilteredBy.TextFormat);
+        }
+
+        public void SpecialValuestButtonPressed()
+        {
+            UmdFilterButtons.TextFormatButton.IsEnabled = true;
+            UmdFilterButtons.AllButton.IsEnabled = true;
+            UmdFilterButtons.SpecialValuesButton.IsEnabled = false;
+            UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
+            UmdFilterButtons.AlarmButton.IsEnabled = true;
+            InitializeUI(FilteredBy.SpecialValue);
+        }
+
+        public void TallyAndUmdButtonPressed()
+        {
+            UmdFilterButtons.TextFormatButton.IsEnabled = true;
+            UmdFilterButtons.AllButton.IsEnabled = true;
+            UmdFilterButtons.SpecialValuesButton.IsEnabled = true;
+            UmdFilterButtons.TallyAndUmdButton.IsEnabled = false;
+            UmdFilterButtons.AlarmButton.IsEnabled = true;
+            InitializeUI(FilteredBy.TallyAndUmd);
+        }
+
+        public void AlarmButtonPressed()
+        {
+            UmdFilterButtons.TextFormatButton.IsEnabled = true;
+            UmdFilterButtons.AllButton.IsEnabled = true;
+            UmdFilterButtons.SpecialValuesButton.IsEnabled = true;
+            UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
+            UmdFilterButtons.AlarmButton.IsEnabled = false;
+            InitializeUI(FilteredBy.Alarm);
+        }
+
+        public void AllButtonPressed()
+        {
+            UmdFilterButtons.TextFormatButton.IsEnabled = true;
+            UmdFilterButtons.AllButton.IsEnabled = false;
+            UmdFilterButtons.SpecialValuesButton.IsEnabled = true;
+            UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
+            UmdFilterButtons.AlarmButton.IsEnabled = true;
+            InitializeUI(FilteredBy.All);
+        }
+
+        private void InitializeUI(FilteredBy sectionFilter)
+        {
+            Clear();
+            Title = "UMD Editor";
+
+            AddSection(CheckBoxPanel, new SectionLayout((int)StartRowSectionPosition.CheckBoxSection, 0));
+            AddSection(StaticTopPanel, new SectionLayout((int)StartRowSectionPosition.StaticTopPanel, 1));
+            AddSection(UmdFilterButtons, new SectionLayout((int)StartRowSectionPosition.UmdFilterButtons, 1));
+
+            switch (sectionFilter)
+            {
+                case FilteredBy.TextFormat:
+                    AddSection(TextFormatSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
+                    break;
+                case FilteredBy.SpecialValue:
+                    AddSection(SpecialValuesSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
+                    break;
+                case FilteredBy.TallyAndUmd:
+                    AddSection(TallyAndUmdSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
+                    break;
+                case FilteredBy.Alarm:
+                    AddSection(AlarmsSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
+                    break;
+                case FilteredBy.All:
+                    AddSection(TextFormatSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
+                    AddSection(SpecialValuesSection, new SectionLayout((int)StartRowSectionPosition.SpecialValuesSection, 1));
+                    AddSection(TallyAndUmdSection, new SectionLayout((int)StartRowSectionPosition.TallySection, 1));
+                    AddSection(AlarmsSection, new SectionLayout((int)StartRowSectionPosition.AlarmSection, 1));
+                    break;
+                default:
+                    // no action
+                    break;
+            }
+
+            AddWidget(CancelButton, 100, 0, HorizontalAlignment.Left, VerticalAlignment.Bottom);
+        }
     }
 
     public class UmdCheckPanel : Section
@@ -120,11 +189,11 @@
     {
         public FilterButtons()
         {
-            AddWidget(AllButton, 0, 0);
-            AddWidget(TextFormatButton, 0, 1);
-            AddWidget(SpecialValuesButton, 0, 2);
-            AddWidget(TallyAndUmdButton, 0, 3);
-            AddWidget(AlarmButton, 0, 4);
+            AddWidget(TextFormatButton, 0, 0);
+            AddWidget(SpecialValuesButton, 0, 1);
+            AddWidget(TallyAndUmdButton, 0, 2);
+            AddWidget(AlarmButton, 0, 3);
+            AddWidget(AllButton, 0, 4);
         }
 
         public Button AllButton { get; } = new Button("All") { Width = 150 };
@@ -158,7 +227,7 @@
             AddWidget(TextColorYellow, 3, 2);
             AddWidget(TextColorCustomRGB, 3, 3);
 
-            //Background Color
+            // Background Color
             AddWidget(BackgroundColorLabel, 4, 0);
             AddWidget(BackgroundRed, 5, 0);
             AddWidget(BackgroundGreen, 5, 1);
