@@ -18,10 +18,10 @@
 			<Description>Element ID</Description>
 		</ScriptParameter>
 		<ScriptParameter id="2" type="string" values="">
-			<Description>Output</Description>
+			<Description>Output ID</Description>
 		</ScriptParameter>
 		<ScriptParameter id="3" type="string" values="">
-			<Description>Layout</Description>
+			<Description>Layout ID</Description>
 		</ScriptParameter>
 	</Parameters>
 
