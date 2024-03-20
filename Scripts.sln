@@ -77,6 +77,28 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IAS", "IAS", "{C8BD98A1-7A4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GQI", "GQI", "{9B25E832-7B2A-4364-AA0F-395AB7707142}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TAG-IAS-Layout Position Editor", "TAG-IAS-Layout Position Editor", "{C1C1CCD5-6256-48F7-984E-5B97D51E5426}"
+	ProjectSection(SolutionItems) = preProject
+		TAG-IAS-Layout Position Editor.xml = TAG-IAS-Layout Position Editor.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{57184193-D0C1-4E84-865F-0311ED012B90}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-IAS-Layout Position Editor_1", "TAG-IAS-Layout Position Editor_1\TAG-IAS-Layout Position Editor_1.csproj", "{5168E575-0212-4206-90A0-B7F00DCDF77D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TAG-IAS-Modify Output Layout", "TAG-IAS-Modify Output Layout", "{44286B7D-AAB6-42D9-BFAA-F32E75107753}"
+	ProjectSection(SolutionItems) = preProject
+		TAG-IAS-Modify Output Layout.xml = TAG-IAS-Modify Output Layout.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{7B3A5CCC-8D95-4D69-8A49-E4DBDA0BC8EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-IAS-Modify Output Layout_1", "TAG-IAS-Modify Output Layout_1\TAG-IAS-Modify Output Layout_1.csproj", "{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedMethods", "Common\SharedMethods.shproj", "{391D87DC-2DE3-4EFE-A1D2-40970BBB52C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedMethods", "SharedMethods", "{8AF485F9-FB7F-475E-9054-760C710DAEEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +121,14 @@ Global
 		{91D77400-FA05-4335-8DDF-3DED0C1765F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91D77400-FA05-4335-8DDF-3DED0C1765F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91D77400-FA05-4335-8DDF-3DED0C1765F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5168E575-0212-4206-90A0-B7F00DCDF77D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5168E575-0212-4206-90A0-B7F00DCDF77D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5168E575-0212-4206-90A0-B7F00DCDF77D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5168E575-0212-4206-90A0-B7F00DCDF77D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,8 +150,21 @@ Global
 		{91D77400-FA05-4335-8DDF-3DED0C1765F4} = {7ED7AAB2-FE13-41A8-A844-354D6CE908A5}
 		{C8BD98A1-7A48-4A16-87F1-0BBF8013B3F7} = {82876D1A-BF8E-42F5-B21F-68270190C345}
 		{9B25E832-7B2A-4364-AA0F-395AB7707142} = {82876D1A-BF8E-42F5-B21F-68270190C345}
+		{C1C1CCD5-6256-48F7-984E-5B97D51E5426} = {82876D1A-BF8E-42F5-B21F-68270190C345}
+		{57184193-D0C1-4E84-865F-0311ED012B90} = {C1C1CCD5-6256-48F7-984E-5B97D51E5426}
+		{5168E575-0212-4206-90A0-B7F00DCDF77D} = {57184193-D0C1-4E84-865F-0311ED012B90}
+		{44286B7D-AAB6-42D9-BFAA-F32E75107753} = {82876D1A-BF8E-42F5-B21F-68270190C345}
+		{7B3A5CCC-8D95-4D69-8A49-E4DBDA0BC8EE} = {44286B7D-AAB6-42D9-BFAA-F32E75107753}
+		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2} = {7B3A5CCC-8D95-4D69-8A49-E4DBDA0BC8EE}
+		{391D87DC-2DE3-4EFE-A1D2-40970BBB52C6} = {8AF485F9-FB7F-475E-9054-760C710DAEEE}
+		{8AF485F9-FB7F-475E-9054-760C710DAEEE} = {82876D1A-BF8E-42F5-B21F-68270190C345}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7A356EBC-DCA5-45C1-88F9-EA3577E6920E}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Common\Common.projitems*{3465ae9c-7608-492c-a0f4-ac5e5eeddfc2}*SharedItemsImports = 5
+		Common\Common.projitems*{391d87dc-2de3-4efe-a1d2-40970bbb52c6}*SharedItemsImports = 13
+		Common\Common.projitems*{5168e575-0212-4206-90a0-b7f00dcdf77d}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
