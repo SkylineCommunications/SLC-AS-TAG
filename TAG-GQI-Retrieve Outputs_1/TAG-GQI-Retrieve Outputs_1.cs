@@ -279,13 +279,14 @@ namespace TAG_GQI_Retrieve_Outputs_1
         private void GetOutputMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] encoderConfigTable)
         {
             var deviceOverviewTable = GetTable(response, (int)McmTableId.DeviceOverview);
-            var deviceRows = deviceOverviewTable.Where(x => !Convert.ToString(x[1]).Equals("Cloud License"));
+            var deviceRows = deviceOverviewTable.Where(x => !Convert.ToString(x[0]).Equals("Cloud License"));
+
             for (int i = 0; i < encoderConfigTable.Length; i++)
             {
                 var deviceEncoderConfigRow = encoderConfigTable[i];
-                var filteredDeviceRow = deviceRows.First(x => Convert.ToString(x[8]).Equals(Convert.ToString(deviceEncoderConfigRow[4])));
-                var deviceName = string.Empty;
-                deviceName = filteredDeviceRow == null ? "N/A" : Convert.ToString(filteredDeviceRow[0]);
+                //var filteredDeviceRow = deviceRows.First(x => Convert.ToString(x[8]).Equals(Convert.ToString(deviceEncoderConfigRow[16])));
+                //var deviceName = string.Empty;
+                //deviceName = filteredDeviceRow == null ? "N/A" : Convert.ToString(filteredDeviceRow[0]);
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
                 var elementMetadata = new ObjectRefMetadata { Object = elementID };
@@ -297,13 +298,13 @@ namespace TAG_GQI_Retrieve_Outputs_1
                     cells = new[]
                     {
                         new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                        new GQICell { Value = Convert.ToString(deviceName) }, // Device
+                        new GQICell { Value = Convert.ToString("N/A"/*deviceName*/) }, // Device
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[23]) }, // Output ID
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                        new GQICell { Value = deviceEncoderConfigRow[14] }, // Resolution
-                        new GQICell { Value = deviceEncoderConfigRow[9] }, // Frame Rate
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[4]) }, // Resolution
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[9]) }, // Frame Rate
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[11]) }, // Layout
-                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[12]) }, // Layout ID
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[17]) }, // Layout ID
                     };
 
                     var row = new GQIRow(cells)
@@ -316,18 +317,18 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 else
                 {
                     var layoutNameList = Convert.ToString(deviceEncoderConfigRow[11]).Split(';').ToList();
-                    var layoutIdList = Convert.ToString(deviceEncoderConfigRow[12]).Split(';').ToList();
+                    var layoutIdList = Convert.ToString(deviceEncoderConfigRow[17]).Split(';').ToList();
 
                     for (int j = 0; j < layoutIdList.Count; j++)
                     {
                         cells = new[]
                         {
                             new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                            new GQICell { Value = Convert.ToString(deviceName) }, // Device
+                            new GQICell { Value = Convert.ToString("N/A"/*deviceName*/) }, // Device
                             new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[23]) }, // Output ID
                             new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                            new GQICell { Value = deviceEncoderConfigRow[14] }, // Resolution
-                            new GQICell { Value = deviceEncoderConfigRow[9] }, // Frame Rate
+                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[4]) }, // Resolution
+                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[9]) }, // Frame Rate
                             new GQICell { Value = Convert.ToString(layoutNameList[j]) }, // Layout
                             new GQICell { Value = Convert.ToString(layoutIdList[j]) }, // Layout ID
                         };
