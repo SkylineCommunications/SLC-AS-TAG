@@ -56,6 +56,7 @@ namespace TAG_IAS_Change_Mosaic_Audio_1
     using Newtonsoft.Json;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -77,9 +78,9 @@ namespace TAG_IAS_Change_Mosaic_Audio_1
 
             try
             {
-                var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                var outputId = GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
-                var layoutId = GetOneDeserializedValue(engine.GetScriptParam("Layout ID").Value);
+                var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                var outputId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
+                var layoutId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Layout ID").Value);
                 var controller = new InteractiveController(engine);
                 var dialog = new MosaicDialog(engine);
                 dialog.SetValues(elementId, outputId, layoutId);
@@ -97,18 +98,6 @@ namespace TAG_IAS_Change_Mosaic_Audio_1
             {
                 engine.GenerateInformation($"Exception thrown: {ex}");
                 throw;
-            }
-        }
-
-        private string GetOneDeserializedValue(string scriptParam)
-        {
-            if (scriptParam.Contains("[") && scriptParam.Contains("]"))
-            {
-                return JsonConvert.DeserializeObject<List<string>>(scriptParam)[0];
-            }
-            else
-            {
-                return scriptParam;
             }
         }
     }
