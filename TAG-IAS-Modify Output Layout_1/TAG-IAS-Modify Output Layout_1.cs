@@ -66,6 +66,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
     public class Script
 	{
         private static string elementType;
+        private static string outputId;
 
         /// <summary>
         /// The script entry point.
@@ -84,7 +85,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
             try
             {
                 var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                var outputId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
+                outputId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
 
                 var controller = new InteractiveController(engine);
 
@@ -106,7 +107,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
 
                 var outputDialog = new OutputDialog(engine, layoutsPerOutput, layoutsList, elementType);
 
-                outputDialog.UpdateButton.Pressed += (sender, args) => engine.GenerateInformation("Update requested");
+                outputDialog.UpdateButton.Pressed += (sender, args) => UpdateLayout(engine, outputDialog, element);
                 outputDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
 
                 controller.Run(outputDialog);
@@ -121,9 +122,10 @@ namespace TAG_IAS_Modify_Output_Layout_1
             }
         }
 
-        private static void SendLayoutUpdate(Element element, int columnPid, string key, string value)
+        private static void UpdateLayout(IEngine engine, OutputDialog outputDialog, Element element)
         {
-            element.SetParameterByPrimaryKey(columnPid, key, value);
+            outputDialog.SendLayoutUpdate(element, elementType);
+            engine.ExitSuccess("Update finished");
         }
 
         private static List<string> GetLayoutsFromElement(IDmsElement element)
@@ -153,7 +155,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
             if (elementType.Equals("MCM"))
             {
                 var encoderConfigTable = element.GetTable(tablePid);
-                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 11524, Value = outputId } };
+                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 1501, Value = outputId } };
                 matchedOutputs = encoderConfigTable.QueryData(filter).ToList();
             }
             else
@@ -175,5 +177,12 @@ namespace TAG_IAS_Modify_Output_Layout_1
         {
             return protocolName.Contains("MCM") ? "MCM" : "MCS";
         }
+    }
+
+    public class LayoutData
+    {
+        public string RowId { get; set; }
+
+        public string Layout { get; set; }
     }
 }

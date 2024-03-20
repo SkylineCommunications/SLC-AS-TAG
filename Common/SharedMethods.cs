@@ -24,12 +24,14 @@
         public static readonly int ChannelStatusTableId = 240;
         public static readonly int EncoderConfigTableId = 1500;
         public static readonly int LayoutsTableId = 1560;
+        public static readonly int EncoderConfigLayoutsColumnId = 1612;
         public static readonly int AllLayoutsTable_TitlePid = 10353;
     }
 
     public class MCS_TablesIDs
     {
         public static readonly int OutputsLayoutsTableId = 3400;
+        public static readonly int OutputsLayoutsLayoutColumnId = 3456;
         public static readonly int LayoutsTableIds = 3600;
         public static readonly int AllLayoutsTable_TitlePid = 5653;
 
