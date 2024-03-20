@@ -134,7 +134,7 @@
                 var allLayoutsTableData = tagElement.GetTable(5600).GetData();
                 listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId);
                 audioPidList = CreateMcsAudioPidList(pidsOverviewTableData);
-                var outputTable = tagElement.GetTable(3100).GetData(); // replace with the actual TAG MCS Data.
+                var outputTable = tagElement.GetTable(3100).GetData();
                 outputName = GetOutputNameById(outputTable, outputId);
             }
             else
