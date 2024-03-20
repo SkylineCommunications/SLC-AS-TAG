@@ -67,7 +67,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
     [GQIMetaData(Name = "Get TAG All Outputs")]
     public class GetTagOutputs : IGQIDataSource, IGQIOnInit, IGQIInputArguments
     {
-        private readonly Dictionary<string, string> resolutionDict = new Dictionary<string, string>
+        private readonly Dictionary<string, string> McsResolutionDict = new Dictionary<string, string>
         {
             {"0","1920x1080"},
             {"1","1080x1920 (90deg)"},
@@ -79,7 +79,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
             {"7","2160x3840 (90deg)"},
         };
 
-        private readonly Dictionary<string, string> frameRateDict = new Dictionary<string, string>
+        private readonly Dictionary<string, string> McsFrameRateDict = new Dictionary<string, string>
         {
             {"1","1/25 fps"},
             {"2","2/25 fps"},
@@ -94,6 +94,30 @@ namespace TAG_GQI_Retrieve_Outputs_1
             {"11","50 fps"},
             {"12","59.94 fps"},
             {"13","60 fps"},
+        };
+
+        private readonly Dictionary<string, string> McmResolutionDict = new Dictionary<string, string>
+        {
+            {"1","1920x1080px"},
+            {"2","1080x1920px"},
+            {"3","1280x720px"},
+            {"4","800x488px"},
+            {"5","640x480px"},
+            {"6","640x360px"},
+        };
+
+        private readonly Dictionary<string, string> McmFrameRateDict = new Dictionary<string, string>
+        {
+            {"1","25 fps"},
+            {"2","12.5/25 fps"},
+            {"3","5/25 fps"},
+            {"4","2.5/25 fps"},
+            {"5","2/25 fps"},
+            {"6","1/25 fps"},
+            {"7","23.976 fps"},
+            {"8","24 fps"},
+            {"9","29.97 fps"},
+            {"10","30 fps"},
         };
 
         private readonly GQIBooleanArgument individualRowsLayout = new GQIBooleanArgument("Individual Rows Per Layout") { IsRequired = true };
@@ -221,8 +245,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
                         new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
                         new GQICell { Value = outputName }, // Output
-                        new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                        new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                        new GQICell { Value = McsResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                        new GQICell { Value = McsFrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
                         new GQICell { Value = layoutName }, // Layout
                         new GQICell { Value = layoutId }, // Layout ID
                     };
@@ -244,8 +268,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                             new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
                             new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
                             new GQICell { Value = outputName }, // Output
-                            new GQICell { Value = resolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                            new GQICell { Value = frameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                            new GQICell { Value = McsResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                            new GQICell { Value = McsFrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
                             new GQICell { Value = layout.LayoutName }, // Layout
                             new GQICell { Value = layout.LayoutId }, // Layout ID
                         };
@@ -284,9 +308,9 @@ namespace TAG_GQI_Retrieve_Outputs_1
             for (int i = 0; i < encoderConfigTable.Length; i++)
             {
                 var deviceEncoderConfigRow = encoderConfigTable[i];
-                //var filteredDeviceRow = deviceRows.First(x => Convert.ToString(x[8]).Equals(Convert.ToString(deviceEncoderConfigRow[16])));
-                //var deviceName = string.Empty;
-                //deviceName = filteredDeviceRow == null ? "N/A" : Convert.ToString(filteredDeviceRow[0]);
+                var filteredDeviceRow = deviceRows.First(x => Convert.ToString(x[4]).Equals(Convert.ToString(deviceEncoderConfigRow[16])));
+                var deviceName = string.Empty;
+                deviceName = filteredDeviceRow == null ? "N/A" : Convert.ToString(filteredDeviceRow[0]);
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
                 var elementMetadata = new ObjectRefMetadata { Object = elementID };
@@ -298,11 +322,11 @@ namespace TAG_GQI_Retrieve_Outputs_1
                     cells = new[]
                     {
                         new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                        new GQICell { Value = Convert.ToString("N/A"/*deviceName*/) }, // Device
-                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[23]) }, // Output ID
+                        new GQICell { Value = Convert.ToString(deviceName) }, // Device
+                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[0]) }, // Output ID
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[4]) }, // Resolution
-                        new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[9]) }, // Frame Rate
+                        new GQICell { Value = McmResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
+                        new GQICell { Value = McmFrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[11]) }, // Layout
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[17]) }, // Layout ID
                     };
@@ -324,11 +348,11 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         cells = new[]
                         {
                             new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                            new GQICell { Value = Convert.ToString("N/A"/*deviceName*/) }, // Device
-                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[23]) }, // Output ID
+                            new GQICell { Value = Convert.ToString(deviceName) }, // Device
+                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[0]) }, // Output ID
                             new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[4]) }, // Resolution
-                            new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[9]) }, // Frame Rate
+                            new GQICell { Value = McmResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
+                            new GQICell { Value = McmFrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
                             new GQICell { Value = Convert.ToString(layoutNameList[j]) }, // Layout
                             new GQICell { Value = Convert.ToString(layoutIdList[j]) }, // Layout ID
                         };
