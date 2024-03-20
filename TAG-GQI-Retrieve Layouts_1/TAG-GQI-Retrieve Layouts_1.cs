@@ -59,6 +59,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages;
+    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -114,7 +115,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var allLayoutsTable = GetTable(response, mcsAllLayoutTable);
+                    var allLayoutsTable = SharedMethods.GetTable(_dms, response, mcsAllLayoutTable);
                     GetAllLayoutsTableRows(rows, response, allLayoutsTable);
                 }
 
@@ -124,7 +125,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
                     var mcmResponses = _dms.SendMessages(mcmRequest);
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var allLayoutsTable = GetTable(response, mcmAllLayoutTable);
+                        var allLayoutsTable = SharedMethods.GetTable(_dms,response, mcmAllLayoutTable);
                         GetAllLayoutsTableRows(rows, response, allLayoutsTable);
                     }
                 }
@@ -170,54 +171,6 @@ namespace TAG_GQI_Retrieve_Layouts_1
 
                 rows.Add(row);
             }
-        }
-
-        private object[][] GetTable(LiteElementInfoEvent response, int tableId)
-        {
-            var partialTableRequest = new GetPartialTableMessage
-            {
-                DataMinerID = response.DataMinerID,
-                ElementID = response.ElementID,
-                ParameterID = tableId,
-            };
-
-            var messageResponse = _dms.SendMessage(partialTableRequest) as ParameterChangeEventMessage;
-            if (messageResponse.NewValue.ArrayValue != null && messageResponse.NewValue.ArrayValue.Length > 0)
-            {
-                return BuildRows(messageResponse.NewValue.ArrayValue);
-            }
-            else
-            {
-                return new object[0][];
-            }
-        }
-
-        private object[][] BuildRows(ParameterValue[] columns)
-        {
-            int length1 = columns.Length;
-            int length2 = 0;
-            if (length1 > 0)
-                length2 = columns[0].ArrayValue.Length;
-            object[][] objArray;
-            if (length1 > 0 && length2 > 0)
-            {
-                objArray = new object[length2][];
-                for (int index = 0; index < length2; ++index)
-                    objArray[index] = new object[length1];
-            }
-            else
-            {
-                objArray = new object[0][];
-            }
-
-            for (int index1 = 0; index1 < length1; ++index1)
-            {
-                ParameterValue[] arrayValue = columns[index1].ArrayValue;
-                for (int index2 = 0; index2 < length2; ++index2)
-                    objArray[index2][index1] = arrayValue[index2].IsEmpty ? (object)null : arrayValue[index2].ArrayValue[0].InteropValue;
-            }
-
-            return objArray;
         }
 
         private void CreateDebugRow(List<GQIRow> rows, string message)

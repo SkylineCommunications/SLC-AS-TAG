@@ -60,6 +60,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.Messages;
+    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -192,7 +193,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var outputConfigTable = GetTable(response, (int)McsTableId.DeviceOutputConfig);
+                    var outputConfigTable = SharedMethods.GetTable(_dms, response, (int)McsTableId.DeviceOutputConfig);
                     GetOutputMcsTableRows(rows, response, outputConfigTable);
                 }
 
@@ -202,7 +203,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var encoderConfigTable = GetTable(response, (int)McmTableId.DeviceEncoderConfig);
+                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, (int)McmTableId.DeviceEncoderConfig);
                         GetOutputMcmTableRows(rows, response, encoderConfigTable);
                     }
                 }
@@ -220,7 +221,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
 
         private void GetOutputMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] outputConfigTable)
         {
-            var outputLayoutsTable = GetTable(response, (int)McsTableId.OutputLayouts);
+            var outputLayoutsTable = SharedMethods.GetTable(_dms, response, (int)McsTableId.OutputLayouts);
 
             for (int i = 0; i < outputConfigTable.Length; i++)
             {
@@ -302,7 +303,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
 
         private void GetOutputMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] encoderConfigTable)
         {
-            var deviceOverviewTable = GetTable(response, (int)McmTableId.DeviceOverview);
+            var deviceOverviewTable = SharedMethods.GetTable(_dms, response, (int)McmTableId.DeviceOverview);
             var deviceRows = deviceOverviewTable.Where(x => !Convert.ToString(x[0]).Equals("Cloud License"));
 
             for (int i = 0; i < encoderConfigTable.Length; i++)
@@ -366,54 +367,6 @@ namespace TAG_GQI_Retrieve_Outputs_1
                     }
                 }
             }
-        }
-
-        private object[][] GetTable(LiteElementInfoEvent response, int tableId)
-        {
-            var partialTableRequest = new GetPartialTableMessage
-            {
-                DataMinerID = response.DataMinerID,
-                ElementID = response.ElementID,
-                ParameterID = tableId,
-            };
-
-            var messageResponse = _dms.SendMessage(partialTableRequest) as ParameterChangeEventMessage;
-            if (messageResponse.NewValue.ArrayValue != null && messageResponse.NewValue.ArrayValue.Length > 0)
-            {
-                return BuildRows(messageResponse.NewValue.ArrayValue);
-            }
-            else
-            {
-                return new object[0][];
-            }
-        }
-
-        private static object[][] BuildRows(ParameterValue[] columns)
-        {
-            int length1 = columns.Length;
-            int length2 = 0;
-            if (length1 > 0)
-                length2 = columns[0].ArrayValue.Length;
-            object[][] objArray;
-            if (length1 > 0 && length2 > 0)
-            {
-                objArray = new object[length2][];
-                for (int index = 0; index < length2; ++index)
-                    objArray[index] = new object[length1];
-            }
-            else
-            {
-                objArray = new object[0][];
-            }
-
-            for (int index1 = 0; index1 < length1; ++index1)
-            {
-                ParameterValue[] arrayValue = columns[index1].ArrayValue;
-                for (int index2 = 0; index2 < length2; ++index2)
-                    objArray[index2][index1] = arrayValue[index2].IsEmpty ? (object)null : arrayValue[index2].ArrayValue[0].InteropValue;
-            }
-
-            return objArray;
         }
 
         private static void CreateDebugRow(List<GQIRow> rows, string message)

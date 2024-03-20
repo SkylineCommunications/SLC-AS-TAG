@@ -59,6 +59,7 @@ namespace TAG_GQI_Infrastructure_1
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages;
+    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -167,7 +168,7 @@ namespace TAG_GQI_Infrastructure_1
 
         private void GetMCMRows(List<GQIRow> rows, LiteElementInfoEvent response)
         {
-            var devicesRows = GetTable(response, (int)MCMTableId.DeviceOverview);
+            var devicesRows = SharedMethods.GetTable(_dms,response, (int)MCMTableId.DeviceOverview);
 
             for (int i = 0; i < devicesRows.Length; i++)
             {
@@ -220,11 +221,11 @@ namespace TAG_GQI_Infrastructure_1
 
         private void GetMCSRows(List<GQIRow> rows, LiteElementInfoEvent response)
         {
-            var devicesRows = GetTable(response, (int)MCSTableId.Devices);
-            var deviceHardwareRows = GetTable(response, (int)MCSTableId.DeviceHardware);
-            var deviceInfoRows = GetTable(response, (int)MCSTableId.DeviceInfo);
-            var deviceCpuTable = GetTable(response, (int)MCSTableId.DeviceCpu);
-            var deviceCpuTempTable = GetTable(response, (int)MCSTableId.DeviceCpuTemp);
+            var devicesRows = SharedMethods.GetTable(_dms, response, (int)MCSTableId.Devices);
+            var deviceHardwareRows = SharedMethods.GetTable(_dms, response, (int)MCSTableId.DeviceHardware);
+            var deviceInfoRows = SharedMethods.GetTable(_dms, response, (int)MCSTableId.DeviceInfo);
+            var deviceCpuTable = SharedMethods.GetTable(_dms, response, (int)MCSTableId.DeviceCpu);
+            var deviceCpuTempTable = SharedMethods.GetTable(_dms, response, (int)MCSTableId.DeviceCpuTemp);
 
             var averagedTemperaturesByDevice = new Dictionary<object, double>();
             if (deviceCpuTempTable != null && deviceCpuTempTable.Length > 0 && deviceCpuTempTable[0] != null && deviceCpuTempTable[0].Length > 0)
@@ -333,54 +334,6 @@ namespace TAG_GQI_Infrastructure_1
         private static string CheckValue(double value)
         {
             return value == -1 ? "N/A" : Convert.ToString(value);
-        }
-
-        private object[][] GetTable(LiteElementInfoEvent response, int tableId)
-        {
-            var partialTableRequest = new GetPartialTableMessage
-            {
-                DataMinerID = response.DataMinerID,
-                ElementID = response.ElementID,
-                ParameterID = tableId,
-            };
-
-            var messageResponse = _dms.SendMessage(partialTableRequest) as ParameterChangeEventMessage;
-            if (messageResponse.NewValue.ArrayValue != null && messageResponse.NewValue.ArrayValue.Length > 0)
-            {
-                return BuildRows(messageResponse.NewValue.ArrayValue);
-            }
-            else
-            {
-                return new object[0][];
-            }
-        }
-
-        private static object[][] BuildRows(ParameterValue[] columns)
-        {
-            int length1 = columns.Length;
-            int length2 = 0;
-            if (length1 > 0)
-                length2 = columns[0].ArrayValue.Length;
-            object[][] objArray;
-            if (length1 > 0 && length2 > 0)
-            {
-                objArray = new object[length2][];
-                for (int index = 0; index < length2; ++index)
-                    objArray[index] = new object[length1];
-            }
-            else
-            {
-                objArray = new object[0][];
-            }
-
-            for (int index1 = 0; index1 < length1; ++index1)
-            {
-                ParameterValue[] arrayValue = columns[index1].ArrayValue;
-                for (int index2 = 0; index2 < length2; ++index2)
-                    objArray[index2][index1] = arrayValue[index2].IsEmpty ? (object)null : arrayValue[index2].ArrayValue[0].InteropValue;
-            }
-
-            return objArray;
         }
 
         private static void CreateDebugRow(List<GQIRow> rows, string message)

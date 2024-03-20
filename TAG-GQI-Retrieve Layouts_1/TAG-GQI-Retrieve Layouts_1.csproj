@@ -17,6 +17,7 @@
     <DefineConstants>$(DefineConstants);DCFv1;DBInfo;ALARM_SQUASHING</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Common" Version="1.1.1.5" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.2.4" />
   </ItemGroup>
@@ -25,4 +26,5 @@
       <UserProperties DisLinkedXmlFile="..\TAG-GQI-Retrieve Layouts.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="..\Common\Common.projitems" Label="Shared" />
 </Project>
