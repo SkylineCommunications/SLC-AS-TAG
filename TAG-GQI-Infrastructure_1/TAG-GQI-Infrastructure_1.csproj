@@ -17,11 +17,14 @@
 		<DefineConstants>$(DefineConstants);DCFv1;DBInfo;ALARM_SQUASHING</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.2.4" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Automation" Version="1.1.1.6" />
+		<PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.3.3" />
 	</ItemGroup>
 	<ProjectExtensions>
 	    <VisualStudio>
 		    <UserProperties DisLinkedXmlFile="..\TAG-GQI-Infrastructure.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
         </VisualStudio>
 	</ProjectExtensions>
+	<Import Project="..\Common\Common.projitems" Label="Shared" />
 </Project>

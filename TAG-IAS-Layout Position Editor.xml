@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <DMSScript options="272" xmlns="http://www.skyline.be/automation">
-	<Name>TAG-IAS-Change Mosaic Audio</Name>
+	<Name>TAG-IAS-Layout Position Editor</Name>
 	<Description></Description>
 	<Type>Automation</Type>
-	<Author>SKYLINE2\CarlosMT</Author>
+	<Author>SKYLINE2\GermanBS</Author>
 	<CheckSets>FALSE</CheckSets>
 	<Folder>TAG</Folder>
 
@@ -18,16 +18,19 @@
 			<Description>Element ID</Description>
 		</ScriptParameter>
 		<ScriptParameter id="2" type="string" values="">
-			<Description>Output ID</Description>
+			<Description>Layout ID</Description>
 		</ScriptParameter>
 		<ScriptParameter id="3" type="string" values="">
-			<Description>Layout ID</Description>
+			<Description>Position</Description>
+		</ScriptParameter>
+		<ScriptParameter id="4" type="string" values="">
+			<Description>Action</Description>
 		</ScriptParameter>
 	</Parameters>
 
 	<Script>
 		<Exe id="10" type="csharp">
-			<Value><![CDATA[[Project:TAG-IAS-Change Mosaic Audio_1]]]></Value>
+			<Value><![CDATA[[Project:TAG-IAS-Layout Position Editor_1]]]></Value>
 			<!--<Param type="debug">true</Param>-->
 			<Message></Message>
 		</Exe>

@@ -20,11 +20,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Automation" Version="1.1.1.6" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.3.3" />
-    <PackageReference Include="Skyline.DataMiner.Utils.InteractiveAutomationScriptToolkit" Version="8.0.3" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties DisLinkedXmlFile="..\TAG-IAS-Change Mosaic Audio.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
+      <UserProperties DisLinkedXmlFile="..\TAG-GQI-Retrieve Layouts.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\Common\Common.projitems" Label="Shared" />
