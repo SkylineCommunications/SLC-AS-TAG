@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using SharedMethods;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
@@ -44,9 +43,8 @@
 
         public Button CancelButton { get; private set; }
 
-        public void SendLayoutUpdate(Element element, string elementType)
+        public void SendLayoutUpdate(Element element, int columnPid)
         {
-            int columnPid = elementType.Equals("MCM") ? MCM_TablesIDs.EncoderConfigLayoutsColumnId : MCS_TablesIDs.OutputsLayoutsLayoutColumnId;
             foreach (var layoutToUpdate in Layouts)
             {
                 var layoutPanel = (LayoutsPanel)layoutToUpdate;
