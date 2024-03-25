@@ -15,7 +15,7 @@
 
 	<Parameters>
 		<ScriptParameter id="1" type="string" values="">
-			<Description>Element ID</Description>
+			<Description>Element Name</Description>
 		</ScriptParameter>
 		<ScriptParameter id="2" type="string" values="">
 			<Description>Title Index</Description>

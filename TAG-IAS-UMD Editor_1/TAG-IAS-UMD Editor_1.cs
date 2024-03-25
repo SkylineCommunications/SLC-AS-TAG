@@ -59,6 +59,7 @@ namespace TAG_IAS_UMD_Editor_1
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
     using TAG_UMD_Editor;
+    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -79,8 +80,8 @@ namespace TAG_IAS_UMD_Editor_1
             //// engine.ShowUI();
             try
             {
-                var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                var titleIndex = GetOneDeserializedValue(engine.GetScriptParam("Title Index").Value);
+                var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                var titleIndex = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Title Index").Value);
 
                 //// IAS Toolkit code
                 var controller = new InteractiveController(engine);
@@ -95,7 +96,7 @@ namespace TAG_IAS_UMD_Editor_1
                 dialog.RadioButtonPanel.UmdRadioButtons.Changed += (sender, args) => dialog.ChangeUmdOption();
 
                 OnPressedButtons(dialog);
-
+                dialog.ApplyButton.Pressed += (sender, args) => dialog.ApplySets(engine, elementId, titleIndex);
                 dialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("UMD Editor Canceled");
                 controller.Run(dialog);
             }
@@ -166,18 +167,6 @@ namespace TAG_IAS_UMD_Editor_1
             dialog.AlarmsSection.AlarmBackground.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmBackground);
             dialog.AlarmsSection.AlarmTextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmTextColor);
             dialog.AlarmsSection.AlarmCount.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmCount);
-        }
-
-        private string GetOneDeserializedValue(string scriptParam)
-        {
-            if (scriptParam.Contains("[") && scriptParam.Contains("]"))
-            {
-                return JsonConvert.DeserializeObject<List<string>>(scriptParam)[0];
-            }
-            else
-            {
-                return scriptParam;
-            }
         }
     }
 }
