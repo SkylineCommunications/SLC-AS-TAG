@@ -14,10 +14,16 @@
 	</Memory>
 
 	<Parameters>
+		<ScriptParameter id="1" type="string" values="">
+			<Description>Element ID</Description>
+		</ScriptParameter>
+		<ScriptParameter id="2" type="string" values="">
+			<Description>Title Index</Description>
+		</ScriptParameter>
 	</Parameters>
 
 	<Script>
-		<Exe id="1" type="csharp">
+		<Exe id="10" type="csharp">
 			<Value><![CDATA[[Project:TAG-IAS-UMD Editor_1]]]></Value>
 			<!--<Param type="debug">true</Param>-->
 			<Message></Message>

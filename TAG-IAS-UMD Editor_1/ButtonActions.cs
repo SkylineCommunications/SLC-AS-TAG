@@ -49,6 +49,21 @@
             {ButtonValues.SDTProvider,"#SDTPROV#" },
             {ButtonValues.Timecode,"#TIMECODE#" },
             {ButtonValues.TransportId,"#TSID#" },
+            {ButtonValues.Tally0Background,"#TBC0#" },
+            {ButtonValues.Tally0Light,"#T0#" },
+            {ButtonValues.Tally0TextColor,"#TC0#" },
+            {ButtonValues.Tally1Background,"#TBC1#" },
+            {ButtonValues.Tally1Light,"#T1#" },
+            {ButtonValues.Tally1TextColor,"#TC1#" },
+            {ButtonValues.UMD0Background,"#not set#" },
+            {ButtonValues.UMD0Text,"#not set#" },
+            {ButtonValues.UMD0TextColor,"#UC0#" },
+            {ButtonValues.UMD1Background,"#not set#" },
+            {ButtonValues.UMD1Text,"#not set#" },
+            {ButtonValues.UMD1TextColor,"#UC1#" },
+            {ButtonValues.AlarmTextColor,"#TCA#" },
+            {ButtonValues.AlarmBackground,"#BCA#" },
+            {ButtonValues.AlarmCount,"#AC#" },
         };
 
         public enum ButtonValues
@@ -78,6 +93,21 @@
             SDTProvider,
             Timecode,
             TransportId,
+            Tally0Background,
+            Tally0Light,
+            Tally0TextColor,
+            Tally1Background,
+            Tally1Light,
+            Tally1TextColor,
+            UMD0Background,
+            UMD0Text,
+            UMD0TextColor,
+            UMD1Background,
+            UMD1Text,
+            UMD1TextColor,
+            AlarmTextColor,
+            AlarmBackground,
+            AlarmCount,
         }
     }
 }

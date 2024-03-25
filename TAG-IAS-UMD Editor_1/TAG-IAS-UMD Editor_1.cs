@@ -78,6 +78,9 @@ namespace TAG_IAS_UMD_Editor_1
             //// engine.ShowUI();
             try
             {
+                var elementId = GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                var titleIndex = GetOneDeserializedValue(engine.GetScriptParam("Title Index").Value);
+
                 //// IAS Toolkit code
                 var controller = new InteractiveController(engine);
                 var dialog = new UmdDialog(engine);
@@ -90,6 +93,8 @@ namespace TAG_IAS_UMD_Editor_1
 
                 dialog.RadioButtonPanel.UmdRadioButtons.Changed += (sender, args) => dialog.ChangeUmdOption();
 
+                OnPressedButtons(dialog);
+
                 dialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("UMD Editor Canceled");
                 controller.Run(dialog);
             }
@@ -101,6 +106,76 @@ namespace TAG_IAS_UMD_Editor_1
             {
                 engine.Log($"{ex}");
                 engine.GenerateInformation($"{ex}");
+            }
+        }
+
+        private void OnPressedButtons(UmdDialog dialog)
+        {
+            // Text Attributes
+            dialog.TextFormatSection.Bold.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Bold);
+            dialog.TextFormatSection.Underlined.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Underlined);
+            dialog.TextFormatSection.Italics.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Italics);
+            dialog.TextFormatSection.Regular.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.RegularFormat);
+            dialog.TextFormatSection.HalfWidth.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.HalfWidth);
+            dialog.TextFormatSection.Flash.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Flash);
+
+            // Text Color
+            dialog.TextFormatSection.TextColorRed.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextRed);
+            dialog.TextFormatSection.TextColorGreen.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextGreen);
+            dialog.TextFormatSection.TextColorYellow.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextYellow);
+            dialog.TextFormatSection.TextColorCustomRGB.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextCustomRGB);
+
+            // Text Color
+            dialog.TextFormatSection.BackgroundRed.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundRed);
+            dialog.TextFormatSection.BackgroundGreen.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundGreen);
+            dialog.TextFormatSection.BackgroundYellow.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundYellow);
+            dialog.TextFormatSection.BackgroundCustomRGB.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundCustomRGB);
+
+            // Special Values Filter
+            dialog.SpecialValuesSection.Bitrate.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Bitrate);
+            dialog.SpecialValuesSection.ChannelTitle.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.ChannelTitle);
+            dialog.SpecialValuesSection.Codec.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Codec);
+            dialog.SpecialValuesSection.ColorSpace.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.ColorSpace);
+            dialog.SpecialValuesSection.ColorSpaceShort.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.ColorSpaceShort);
+            dialog.SpecialValuesSection.HDType.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.HDType);
+            dialog.SpecialValuesSection.Resolution.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Resolution);
+            dialog.SpecialValuesSection.SDTName.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.SDTName);
+            dialog.SpecialValuesSection.SDTProvider.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.SDTProvider);
+            dialog.SpecialValuesSection.Timecode.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Timecode);
+            dialog.SpecialValuesSection.TransportId.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TransportId);
+
+            // Tally Actions
+
+            dialog.TallyAndUmdSection.Tally0Background.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally0Background);
+            dialog.TallyAndUmdSection.Tally0Light.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally0Light);
+            dialog.TallyAndUmdSection.Tally0TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally0TextColor);
+            dialog.TallyAndUmdSection.Tally1Background.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally1Background);
+            dialog.TallyAndUmdSection.Tally1Light.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally1Light);
+            dialog.TallyAndUmdSection.Tally1TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally1TextColor);
+
+            // UMD Actions
+            dialog.TallyAndUmdSection.Umd0Background.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0Background);
+            dialog.TallyAndUmdSection.Umd0Text.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0Text);
+            dialog.TallyAndUmdSection.Umd0TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0TextColor);
+            dialog.TallyAndUmdSection.Umd1Background.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1Background);
+            dialog.TallyAndUmdSection.Umd1Text.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1Text);
+            dialog.TallyAndUmdSection.Umd1TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1TextColor);
+
+            // Alarm
+            dialog.AlarmsSection.AlarmBackground.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmBackground);
+            dialog.AlarmsSection.AlarmTextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmTextColor);
+            dialog.AlarmsSection.AlarmCount.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmCount);
+        }
+
+        private string GetOneDeserializedValue(string scriptParam)
+        {
+            if (scriptParam.Contains("[") && scriptParam.Contains("]"))
+            {
+                return JsonConvert.DeserializeObject<List<string>>(scriptParam)[0];
+            }
+            else
+            {
+                return scriptParam;
             }
         }
     }

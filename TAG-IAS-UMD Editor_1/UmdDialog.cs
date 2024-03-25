@@ -3,9 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Security.Cryptography.X509Certificates;
     using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.ServiceManager.Objects;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     public class UmdDialog : Dialog
@@ -77,25 +75,6 @@
             UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
             UmdFilterButtons.AlarmButton.IsEnabled = true;
 
-            // Text Attributes
-            TextFormatSection.Underlined.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Underlined);
-            TextFormatSection.Italics.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Italics);
-            TextFormatSection.Regular.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.RegularFormat);
-            TextFormatSection.HalfWidth.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.HalfWidth);
-            TextFormatSection.Flash.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Flash);
-
-            // Text Color
-            TextFormatSection.TextColorRed.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextRed);
-            TextFormatSection.TextColorGreen.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextGreen);
-            TextFormatSection.TextColorYellow.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextYellow);
-            TextFormatSection.TextColorCustomRGB.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TextCustomRGB);
-
-            // Text Color
-            TextFormatSection.BackgroundRed.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundRed);
-            TextFormatSection.BackgroundGreen.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundGreen);
-            TextFormatSection.BackgroundYellow.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundYellow);
-            TextFormatSection.BackgroundCustomRGB.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.BackgroundCustomRGB);
-
             InitializeUI(FilteredBy.TextFormat);
         }
 
@@ -106,18 +85,6 @@
             UmdFilterButtons.SpecialValuesButton.IsEnabled = false;
             UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
             UmdFilterButtons.AlarmButton.IsEnabled = true;
-
-            SpecialValuesSection.Bitrate.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Bitrate);
-            SpecialValuesSection.ChannelTitle.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.ChannelTitle);
-            SpecialValuesSection.Codec.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Codec);
-            SpecialValuesSection.ColorSpace.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.ColorSpace);
-            SpecialValuesSection.ColorSpaceShort.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.ColorSpaceShort);
-            SpecialValuesSection.HDType.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.HDType);
-            SpecialValuesSection.Resolution.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Resolution);
-            SpecialValuesSection.SDTName.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.SDTName);
-            SpecialValuesSection.SDTProvider.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.SDTProvider);
-            SpecialValuesSection.Timecode.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Timecode);
-            SpecialValuesSection.TransportId.Pressed += (sender, args) => UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TransportId);
 
             InitializeUI(FilteredBy.SpecialValue);
         }
