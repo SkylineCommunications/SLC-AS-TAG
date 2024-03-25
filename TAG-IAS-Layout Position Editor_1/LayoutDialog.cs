@@ -46,20 +46,20 @@
 
         public Button CancelButton { get; private set; }
 
-        public void GetLayoutsFromElement(IDmsElement element)
+        public void GetLayoutsFromElement(IDmsElement element, string elementType)
         {
             var channelsList = new List<string> { "< None >" };
 
-            if (element.Protocol.Name.Contains("MCM"))
+            if (elementType.Equals("MCM"))
             {
-                var channelsTableData = element.GetTable(MCM_TablesIDs.ChannelStatusTableId);
+                var channelsTableData = element.GetTable(MCM.ChannelStatusTableId);
                 var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 256, Value = Convert.ToString((int)Monitored.Yes) } };
                 var matchedChannels = channelsTableData.QueryData(filter).ToList();
                 channelsList.AddRange(matchedChannels.Select(row => Convert.ToString(row[12 /* Name */])));
             }
             else
             {
-                foreach (var tableId in MCS_TablesIDs.ChannelsTableIds)
+                foreach (var tableId in MCS.ChannelsTableIds)
                 {
                     var channelsTableData = element.GetTable(tableId);
                     var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.NotEqual, Pid = 2107, Value = "Not Set" } };

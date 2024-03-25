@@ -95,27 +95,28 @@ namespace TAG_IAS_Layout_Position_Editor_1
                 if (elementData.Length < 2)
                 {
                     engine.ShowUI("Element ID format not supported. Please check the incoming data. [Format: DMA ID/Element ID]");
-                    engine.GenerateInformation("Element ID format not supported. Please check the incoming data. [Format: DMA ID/Element ID]");
                     return;
                 }
 
                 var dms = engine.GetDms();
                 var dmsElement = dms.GetElement(new DmsElementId(Convert.ToInt32(elementData[0]), Convert.ToInt32(elementData[1])));
                 var element = engine.FindElementByKey(elementId);
-                var columnPid = GetColumnPidByElement(dmsElement);
+
+                var elementType = TAG.GetElementType(element.Protocol.Name);
+                var tag = TAG.GetDeviceByType(dmsElement, elementType);
 
                 if (action.ToUpperInvariant().Equals("EDIT"))
                 {
-                    layoutDialog.GetLayoutsFromElement(dmsElement);
+                    layoutDialog.GetLayoutsFromElement(dmsElement, elementType);
 
-                    layoutDialog.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, columnPid, layoutDialog.ChannelsDropDown.Selected);
+                    layoutDialog.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, tag.AllLayouts_TitleColumnId, layoutDialog.ChannelsDropDown.Selected);
                     layoutDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
 
                     controller.Run(layoutDialog);
                 }
                 else
                 {
-                    UpdateLayoutChannel(engine, element, columnPid, "None");
+                    UpdateLayoutChannel(engine, element, tag.AllLayouts_TitleColumnId, "None");
                 }
             }
             catch (ScriptAbortException)
@@ -124,7 +125,7 @@ namespace TAG_IAS_Layout_Position_Editor_1
             }
             catch (Exception ex)
             {
-                engine.GenerateInformation($"Exception thrown: {ex}");
+                engine.ShowUI($"Exception thrown: {ex}");
             }
         }
 
@@ -133,6 +134,7 @@ namespace TAG_IAS_Layout_Position_Editor_1
             if (String.IsNullOrWhiteSpace(value))
             {
                 engine.GenerateInformation($"Value to set on layout with ID {layoutId} and position {position} is null or empty.");
+                engine.ShowUI($"Value to set on layout with ID {layoutId} and position {position} is null or empty.");
                 return;
             }
 
@@ -143,11 +145,6 @@ namespace TAG_IAS_Layout_Position_Editor_1
 
             element.SetParameterByPrimaryKey(columnPid, $"{layoutId}/{position}", value);
             engine.ExitSuccess("Layout Title updated");
-        }
-
-		private static int GetColumnPidByElement(IDmsElement element)
-        {
-            return element.Protocol.Name.Contains("MCM") ? MCM_TablesIDs.AllLayoutsTable_TitlePid : MCS_TablesIDs.AllLayoutsTable_TitlePid;
         }
     }
 }
