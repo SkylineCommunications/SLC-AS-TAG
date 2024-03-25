@@ -18,7 +18,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.2.4" />
+    <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Automation" Version="1.1.1.6" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.3.3" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>

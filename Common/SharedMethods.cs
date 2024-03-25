@@ -1,14 +1,14 @@
 ﻿namespace SharedMethods
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Newtonsoft.Json;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Newtonsoft.Json;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Net.Messages;
 
-    public class SharedMethods
+	public class SharedMethods
     {
         public static string GetOneDeserializedValue(string scriptParam) // [ "value" , "value" ]
         {
@@ -71,7 +71,7 @@
         }
     }
 
-    public abstract class TAG
+	public abstract class TAG
     {
         public IDmsElement element;
 
@@ -121,7 +121,7 @@
         }
     }
 
-    public class MCM : TAG
+	public class MCM : TAG
     {
         public MCM(IDmsElement element)
         {
@@ -143,7 +143,7 @@
         public override int AllLayouts_TitleColumnId { get => 10353; }
     }
 
-    public class MCS : TAG
+	public class MCS : TAG
     {
         public MCS(IDmsElement element)
         {
