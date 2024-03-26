@@ -3,17 +3,17 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     public class UmdDialog : Dialog
     {
         public UmdDialog(IEngine engine) : base(engine)
         {
             Engine = engine;
-            Width = 1400;
             Clear();
             Title = "UMD Editor";
 
@@ -24,6 +24,7 @@
             SpecialValuesSection = new SpecialValuesSection();
             TallyAndUmdSection = new TallyAndUmdSection();
             AlarmsSection = new AlarmSection();
+            BottomPanelButtons = new BottomPanelButtons();
 
             UmdButtonActions = new ButtonActions(StaticTopPanel);
 
@@ -41,6 +42,7 @@
             SpecialValuesSection = 18,
             TallySection = 22,
             AlarmSection = 37,
+            BottomPanelButtons = 50,
         }
 
         public enum FilteredBy
@@ -64,9 +66,7 @@
 
         public FilterButtons UmdFilterButtons { get; set; }
 
-        public Button CancelButton { get; set; } = new Button("Cancel") { Width = 100 };
-
-        public Button ApplyButton { get; set; } = new Button("Cancel") { Width = 100 };
+        public BottomPanelButtons BottomPanelButtons { get; set; }
 
         public TextFormatSection TextFormatSection { get; set; }
 
@@ -133,40 +133,27 @@
             InitializeUI(FilteredBy.All);
         }
 
-        public void ApplySets(IEngine engine, string tagElementName, string titleIndex)
+        public void ApplySets(IEngine engine, string elementId, string titleIndex, string layoutName)
         {
             var dms = engine.GetDms();
-            var tagElement = dms.GetElement(tagElementName);
+            var tagElement = dms.GetElement(new DmsElementId(elementId));
             var tagType = tagElement.Protocol.Name;
             var selectedUmd = RadioButtonPanel.UmdRadioButtons.Selected;
 
             if (tagType.Contains("MCS"))
             {
                 var layoutsTable = tagElement.GetTable(5000);
-                var columnPid = GetColumnByUmd(selectedUmd);
+                var columnPid = GetMcsColumnByUmd(selectedUmd);
+                tagElement.GetStandaloneParameter<string>(5999).SetValue(layoutName); // Layout Drop-down Write
+                Thread.Sleep(1000);
                 layoutsTable.GetColumn<string>(columnPid).SetValue(titleIndex, StaticTopPanel.UmdTextBox.Text);
             }
             else
             {
-
+                // TAG MCM Actions
             }
-        }
 
-        private int GetColumnByUmd(string selectedValue)
-        {
-            switch (selectedValue)
-            {
-                case "UMD 1":
-                    return 5005;
-                case "UMD 2":
-                    return 5006;
-                case "UMD 3":
-                    return 5007;
-                case "UMD 4":
-                    return 5008;
-                default:
-                    return 0;
-            }
+            engine.ExitSuccess("UMD Set Applied.");
         }
 
         public void ChangeUmdOption()
@@ -180,6 +167,24 @@
 
             InitializeUI(FilteredBy.TextFormat);
         }
+
+        private static int GetMcsColumnByUmd(string selectedValue)
+        {
+            switch (selectedValue)
+            {
+                case "UMD 1":
+                    return 5025;
+                case "UMD 2":
+                    return 5026;
+                case "UMD 3":
+                    return 5027;
+                case "UMD 4":
+                    return 5028;
+                default:
+                    return 0;
+            }
+        }
+
 
         private void InitializeUI(FilteredBy sectionFilter)
         {
@@ -214,8 +219,7 @@
                     break;
             }
 
-            AddWidget(CancelButton, 50, 0, HorizontalAlignment.Left, VerticalAlignment.Bottom);
-            AddWidget(ApplyButton, 50, 1, HorizontalAlignment.Right, VerticalAlignment.Bottom);
+            AddSection(BottomPanelButtons, new SectionLayout((int)StartRowSectionPosition.BottomPanelButtons, 1));
         }
     }
 
@@ -445,5 +449,19 @@
         public Button AlarmBackground { get; } = new Button("Alarm Background") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
 
         public Button AlarmCount { get; } = new Button("Alarm Count") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
+    }
+
+    public class BottomPanelButtons : Section
+    {
+        public BottomPanelButtons()
+        {
+            AddWidget(new WhiteSpace(),0,0);
+            AddWidget(CancelButton, 1, 0, HorizontalAlignment.Left);
+            AddWidget(ApplyButton, 1, 5, HorizontalAlignment.Right);
+        }
+
+        public Button CancelButton { get; set; } = new Button("Cancel") { Width = 100 };
+
+        public Button ApplyButton { get; set; } = new Button("Apply") { Width = 100 };
     }
 }

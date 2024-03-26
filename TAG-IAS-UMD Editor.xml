@@ -15,10 +15,13 @@
 
 	<Parameters>
 		<ScriptParameter id="1" type="string" values="">
-			<Description>Element Name</Description>
+			<Description>Element ID</Description>
 		</ScriptParameter>
 		<ScriptParameter id="2" type="string" values="">
 			<Description>Title Index</Description>
+		</ScriptParameter>
+		<ScriptParameter id="3" type="string" values="">
+			<Description>Layout Name</Description>
 		</ScriptParameter>
 	</Parameters>
 

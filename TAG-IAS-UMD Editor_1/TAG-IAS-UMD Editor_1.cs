@@ -67,9 +67,18 @@ namespace TAG_IAS_UMD_Editor_1
     public class Script
     {
         /// <summary>
-        /// The script entry point.
+        /// Gets or sets the script entry point.
         /// </summary>
         /// <param name="engine">Link with SLAutomation process.</param>
+        ///
+        public IEngine Engine { get; set; }
+
+        public string ElementId { get; set; }
+
+        public string TitleIndex { get; set; }
+
+        public string LayoutName { get; set; }
+
         public void Run(IEngine engine)
         {
             // DO NOT REMOVE THIS COMMENTED-OUT CODE OR THE SCRIPT WON'T RUN!
@@ -80,24 +89,17 @@ namespace TAG_IAS_UMD_Editor_1
             //// engine.ShowUI();
             try
             {
-                var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                var titleIndex = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Title Index").Value);
+                Engine = engine;
+                ElementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                TitleIndex = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Title Index").Value);
+                LayoutName = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Layout Name").Value);
 
                 //// IAS Toolkit code
                 var controller = new InteractiveController(engine);
                 var dialog = new UmdDialog(engine);
 
-                dialog.UmdFilterButtons.TextFormatButton.Pressed += (sender, args) => dialog.TextFormatButtonPressed();
-                dialog.UmdFilterButtons.SpecialValuesButton.Pressed += (sender, args) => dialog.SpecialValuesButtonPressed();
-                dialog.UmdFilterButtons.TallyAndUmdButton.Pressed += (sender, args) => dialog.TallyAndUmdButtonPressed();
-                dialog.UmdFilterButtons.AlarmButton.Pressed += (sender, args) => dialog.AlarmButtonPressed();
-                dialog.UmdFilterButtons.AllButton.Pressed += (sender, args) => dialog.AllButtonPressed();
-
-                dialog.RadioButtonPanel.UmdRadioButtons.Changed += (sender, args) => dialog.ChangeUmdOption();
-
                 OnPressedButtons(dialog);
-                dialog.ApplyButton.Pressed += (sender, args) => dialog.ApplySets(engine, elementId, titleIndex);
-                dialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("UMD Editor Canceled");
+
                 controller.Run(dialog);
             }
             catch (ScriptAbortException)
@@ -113,6 +115,14 @@ namespace TAG_IAS_UMD_Editor_1
 
         private void OnPressedButtons(UmdDialog dialog)
         {
+            // Filtered Section
+            dialog.UmdFilterButtons.TextFormatButton.Pressed += (sender, args) => dialog.TextFormatButtonPressed();
+            dialog.UmdFilterButtons.SpecialValuesButton.Pressed += (sender, args) => dialog.SpecialValuesButtonPressed();
+            dialog.UmdFilterButtons.TallyAndUmdButton.Pressed += (sender, args) => dialog.TallyAndUmdButtonPressed();
+            dialog.UmdFilterButtons.AlarmButton.Pressed += (sender, args) => dialog.AlarmButtonPressed();
+            dialog.UmdFilterButtons.AllButton.Pressed += (sender, args) => dialog.AllButtonPressed();
+            dialog.RadioButtonPanel.UmdRadioButtons.Changed += (sender, args) => dialog.ChangeUmdOption();
+
             // Text Attributes
             dialog.TextFormatSection.Bold.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Bold);
             dialog.TextFormatSection.Underlined.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Underlined);
@@ -147,7 +157,6 @@ namespace TAG_IAS_UMD_Editor_1
             dialog.SpecialValuesSection.TransportId.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.TransportId);
 
             // Tally Actions
-
             dialog.TallyAndUmdSection.Tally0Background.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally0Background);
             dialog.TallyAndUmdSection.Tally0Light.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally0Light);
             dialog.TallyAndUmdSection.Tally0TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally0TextColor);
@@ -167,6 +176,10 @@ namespace TAG_IAS_UMD_Editor_1
             dialog.AlarmsSection.AlarmBackground.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmBackground);
             dialog.AlarmsSection.AlarmTextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmTextColor);
             dialog.AlarmsSection.AlarmCount.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmCount);
+
+            // Bottom Panel
+            dialog.BottomPanelButtons.ApplyButton.Pressed += (sender, args) => dialog.ApplySets(Engine, ElementId, TitleIndex, LayoutName);
+            dialog.BottomPanelButtons.CancelButton.Pressed += (sender, args) => Engine.ExitSuccess("UMD Editor Canceled");
         }
     }
 }
