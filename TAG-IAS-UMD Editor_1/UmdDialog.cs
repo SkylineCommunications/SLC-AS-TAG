@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
+    using SharedMethods;
+    using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
@@ -11,13 +13,19 @@
 
     public class UmdDialog : Dialog
     {
-        public UmdDialog(IEngine engine) : base(engine)
+        public UmdDialog(IEngine engine,string elementId, string selectedLayout, string titleIndex) : base(engine)
         {
             Engine = engine;
+            var dms = engine.GetDms();
+            TagElement = dms.GetElement(new DmsElementId(elementId));
+            isMCS = TagElement.Protocol.Name.Contains("MCS");
+
+            SelectedLayout = selectedLayout;
+            TitleIndex = titleIndex;
             Clear();
             Title = "UMD Editor";
 
-            RadioButtonPanel = new UmdRadioButtonPanel();
+            RadioButtonPanel = new UmdRadioButtonPanel(isMCS);
             StaticTopPanel = new TopPanel();
             UmdFilterButtons = new FilterButtons();
             TextFormatSection = new TextFormatSection();
@@ -25,10 +33,12 @@
             TallyAndUmdSection = new TallyAndUmdSection();
             AlarmsSection = new AlarmSection();
             BottomPanelButtons = new BottomPanelButtons();
-
             UmdButtonActions = new ButtonActions(StaticTopPanel);
 
             UmdFilterButtons.TextFormatButton.IsEnabled = false; // Default selected option
+            var umdValue = CheckUmdValue();
+            StaticTopPanel.UmdTextBox.Text = umdValue;
+
             TextFormatButtonPressed();
         }
 
@@ -54,11 +64,17 @@
             All,
         }
 
+        public IDmsElement TagElement { get; set; }
+
         public IEngine Engine { get; set; }
+
+        public string SelectedLayout { get; set; }
+
+        public string TitleIndex { get; set; }
 
         public string ElementId { get; set; }
 
-        public string TitleIndex { get; set; }
+        public bool isMCS { get; set; }
 
         public UmdRadioButtonPanel RadioButtonPanel { get; private set; }
 
@@ -133,27 +149,24 @@
             InitializeUI(FilteredBy.All);
         }
 
-        public void ApplySets(IEngine engine, string elementId, string titleIndex, string layoutName)
+        public void ApplySets()
         {
-            var dms = engine.GetDms();
-            var tagElement = dms.GetElement(new DmsElementId(elementId));
-            var tagType = tagElement.Protocol.Name;
             var selectedUmd = RadioButtonPanel.UmdRadioButtons.Selected;
+            var umdColumnPid = GetWriteIdBySelectedUmd(selectedUmd);
 
-            if (tagType.Contains("MCS"))
+            if (isMCS)
             {
-                var layoutsTable = tagElement.GetTable(5000);
-                var columnPid = GetMcsColumnByUmd(selectedUmd);
-                tagElement.GetStandaloneParameter<string>(5999).SetValue(layoutName); // Layout Drop-down Write
+                var layoutsTable = TagElement.GetTable(5000);
+                TagElement.GetStandaloneParameter<string>(5999).SetValue(SelectedLayout); // Layout Drop-down Write
                 Thread.Sleep(1000);
-                layoutsTable.GetColumn<string>(columnPid).SetValue(titleIndex, StaticTopPanel.UmdTextBox.Text);
+                layoutsTable.GetColumn<string>(umdColumnPid).SetValue(TitleIndex, StaticTopPanel.UmdTextBox.Text);
             }
             else
             {
                 // TAG MCM Actions
             }
 
-            engine.ExitSuccess("UMD Set Applied.");
+            Engine.ExitSuccess("UMD Set Applied.");
         }
 
         public void ChangeUmdOption()
@@ -163,28 +176,99 @@
             UmdFilterButtons.SpecialValuesButton.IsEnabled = true;
             UmdFilterButtons.TallyAndUmdButton.IsEnabled = true;
             UmdFilterButtons.AlarmButton.IsEnabled = true;
-            StaticTopPanel.UmdTextBox.Text = string.Empty;
+
+            var umdValue = CheckUmdValue();
+
+            StaticTopPanel.UmdTextBox.Text = umdValue;
 
             InitializeUI(FilteredBy.TextFormat);
         }
 
-        private static int GetMcsColumnByUmd(string selectedValue)
+        private string CheckUmdValue()
         {
-            switch (selectedValue)
+            var selectedUmd = RadioButtonPanel.UmdRadioButtons.Selected;
+            var umdColumnPid = GetReadIdBySelectedUmd(selectedUmd);
+
+            if (isMCS)
             {
-                case "UMD 1":
-                    return 5025;
-                case "UMD 2":
-                    return 5026;
-                case "UMD 3":
-                    return 5027;
-                case "UMD 4":
-                    return 5028;
-                default:
-                    return 0;
+                var layoutsTable = TagElement.GetTable(5000);
+                TagElement.GetStandaloneParameter<string>(5999).SetValue(SelectedLayout); // Layout Drop-down Write
+                Thread.Sleep(1000);
+                var umdElementValue = layoutsTable.GetColumn<string>(umdColumnPid).GetValue(TitleIndex, KeyType.PrimaryKey);
+                Engine.GenerateInformation($"UMD Value: {umdElementValue}");
+                return umdElementValue;
+            }
+            else
+            {
+                // TAG MCM Actions
+
+                return string.Empty;
             }
         }
 
+        private int GetWriteIdBySelectedUmd(string selectedValue)
+        {
+            if (isMCS)
+            {
+                switch (selectedValue)
+                {
+                    case "UMD 1":
+                        return 5025;
+                    case "UMD 2":
+                        return 5026;
+                    case "UMD 3":
+                        return 5027;
+                    case "UMD 4":
+                        return 5028;
+                    default:
+                        return 0;
+                }
+            }
+            else // MCM
+            {
+                switch (selectedValue)
+                {
+                    case "UMD 1":
+                        return 2856;
+                    case "UMD 2":
+                        return 2857;
+                    default:
+                        return 0;
+                }
+            }
+        }
+
+        private int GetReadIdBySelectedUmd(string selectedValue)
+        {
+            if (isMCS)
+            {
+                switch (selectedValue)
+                {
+                    case "UMD 1":
+                        return 5005;
+                    case "UMD 2":
+                        return 5006;
+                    case "UMD 3":
+                        return 5007;
+                    case "UMD 4":
+                        return 5008;
+                    default:
+                        return 0;
+                }
+            }
+            else // MCM
+            {
+                switch (selectedValue)
+                {
+                    case "UMD 1":
+                        return 2806;
+                    case "UMD 2":
+                        return 2807;
+                    default:
+                        return 0;
+                }
+            }
+        }
 
         private void InitializeUI(FilteredBy sectionFilter)
         {
@@ -225,9 +309,9 @@
 
     public class UmdRadioButtonPanel : Section
     {
-        public UmdRadioButtonPanel()
+        public UmdRadioButtonPanel(bool isMCS)
         {
-            var optionsList = new List<string> { "UMD 1", "UMD 2", "UMD 3", "UMD 4", };
+            var optionsList = isMCS ? new List<string> { "UMD 1", "UMD 2", "UMD 3", "UMD 4", } : new List<string> { "UMD 1", "UMD 2", };
             UmdRadioButtons.Options = optionsList;
             UmdRadioButtons.Selected = optionsList.First();
             AddWidget(UmdRadioButtons, 0, 0, 5, 1);

@@ -71,13 +71,6 @@ namespace TAG_IAS_UMD_Editor_1
         /// </summary>
         /// <param name="engine">Link with SLAutomation process.</param>
         ///
-        public IEngine Engine { get; set; }
-
-        public string ElementId { get; set; }
-
-        public string TitleIndex { get; set; }
-
-        public string LayoutName { get; set; }
 
         public void Run(IEngine engine)
         {
@@ -89,16 +82,15 @@ namespace TAG_IAS_UMD_Editor_1
             //// engine.ShowUI();
             try
             {
-                Engine = engine;
-                ElementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                TitleIndex = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Title Index").Value);
-                LayoutName = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Layout Name").Value);
+                var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
+                var titleIndex = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Title Index").Value);
+                var layoutName = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Layout Name").Value);
 
                 //// IAS Toolkit code
                 var controller = new InteractiveController(engine);
-                var dialog = new UmdDialog(engine);
+                var dialog = new UmdDialog(engine, elementId, layoutName, titleIndex);
 
-                OnPressedButtons(dialog);
+                OnPressedButtons(engine, dialog);
 
                 controller.Run(dialog);
             }
@@ -113,7 +105,7 @@ namespace TAG_IAS_UMD_Editor_1
             }
         }
 
-        private void OnPressedButtons(UmdDialog dialog)
+        private void OnPressedButtons(IEngine engine, UmdDialog dialog)
         {
             // Filtered Section
             dialog.UmdFilterButtons.TextFormatButton.Pressed += (sender, args) => dialog.TextFormatButtonPressed();
@@ -178,8 +170,8 @@ namespace TAG_IAS_UMD_Editor_1
             dialog.AlarmsSection.AlarmCount.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmCount);
 
             // Bottom Panel
-            dialog.BottomPanelButtons.ApplyButton.Pressed += (sender, args) => dialog.ApplySets(Engine, ElementId, TitleIndex, LayoutName);
-            dialog.BottomPanelButtons.CancelButton.Pressed += (sender, args) => Engine.ExitSuccess("UMD Editor Canceled");
+            dialog.BottomPanelButtons.ApplyButton.Pressed += (sender, args) => dialog.ApplySets();
+            dialog.BottomPanelButtons.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("UMD Editor Canceled");
         }
     }
 }
