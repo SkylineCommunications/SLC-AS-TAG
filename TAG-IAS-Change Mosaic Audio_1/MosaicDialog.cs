@@ -107,6 +107,7 @@
 
                 var primaryKey = Convert.ToString(outputAudioRow[0]);
 
+                outputAudiosTable.GetColumn<string>(3356).SetValue(primaryKey, this.ChannelOutputDropDown.Selected);
                 outputAudiosTable.GetColumn<double?>(3358).SetValue(primaryKey, Convert.ToInt32(audioId)); // Setting Write to execute QA
                 outputAudiosTable.GetColumn<double?>(3360).SetValue(primaryKey, Convert.ToInt32(audioId)); // Setting Write to execute QA
             }
