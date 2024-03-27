@@ -166,7 +166,7 @@ namespace TAG_IAS_UMD_Editor_1
             dialog.AlarmsSection.AlarmCount.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmCount);
 
             // Bottom Panel
-            dialog.BottomPanelButtons.ApplyButton.Pressed += (sender, args) => dialog.ApplySets();
+            dialog.BottomPanelButtons.ApplyButton.Pressed += (sender, args) => dialog.ApplySets(engine);
             dialog.BottomPanelButtons.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("UMD Editor Canceled");
         }
     }

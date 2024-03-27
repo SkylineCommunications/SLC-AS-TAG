@@ -1,11 +1,8 @@
 ﻿namespace TAG_UMD_Editor
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-    using SharedMethods;
-    using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
@@ -17,7 +14,7 @@
         {
             var dms = engine.GetDms();
 
-            Tag = new Tag(dms, elementId, selectedLayout, titleIndex);
+            Tag = new Tag(engine, dms, elementId, selectedLayout, titleIndex);
 
             Clear();
             Title = "UMD Editor";
@@ -136,7 +133,7 @@
             InitializeUI(FilteredBy.All);
         }
 
-        public void ApplySets()
+        public void ApplySets(IEngine engine)
         {
             var selectedUmd = RadioButtonPanel.UmdRadioButtons.Selected;
             var umdColumnId = GetParamIdBySelectedUmd(selectedUmd);
@@ -157,8 +154,9 @@
                 if (tallyLayoutRow.Any())
                 {
                     var row = tallyLayoutRow.First();
-                    tallyLayoutsTable.GetColumn<string>(umdColumnId).SetValue(Convert.ToString(row[0]), StaticTopPanel.UmdTextBox.Text);
-                    tallyLayoutsTable.GetColumn<double>(2819).SetValue(Convert.ToString(row[0]), 1); // Update button
+
+                    Tag.TagEngineElement.SetParameterByPrimaryKey(umdColumnId, Convert.ToString(row[0]), StaticTopPanel.UmdTextBox.Text);
+                    Tag.TagEngineElement.SetParameterByPrimaryKey(2819, Convert.ToString(row[0]), 1);
                 }
             }
 
@@ -176,7 +174,6 @@
             var umdValue = CheckUmdValue();
 
             StaticTopPanel.UmdTextBox.Text = umdValue;
-
             InitializeUI(FilteredBy.TextFormat);
         }
 
@@ -307,17 +304,30 @@
 
             AddSection(BottomPanelButtons, new SectionLayout((int)StartRowSectionPosition.BottomPanelButtons, 1));
         }
+
+        internal void FocusCursor()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Tag
     {
-        public Tag(IDms dms, string elementId, string selectedLayout, string titleIndex)
+        public Tag(IEngine engine, IDms dms, string elementId, string selectedLayout, string titleIndex)
         {
             TagElement = dms.GetElement(new DmsElementId(elementId));
             SelectedLayout = selectedLayout;
             TitleIndex = titleIndex;
 
             isMCS = TagElement.Protocol.Name.Contains("MCS");
+
+            if (!isMCS)
+            {
+                var splittedId = elementId.Split('/');
+                var dmaId = Convert.ToInt32(splittedId[0]);
+                var element = Convert.ToInt32(splittedId[1]);
+                TagEngineElement = engine.FindElement(dmaId,element);
+            }
         }
 
         public enum TagMcs
@@ -343,6 +353,8 @@
         }
 
         public IDmsElement TagElement { get; set; }
+
+        public Element TagEngineElement { get; set; }
 
         public string SelectedLayout { get; set; }
 
