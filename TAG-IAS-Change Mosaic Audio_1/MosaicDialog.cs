@@ -123,12 +123,14 @@
 
         internal void SetValues(string elementId, string outputId, string layoutId)
         {
+            engine.GenerateInformation("test1");
             dms = engine.GetDms();
             var tagElement = dms.GetElement(new DmsElementId(elementId));
             var tagElementName = tagElement.Name;
             var tagType = tagElement.Protocol.Name;
             string outputName;
             this.MonitoringTagValue.Text = tagElementName;
+            engine.GenerateInformation("test2");
             if (tagType.Contains("MCS"))
             {
                 var pidsOverviewTableData = tagElement.GetTable(2500).GetData();
@@ -151,7 +153,7 @@
                 audioPidList = CreateMcmAudioPidList(pidsOverviewTable);
             }
 
-            outputList = new List<OutputConfigData> { new OutputConfigData { OutputLabel = outputName} };
+            outputList = new List<OutputConfigData> { new OutputConfigData { OutputLabel = outputName } };
             this.OutputEncoderValue.Text = outputList[0].OutputLabel;
 
             if (listChannelsPerLayout.Count > 0)
@@ -274,15 +276,23 @@
             {
                 var channelLabel = Convert.ToString(row[29]).Split('/')[0];
 
-                if (listChannelsPerLayout.Contains(channelLabel) && Convert.ToString(row[2]).Equals("2" /*Type = Audio*/))
+                if (Convert.ToString(row[1]).Equals("-1"))
                 {
-                    list.Add(new AudioPidData
+                    continue;
+                }
+
+                if (AudioDec.TryGetValue(Convert.ToString(row[18 /*Audio DEC*/]), out string audioDec))
+                {
+                    if (listChannelsPerLayout.Contains(channelLabel) && Convert.ToString(row[2]).Equals("2" /*Type = Audio*/))
                     {
-                        Index = Convert.ToString(row[29 /*Index*/]),
-                        Id = Convert.ToString(row[1 /*ID*/]),
-                        Encoding = Convert.ToString(row[18 /*Encoding*/]),
-                        FormattedString = $"{AudioDec[Convert.ToString(row[18 /*Audio DEC*/])]} (PID: {Convert.ToString(row[1 /*ID*/])})",
-                    });
+                        list.Add(new AudioPidData
+                        {
+                            Index = Convert.ToString(row[29 /*Index*/]),
+                            Id = Convert.ToString(row[1 /*ID*/]),
+                            Encoding = Convert.ToString(row[18 /*Encoding*/]),
+                            FormattedString = $"{audioDec} (PID: {Convert.ToString(row[1 /*ID*/])})",
+                        });
+                    }
                 }
             }
 

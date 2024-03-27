@@ -1,12 +1,6 @@
 ﻿namespace TAG_UMD_Editor
 {
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public class ButtonActions
     {
@@ -55,12 +49,12 @@
             {ButtonValues.Tally1Background,"#TBC1#" },
             {ButtonValues.Tally1Light,"#T1#" },
             {ButtonValues.Tally1TextColor,"#TC1#" },
-            {ButtonValues.UMD0Background,"#not set#" },
-            {ButtonValues.UMD0Text,"#not set#" },
-            {ButtonValues.UMD0TextColor,"#UC0#" },
-            {ButtonValues.UMD1Background,"#not set#" },
-            {ButtonValues.UMD1Text,"#not set#" },
-            {ButtonValues.UMD1TextColor,"#UC1#" },
+            {ButtonValues.UMD0TextAndColor,"#U0#" },
+            {ButtonValues.UMD0Text,"#UF0#" },
+            {ButtonValues.UMD0Color,"#UC0#" },
+            {ButtonValues.UMD1TextAndColor,"#U1#" },
+            {ButtonValues.UMD1Text,"#UF1#" },
+            {ButtonValues.UMD1Color,"#UC1#" },
             {ButtonValues.AlarmTextColor,"#TCA#" },
             {ButtonValues.AlarmBackground,"#BCA#" },
             {ButtonValues.AlarmCount,"#AC#" },
@@ -99,12 +93,12 @@
             Tally1Background,
             Tally1Light,
             Tally1TextColor,
-            UMD0Background,
+            UMD0TextAndColor,
             UMD0Text,
-            UMD0TextColor,
-            UMD1Background,
+            UMD0Color,
+            UMD1TextAndColor,
             UMD1Text,
-            UMD1TextColor,
+            UMD1Color,
             AlarmTextColor,
             AlarmBackground,
             AlarmCount,

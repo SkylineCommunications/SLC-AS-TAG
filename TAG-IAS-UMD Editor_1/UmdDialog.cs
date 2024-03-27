@@ -13,19 +13,16 @@
 
     public class UmdDialog : Dialog
     {
-        public UmdDialog(IEngine engine,string elementId, string selectedLayout, string titleIndex) : base(engine)
+        public UmdDialog(IEngine engine, string elementId, string selectedLayout, string titleIndex) : base(engine)
         {
-            Engine = engine;
             var dms = engine.GetDms();
-            TagElement = dms.GetElement(new DmsElementId(elementId));
-            isMCS = TagElement.Protocol.Name.Contains("MCS");
 
-            SelectedLayout = selectedLayout;
-            TitleIndex = titleIndex;
+            Tag = new Tag(dms, elementId, selectedLayout, titleIndex);
+
             Clear();
             Title = "UMD Editor";
 
-            RadioButtonPanel = new UmdRadioButtonPanel(isMCS);
+            RadioButtonPanel = new UmdRadioButtonPanel(Tag.isMCS);
             StaticTopPanel = new TopPanel();
             UmdFilterButtons = new FilterButtons();
             TextFormatSection = new TextFormatSection();
@@ -64,17 +61,7 @@
             All,
         }
 
-        public IDmsElement TagElement { get; set; }
-
-        public IEngine Engine { get; set; }
-
-        public string SelectedLayout { get; set; }
-
-        public string TitleIndex { get; set; }
-
-        public string ElementId { get; set; }
-
-        public bool isMCS { get; set; }
+        public Tag Tag { get; set; }
 
         public UmdRadioButtonPanel RadioButtonPanel { get; private set; }
 
@@ -152,18 +139,27 @@
         public void ApplySets()
         {
             var selectedUmd = RadioButtonPanel.UmdRadioButtons.Selected;
-            var umdColumnPid = GetWriteIdBySelectedUmd(selectedUmd);
+            var umdColumnId = GetParamIdBySelectedUmd(selectedUmd);
 
-            if (isMCS)
+            if (Tag.isMCS)
             {
-                var layoutsTable = TagElement.GetTable(5000);
-                TagElement.GetStandaloneParameter<string>(5999).SetValue(SelectedLayout); // Layout Drop-down Write
+                var layoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcs.LayoutsTable);
+                Tag.TagElement.GetStandaloneParameter<string>(5999).SetValue(Tag.SelectedLayout); // Layout Drop-down Write
                 Thread.Sleep(1000);
-                layoutsTable.GetColumn<string>(umdColumnPid).SetValue(TitleIndex, StaticTopPanel.UmdTextBox.Text);
+                layoutsTable.GetColumn<string>(umdColumnId).SetValue(Tag.TitleIndex, StaticTopPanel.UmdTextBox.Text);
             }
             else
             {
                 // TAG MCM Actions
+                var tallyLayoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcm.TallyLayouts);
+                var tallyLayoutRow = tallyLayoutsTable.GetRows().Where(x => Convert.ToString(x[0]).Contains($"{Tag.SelectedLayout}/{Tag.TitleIndex}"));
+
+                if (tallyLayoutRow.Any())
+                {
+                    var row = tallyLayoutRow.First();
+                    tallyLayoutsTable.GetColumn<string>(umdColumnId).SetValue(Convert.ToString(row[0]), StaticTopPanel.UmdTextBox.Text);
+                    tallyLayoutsTable.GetColumn<double>(2819).SetValue(Convert.ToString(row[0]), 1); // Update button
+                }
             }
 
             Engine.ExitSuccess("UMD Set Applied.");
@@ -187,39 +183,45 @@
         private string CheckUmdValue()
         {
             var selectedUmd = RadioButtonPanel.UmdRadioButtons.Selected;
-            var umdColumnPid = GetReadIdBySelectedUmd(selectedUmd);
+            var umdColumnId = GetReadIdBySelectedUmd(selectedUmd);
 
-            if (isMCS)
+            if (Tag.isMCS)
             {
-                var layoutsTable = TagElement.GetTable(5000);
-                TagElement.GetStandaloneParameter<string>(5999).SetValue(SelectedLayout); // Layout Drop-down Write
+                var layoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcs.LayoutsTable);
+                Tag.TagElement.GetStandaloneParameter<string>(5999).SetValue(Tag.SelectedLayout); // Layout Drop-down Write
                 Thread.Sleep(1000);
-                var umdElementValue = layoutsTable.GetColumn<string>(umdColumnPid).GetValue(TitleIndex, KeyType.PrimaryKey);
-                Engine.GenerateInformation($"UMD Value: {umdElementValue}");
+                var umdElementValue = layoutsTable.GetColumn<string>(umdColumnId).GetValue(Tag.TitleIndex, KeyType.PrimaryKey);
                 return umdElementValue;
             }
             else
             {
                 // TAG MCM Actions
-                var tallyLayoutsTable = TagElement.GetTable(2800);
+                var tallyLayoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcm.TallyLayouts).GetRows().Where(x => Convert.ToString(x[0]).Contains($"{Tag.SelectedLayout}/{Tag.TitleIndex}"));
+
+                if (tallyLayoutsTable.Any())
+                {
+                    var row = tallyLayoutsTable.First();
+                    return Convert.ToString(row[umdColumnId]);
+                }
+
                 return string.Empty;
             }
         }
 
-        private int GetWriteIdBySelectedUmd(string selectedValue)
+        private int GetParamIdBySelectedUmd(string selectedValue)
         {
-            if (isMCS)
+            if (Tag.isMCS)
             {
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return 5025;
+                        return (int)Tag.TagMcs.Umd1Write; // Write
                     case "UMD 2":
-                        return 5026;
+                        return (int)Tag.TagMcs.Umd2Write; // Write
                     case "UMD 3":
-                        return 5027;
+                        return (int)Tag.TagMcs.Umd3Write; // Write
                     case "UMD 4":
-                        return 5028;
+                        return (int)Tag.TagMcs.Umd4Write; // Write
                     default:
                         return 0;
                 }
@@ -229,9 +231,9 @@
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return 2856;
+                        return (int)Tag.TagMcm.Umd1Read; // Read
                     case "UMD 2":
-                        return 2857;
+                        return (int)Tag.TagMcm.Umd2Read; // Read
                     default:
                         return 0;
                 }
@@ -240,18 +242,18 @@
 
         private int GetReadIdBySelectedUmd(string selectedValue)
         {
-            if (isMCS)
+            if (Tag.isMCS)
             {
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return 5005;
+                        return (int)Tag.TagMcs.Umd1Read;
                     case "UMD 2":
-                        return 5006;
+                        return (int)Tag.TagMcs.Umd2Read;
                     case "UMD 3":
-                        return 5007;
+                        return (int)Tag.TagMcs.Umd3Read;
                     case "UMD 4":
-                        return 5008;
+                        return (int)Tag.TagMcs.Umd4Read;
                     default:
                         return 0;
                 }
@@ -261,9 +263,9 @@
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return 2806;
+                        return (int)Tag.TagMcm.Umd1Idx;
                     case "UMD 2":
-                        return 2807;
+                        return (int)Tag.TagMcm.Umd2Idx;
                     default:
                         return 0;
                 }
@@ -307,245 +309,45 @@
         }
     }
 
-    public class UmdRadioButtonPanel : Section
+    public class Tag
     {
-        public UmdRadioButtonPanel(bool isMCS)
+        public Tag(IDms dms, string elementId, string selectedLayout, string titleIndex)
         {
-            var optionsList = isMCS ? new List<string> { "UMD 1", "UMD 2", "UMD 3", "UMD 4", } : new List<string> { "UMD 1", "UMD 2", };
-            UmdRadioButtons.Options = optionsList;
-            UmdRadioButtons.Selected = optionsList.First();
-            AddWidget(UmdRadioButtons, 0, 0, 5, 1);
+            TagElement = dms.GetElement(new DmsElementId(elementId));
+            SelectedLayout = selectedLayout;
+            TitleIndex = titleIndex;
+
+            isMCS = TagElement.Protocol.Name.Contains("MCS");
         }
 
-        public RadioButtonList UmdRadioButtons { get; set; } = new RadioButtonList();
-    }
-
-    public class TopPanel : Section
-    {
-        public TopPanel()
+        public enum TagMcs
         {
-            AddWidget(UmdTextLabel, 0, 0);
-            AddWidget(UmdTextBox, 1, 0, 1, 5);
-            AddWidget(DynamicPropertiesLabel, 2, 0);
+            LayoutsTable = 5000,
+            Umd1Read = 5005,
+            Umd2Read = 5006,
+            Umd3Read = 5007,
+            Umd4Read = 5008,
+            Umd1Write = 5025,
+            Umd2Write = 5026,
+            Umd3Write = 5027,
+            Umd4Write = 5028,
         }
 
-        public Label UmdTextLabel { get; } = new Label("UMD Text:");
-
-        public TextBox UmdTextBox { get; set; } = new TextBox { IsMultiline = true, Height = 100, PlaceHolder = "This is #B#an example" };
-
-        public Label DynamicPropertiesLabel { get; } = new Label("Dynamic UMD Properties");
-    }
-
-    public class FilterButtons : Section
-    {
-        public FilterButtons()
+        public enum TagMcm
         {
-            AddWidget(TextFormatButton, 0, 0);
-            AddWidget(SpecialValuesButton, 0, 1);
-            AddWidget(TallyAndUmdButton, 0, 2);
-            AddWidget(AlarmButton, 0, 3);
-            AddWidget(AllButton, 0, 4);
+            Umd1Idx = 5,
+            Umd2Idx = 6,
+            Umd1Read = 2806,
+            Umd2Read = 2807,
+            TallyLayouts = 2800,
         }
 
-        public Button AllButton { get; } = new Button("All") { Width = 150 };
+        public IDmsElement TagElement { get; set; }
 
-        public Button TextFormatButton { get; } = new Button("Text Format") { Width = 150 };
+        public string SelectedLayout { get; set; }
 
-        public Button SpecialValuesButton { get; } = new Button("Special Values") { Width = 150 };
+        public string TitleIndex { get; set; }
 
-        public Button TallyAndUmdButton { get; } = new Button("Tally & UMD") { Width = 150 };
-
-        public Button AlarmButton { get; } = new Button("Alarm") { Width = 150 };
-    }
-
-    public class TextFormatSection : Section
-    {
-        public TextFormatSection()
-        {
-            // Text Attributes
-            AddWidget(TextFormatLabel, 0, 0);
-            AddWidget(Bold, 1, 0);
-            AddWidget(Italics, 1, 1);
-            AddWidget(Underlined, 1, 2);
-            AddWidget(HalfWidth, 1, 3);
-            AddWidget(Regular, 1, 4);
-            AddWidget(Flash, 1, 5);
-
-            // Text Color
-            AddWidget(TextColorLabel, 2, 0);
-            AddWidget(TextColorRed, 3, 0);
-            AddWidget(TextColorGreen, 3, 1);
-            AddWidget(TextColorYellow, 3, 2);
-            AddWidget(TextColorCustomRGB, 3, 3);
-
-            // Background Color
-            AddWidget(BackgroundColorLabel, 4, 0);
-            AddWidget(BackgroundRed, 5, 0);
-            AddWidget(BackgroundGreen, 5, 1);
-            AddWidget(BackgroundYellow, 5, 2);
-            AddWidget(BackgroundCustomRGB, 5, 3);
-        }
-
-        public Label TextFormatLabel { get; } = new Label("Text Attributes");
-
-        public Button Bold { get; } = new Button("Bold") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Italics { get; } = new Button("Italics") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Underlined { get; } = new Button("Underlined") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button HalfWidth { get; } = new Button("Half Width") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Regular { get; } = new Button("Regular") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Flash { get; } = new Button("Flash") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Label TextColorLabel { get; } = new Label("Text Color");
-
-        public Button TextColorRed { get; } = new Button("Red") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button TextColorGreen { get; } = new Button("Green") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button TextColorYellow { get; } = new Button("Yellow") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button TextColorCustomRGB { get; } = new Button("Custom RGB") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Label BackgroundColorLabel { get; } = new Label("Background Color");
-
-        public Button BackgroundRed { get; } = new Button("Red") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button BackgroundGreen { get; } = new Button("Green") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button BackgroundYellow { get; } = new Button("Yellow") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button BackgroundCustomRGB { get; } = new Button("Custom RGB") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-    }
-
-    public class SpecialValuesSection : Section
-    {
-        public SpecialValuesSection()
-        {
-            AddWidget(SpecialValuesLabel, 0, 0);
-            AddWidget(Bitrate, 1, 0);
-            AddWidget(ChannelTitle, 1, 1);
-            AddWidget(Codec, 1, 2);
-            AddWidget(ColorSpace, 1, 3);
-            AddWidget(ColorSpaceShort, 1, 4);
-            AddWidget(HDType, 1, 5);
-            AddWidget(Resolution, 2, 0);
-            AddWidget(SDTName, 2, 1);
-            AddWidget(SDTProvider, 2, 2);
-            AddWidget(Timecode, 2, 3);
-            AddWidget(TransportId, 2, 4);
-        }
-
-        public Label SpecialValuesLabel { get; } = new Label("Special Values");
-
-        public Button Bitrate { get; } = new Button("Bitrate") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button ChannelTitle { get; } = new Button("Channel Title") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Codec { get; } = new Button("Codec") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button ColorSpace { get; } = new Button("Color Space") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button ColorSpaceShort { get; } = new Button("Color Space (Short)") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button HDType { get; } = new Button("HD Type") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Resolution { get; } = new Button("Resolution") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button SDTName { get; } = new Button("SDT Name") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button SDTProvider { get; } = new Button("SDT Provider") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Timecode { get; } = new Button("Timecode") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button TransportId { get; } = new Button("Transport ID") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-    }
-
-    public class TallyAndUmdSection : Section
-    {
-        public TallyAndUmdSection()
-        {
-            // Tally Widgets
-            AddWidget(TallyLabel, 0, 0);
-            AddWidget(Tally0TextColor, 1, 0);
-            AddWidget(Tally0Background, 1, 1);
-            AddWidget(Tally0Light, 1, 2);
-            AddWidget(Tally1TextColor, 2, 0);
-            AddWidget(Tally1Background, 2, 1);
-            AddWidget(Tally1Light, 2, 2);
-
-            // UMD Widgets
-            AddWidget(UmdLabel, 3, 0);
-            AddWidget(Umd0TextColor, 4, 0);
-            AddWidget(Umd0Background, 4, 1);
-            AddWidget(Umd0Text, 4, 2);
-            AddWidget(Umd1TextColor, 5, 0);
-            AddWidget(Umd1Background, 5, 1);
-            AddWidget(Umd1Text, 5, 2);
-        }
-
-        public Label TallyLabel { get; } = new Label("Tally");
-
-        public Button Tally0TextColor { get; } = new Button("Tally 0 TextColor") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Tally0Background { get; } = new Button("Tally 0 Background") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Tally0Light { get; } = new Button("Tally 0 Light") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Tally1TextColor { get; } = new Button("Tally 1 TextColor") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Tally1Background { get; } = new Button("Tally 1 Background") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Tally1Light { get; } = new Button("Tally 1 Light") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Label UmdLabel { get; } = new Label("UMD");
-
-        public Button Umd0TextColor { get; } = new Button("UMD 0 TextColor") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Umd0Background { get; } = new Button("UMD 0 Background") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Umd0Text { get; } = new Button("UMD 0 Text") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Umd1TextColor { get; } = new Button("UMD 1 TextColor") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Umd1Background { get; } = new Button("UMD 1 Background") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button Umd1Text { get; } = new Button("UMD 1 Text") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-    }
-
-    public class AlarmSection : Section
-    {
-        public AlarmSection()
-        {
-            AddWidget(AlarmLabel, 0, 0);
-            AddWidget(AlarmTextColor, 1, 0);
-            AddWidget(AlarmBackground, 1, 1);
-            AddWidget(AlarmCount, 1, 2);
-        }
-
-        public Label AlarmLabel { get; } = new Label("Alarm");
-
-        public Button AlarmTextColor { get; } = new Button("Alarm Text Color") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button AlarmBackground { get; } = new Button("Alarm Background") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-
-        public Button AlarmCount { get; } = new Button("Alarm Count") { Height = 25, Width = 150, Style = ButtonStyle.CallToAction };
-    }
-
-    public class BottomPanelButtons : Section
-    {
-        public BottomPanelButtons()
-        {
-            AddWidget(new WhiteSpace(),0,0);
-            AddWidget(CancelButton, 1, 0, HorizontalAlignment.Left);
-            AddWidget(ApplyButton, 1, 5, HorizontalAlignment.Right);
-        }
-
-        public Button CancelButton { get; set; } = new Button("Cancel") { Width = 100 };
-
-        public Button ApplyButton { get; set; } = new Button("Apply") { Width = 100 };
+        public bool isMCS { get; set; }
     }
 }

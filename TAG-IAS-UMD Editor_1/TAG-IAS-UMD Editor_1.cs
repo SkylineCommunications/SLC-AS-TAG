@@ -52,14 +52,10 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 namespace TAG_IAS_UMD_Editor_1
 {
     using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Text;
-    using Newtonsoft.Json;
+    using SharedMethods;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
     using TAG_UMD_Editor;
-    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -157,12 +153,12 @@ namespace TAG_IAS_UMD_Editor_1
             dialog.TallyAndUmdSection.Tally1TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.Tally1TextColor);
 
             // UMD Actions
-            dialog.TallyAndUmdSection.Umd0Background.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0Background);
+            dialog.TallyAndUmdSection.Umd0TextAndColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0TextAndColor);
             dialog.TallyAndUmdSection.Umd0Text.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0Text);
-            dialog.TallyAndUmdSection.Umd0TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0TextColor);
-            dialog.TallyAndUmdSection.Umd1Background.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1Background);
+            dialog.TallyAndUmdSection.Umd0Color.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD0Color);
+            dialog.TallyAndUmdSection.Umd1TextAndColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1TextAndColor);
             dialog.TallyAndUmdSection.Umd1Text.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1Text);
-            dialog.TallyAndUmdSection.Umd1TextColor.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1TextColor);
+            dialog.TallyAndUmdSection.Umd1Color.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.UMD1Color);
 
             // Alarm
             dialog.AlarmsSection.AlarmBackground.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmBackground);
