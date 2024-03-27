@@ -22,6 +22,13 @@
             }
         }
 
+        public static string GetParameter(GQIDMS _dms, LiteElementInfoEvent response, int parameterId)
+        {
+            var parameterRequest = new GetParameterMessage(response.DataMinerID, response.ElementID, parameterId);
+            var messageResponse = _dms.SendMessage(parameterRequest) as GetParameterResponseMessage;
+            return messageResponse.DisplayValue;
+        }
+
         public static object[][] GetTable(GQIDMS _dms, LiteElementInfoEvent response, int tableId)
         {
             var partialTableRequest = new GetPartialTableMessage
@@ -123,14 +130,17 @@
 
 	public class MCM : TAG
     {
+        public static readonly int ChannelStatusOverview = 240;
+        public static readonly int ChannelEventsOverview = 340;
+        public static readonly int CpuUsage = 9401;
+        public static readonly int AllocatedMemory = 9402;
+
         public MCM(IDmsElement element)
         {
             this.element = element;
         }
 
         public static int ChannelStatusTableId { get => 240; }
-
-        public static int AllLayoutsTable_TitlePid { get => 10353; }
 
         public override int OutputsTableId { get => 1500; }
 
@@ -145,14 +155,14 @@
 
 	public class MCS : TAG
     {
+        public static readonly int ChannelStatusOverview = 5300;
+
         public MCS(IDmsElement element)
         {
             this.element = element;
         }
 
         public static List<int> ChannelsTableIds { get => new List<int> { 2100, 2200 }; }
-
-        public static int AllLayoutsTable_TitlePid { get => 5653; }
 
         public override int OutputsTableId { get => 3400; }
 

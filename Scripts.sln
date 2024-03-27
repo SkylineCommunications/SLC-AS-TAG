@@ -99,6 +99,15 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedMethods", "Common\Sha
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedMethods", "SharedMethods", "{8AF485F9-FB7F-475E-9054-760C710DAEEE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TAG-GQI-Retrieve Channel Status", "TAG-GQI-Retrieve Channel Status", "{5311D9EA-BD3B-4DF3-82CE-8BFD576FEE83}"
+	ProjectSection(SolutionItems) = preProject
+		TAG-GQI-Retrieve Channel Status.xml = TAG-GQI-Retrieve Channel Status.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{041ECD1C-5830-4E44-A1D6-59A380E4A137}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-GQI-Retrieve Channel Status_1", "TAG-GQI-Retrieve Channel Status_1\TAG-GQI-Retrieve Channel Status_1.csproj", "{063FE4A9-622A-43BD-A74B-C199B664E7B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +138,10 @@ Global
 		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{063FE4A9-622A-43BD-A74B-C199B664E7B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{063FE4A9-622A-43BD-A74B-C199B664E7B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{063FE4A9-622A-43BD-A74B-C199B664E7B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{063FE4A9-622A-43BD-A74B-C199B664E7B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,11 +171,15 @@ Global
 		{3465AE9C-7608-492C-A0F4-AC5E5EEDDFC2} = {7B3A5CCC-8D95-4D69-8A49-E4DBDA0BC8EE}
 		{391D87DC-2DE3-4EFE-A1D2-40970BBB52C6} = {8AF485F9-FB7F-475E-9054-760C710DAEEE}
 		{8AF485F9-FB7F-475E-9054-760C710DAEEE} = {82876D1A-BF8E-42F5-B21F-68270190C345}
+		{5311D9EA-BD3B-4DF3-82CE-8BFD576FEE83} = {9B25E832-7B2A-4364-AA0F-395AB7707142}
+		{041ECD1C-5830-4E44-A1D6-59A380E4A137} = {5311D9EA-BD3B-4DF3-82CE-8BFD576FEE83}
+		{063FE4A9-622A-43BD-A74B-C199B664E7B1} = {041ECD1C-5830-4E44-A1D6-59A380E4A137}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7A356EBC-DCA5-45C1-88F9-EA3577E6920E}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Common\Common.projitems*{063fe4a9-622a-43bd-a74b-c199b664e7b1}*SharedItemsImports = 5
 		Common\Common.projitems*{3465ae9c-7608-492c-a0f4-ac5e5eeddfc2}*SharedItemsImports = 5
 		Common\Common.projitems*{391d87dc-2de3-4efe-a1d2-40970bbb52c6}*SharedItemsImports = 13
 		Common\Common.projitems*{4bb743a0-5633-492f-ac66-9b0bbde0862f}*SharedItemsImports = 5
