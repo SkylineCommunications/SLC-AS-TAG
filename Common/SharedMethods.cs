@@ -22,7 +22,7 @@
             }
         }
 
-        public static object[][] GetTable(GQIDMS _dms, LiteElementInfoEvent response, int tableId)
+        public static object[][] GetTable(GQIDMS dms, LiteElementInfoEvent response, int tableId)
         {
             var partialTableRequest = new GetPartialTableMessage
             {
@@ -31,7 +31,7 @@
                 ParameterID = tableId,
             };
 
-            var messageResponse = _dms.SendMessage(partialTableRequest) as ParameterChangeEventMessage;
+            var messageResponse = dms.SendMessage(partialTableRequest) as ParameterChangeEventMessage;
             if (messageResponse.NewValue.ArrayValue != null && messageResponse.NewValue.ArrayValue.Length > 0)
             {
                 return BuildRows(messageResponse.NewValue.ArrayValue);
@@ -40,6 +40,24 @@
             {
                 return new object[0][];
             }
+        }
+
+        public static object GetParameter(GQIDMS dms, LiteElementInfoEvent response, int parameterId)
+        {
+            var partialTableRequest = new GetParameterMessage
+            {
+                DataMinerID = response.DataMinerID,
+                ElId = response.ElementID,
+                ParameterId = parameterId,
+            };
+
+            var messageResponse = dms.SendMessage(partialTableRequest) as GetParameterResponseMessage;
+            if (messageResponse?.Value?.InteropValue == null)
+            {
+                return -1;
+            }
+
+            return messageResponse.Value.InteropValue;
         }
 
         private static object[][] BuildRows(ParameterValue[] columns)
@@ -127,6 +145,9 @@
         {
             this.element = element;
         }
+
+        public const int CPU_Pid = 9401;
+        public const int Memory_Pid = 9401;
 
         public static int ChannelStatusTableId { get => 240; }
 
