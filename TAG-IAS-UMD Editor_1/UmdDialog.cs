@@ -15,7 +15,7 @@
         {
             var dms = engine.GetDms();
 
-            Tag = new UmdEditorTag(engine, dms, elementId, selectedLayout, titleIndex);
+            Tag = new UmdEditor(engine, dms, elementId, selectedLayout, titleIndex);
             Title = "UMD Editor";
 
             RadioButtonPanel = new UmdRadioButtonPanel(Tag.isMCS);
@@ -57,7 +57,7 @@
             All,
         }
 
-        public UmdEditorTag Tag { get; set; }
+        public UmdEditor Tag { get; set; }
 
         public UmdRadioButtonPanel RadioButtonPanel { get; private set; }
 
