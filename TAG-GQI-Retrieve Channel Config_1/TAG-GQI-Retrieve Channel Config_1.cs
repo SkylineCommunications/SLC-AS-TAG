@@ -49,22 +49,22 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace TAG_GQI_Retrieve_Channel_Details_1
+namespace TAG_GQI_Retrieve_Channel_Config_1
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using SharedMethods;
     using Skyline.DataMiner.Analytics.GenericInterface;
+    using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.Messages;
-    using static TAG_GQI_Retrieve_Channel_Details_1.GetTagOutputs;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
     /// </summary>
-    [GQIMetaData(Name = "Get TAG Channel Status")]
+    [GQIMetaData(Name = "Get TAG Channel Config")]
     public class GetTagOutputs : IGQIDataSource, IGQIOnInit
     {
         private GQIDMS _dms;
@@ -90,16 +90,12 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             return new GQIColumn[]
             {
                 new GQIStringColumn("Label"),
-                new GQIStringColumn("Thumbnail"),
-                new GQIStringColumn("Severity"),
-                new GQIStringColumn("Active Events"),
-                new GQIStringColumn("Bitrate"),
-                new GQIStringColumn("Type"),
-                new GQIStringColumn("CPU Usage"),
-                new GQIStringColumn("Memory Allocated"),
-                new GQIStringColumn("Memory Usage"),
+                new GQIStringColumn("Access Type"),
+                new GQIStringColumn("Service Type"),
+                new GQIStringColumn("Recording"),
+                new GQIStringColumn("Device"),
+                new GQIStringColumn("Monitoring Level"),
                 new GQIStringColumn("More Info"),
-                new GQIStringColumn("Profile"),
             };
         }
 
@@ -130,8 +126,8 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var channelStatusOverviewTable = SharedMethods.GetTable(_dms, response, MCS.ChannelStatusOverview);
-                    GetChannelsMcsTableRows(rows, response, channelStatusOverviewTable);
+                    var channelConfigurationTable = SharedMethods.GetTable(_dms, response, MCS.ChannelsConfiguration);
+                    GetChannelsMcsTableRows(rows, response, channelConfigurationTable);
                 }
 
                 // if no MCS in the system, gather MCM data
@@ -140,8 +136,8 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, MCM.ChannelStatusOverview);
-                        GetChannelsMcmTableRows(rows, response, encoderConfigTable);
+                        var allChannelsProfileTable = SharedMethods.GetTable(_dms, response, MCM.AllChannelsProfile);
+                        GetChannelConfigMcmTableRows(rows, response, allChannelsProfileTable);
                     }
                 }
             }
@@ -156,28 +152,25 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             };
         }
 
-        private void GetChannelsMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable)
+        private void GetChannelsMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelConfigurationTable)
         {
-            foreach (var tableRow in channelStatusOverviewTable)
+            foreach (var tableRow in channelConfigurationTable)
             {
-                var bitrate = GetFormattedValue(Convert.ToString(tableRow[7]), FormattedValueType.Bitrate);
-                var memoryAllocated = GetFormattedValue(Convert.ToString(tableRow[10]), FormattedValueType.MemoryAllocated);
-                var memoryUsage = GetFormattedValue(Convert.ToString(tableRow[11]), FormattedValueType.MemoryUsage);
-                var cpuUsage = GetFormattedValue(Convert.ToString(tableRow[9]), FormattedValueType.CpuUsage);
+                var deviceName = Convert.ToString(tableRow[6]).Equals("Not Set") ? "Unmonitored" : Convert.ToString(tableRow[6]);
+                var accessType = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[2]));
+                var serviceType = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigServiceTypeDict, Convert.ToString(tableRow[3]));
+                var recording = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigRecordingDict, Convert.ToString(tableRow[4]));
+                var monitoringLevel = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigMonitoringLevelDict, Convert.ToString(tableRow[12]));
 
                 GQICell[] cells = new[]
                 {
-                    new GQICell { Value = Convert.ToString(tableRow[2]) }, // Label
-                    new GQICell { Value = Convert.ToString(tableRow[4]) }, // Thumbnail
-                    new GQICell { Value = Convert.ToString(tableRow[5]) }, // Severity
-                    new GQICell { Value = Convert.ToString(tableRow[6]) }, // Active Events
-                    new GQICell { Value = bitrate }, // Bitrate
-                    new GQICell { Value = Convert.ToString(tableRow[8]) }, // Type
-                    new GQICell { Value = cpuUsage}, // CPU Usage
-                    new GQICell { Value = memoryAllocated }, // Memory Allocated
-                    new GQICell { Value = memoryUsage }, // Memory Usage
-                    new GQICell { Value = "info" }, // More Info (Index)
-                    new GQICell { Value = Convert.ToString(tableRow[13]) }, // Profile
+                    new GQICell { Value = Convert.ToString(tableRow[1]) }, // Label
+                    new GQICell { Value = accessType }, // Access Type
+                    new GQICell { Value = serviceType }, // Service Type
+                    new GQICell { Value = recording }, // Recording
+                    new GQICell { Value = deviceName }, // Device
+                    new GQICell { Value = monitoringLevel}, // Monitoring Level
+                    new GQICell { Value = Convert.ToString(tableRow[1]) }, // More Info (Index)
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
@@ -193,90 +186,36 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             }
         }
 
-        private string GetFormattedValue(string valueToCheck, FormattedValueType formattedValueType)
+        private void GetChannelConfigMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] allChannelsProfileTable)
         {
-            if (double.TryParse(valueToCheck, out double parsedDouble))
+            var channelStatusTable = SharedMethods.GetTable(_dms, response, MCM.ChannelStatusOverview);
+            foreach (var tableRow in allChannelsProfileTable)
             {
-                switch (formattedValueType)
+                var matchingRow = channelStatusTable.FirstOrDefault(x => Convert.ToString(x[12]).Equals(Convert.ToString(tableRow[9])));
+                string deviceName;
+                if (matchingRow != null)
                 {
-                    case FormattedValueType.Bitrate:
-
-                        if (parsedDouble > 1000)
-                        {
-                            return (parsedDouble / 1000).ToString("F3") + " Gbps";
-                        }
-                        else
-                        {
-                            return parsedDouble.ToString("F3") + " Mbps";
-                        }
-
-                    case FormattedValueType.MemoryUsage:
-                        return (parsedDouble * 1000).ToString("F3") + " kb";
-                    case FormattedValueType.MemoryAllocated:
-                        if (parsedDouble > 1000)
-                        {
-                            return (parsedDouble / 1000).ToString("F3") + " Gb";
-                        }
-                        else
-                        {
-                            return parsedDouble.ToString("F3") + " Mb";
-                        }
-
-                    case FormattedValueType.CpuUsage:
-                        return parsedDouble.ToString("F0") + " %";
-
-                    default:
-                        return "N/A";
+                    deviceName = Convert.ToString(matchingRow[19]).IsNullOrEmpty() ? "Unmonitored" : Convert.ToString(matchingRow[19]);
                 }
-            }
-            else
-            {
-                return "N/A";
-            }
-        }
-
-        public enum FormattedValueType
-        {
-            Bitrate,
-            MemoryUsage,
-            MemoryAllocated,
-            CpuUsage,
-        }
-
-        private void GetChannelsMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable)
-        {
-            var channelEventsOverviewTable = SharedMethods.GetTable(_dms, response, MCM.ChannelEventsOverview);
-
-            var eventNamesAdded = new List<string>();
-
-            foreach (var tableRow in channelStatusOverviewTable)
-            {
-                var name = Convert.ToString(tableRow[12]);
-                if (eventNamesAdded.Contains(name))
+                else
                 {
+                    // empty table/rows
                     continue;
                 }
 
-                eventNamesAdded.Add(name);
-
-                var channelEventsRows = channelEventsOverviewTable.Where(x => Convert.ToInt32(x[6 /* Status */]).Equals(1)).ToList();
-                var activeEvents = channelEventsRows.Count;
-                var type = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
-                var severity = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
+                var accessType = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[13]));
+                var serviceType = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigServiceTypeDict, Convert.ToString(tableRow[19]));
+                var monitoringLevel = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigMonitoringLevelDict, Convert.ToString(tableRow[32]));
 
                 GQICell[] cells = new[]
                 {
-                    new GQICell { Value = Convert.ToString(tableRow[12]) }, // Label
-                    new GQICell { Value = "N/A" }, // Thumbnail
-                    new GQICell { Value = severity }, // Severity
-                    new GQICell { Value = Convert.ToString(activeEvents) }, // Active Events
-                    new GQICell { Value = "N/A" }, // Bitrate
-                    new GQICell { Value = type}, // Type
-                    new GQICell { Value = "N/A" }, // CPU Usage
-                    new GQICell { Value = "N/A" }, // Memory Allocated
-                    new GQICell { Value = "N/A" }, // Memory Usage
+                    new GQICell { Value = Convert.ToString(tableRow[9]) }, // Label
+                    new GQICell { Value = accessType }, // Access Type
+                    new GQICell { Value = serviceType }, // Service Type
+                    new GQICell { Value = "N/A" }, // Recording
+                    new GQICell { Value = deviceName }, // Device
+                    new GQICell { Value = monitoringLevel}, // Monitoring Level
                     new GQICell { Value = "Info" }, // More Info (Index)
-                    new GQICell { Value = "N/A" }, // Profile
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
