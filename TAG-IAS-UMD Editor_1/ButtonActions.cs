@@ -8,6 +8,7 @@
         public ButtonActions(TopPanel staticTopPanel, IEngine engine)
         {
             StaticTopPanel = staticTopPanel;
+            Engine = engine;
         }
 
         public TopPanel StaticTopPanel { get; set; }
