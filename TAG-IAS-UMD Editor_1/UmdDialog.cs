@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using System.Threading;
+    using SharedMethods;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
@@ -14,9 +15,7 @@
         {
             var dms = engine.GetDms();
 
-            Tag = new Tag(engine, dms, elementId, selectedLayout, titleIndex);
-
-            Clear();
+            Tag = new UmdEditorTag(engine, dms, elementId, selectedLayout, titleIndex);
             Title = "UMD Editor";
 
             RadioButtonPanel = new UmdRadioButtonPanel(Tag.isMCS);
@@ -27,7 +26,7 @@
             TallyAndUmdSection = new TallyAndUmdSection();
             AlarmsSection = new AlarmSection();
             BottomPanelButtons = new BottomPanelButtons();
-            UmdButtonActions = new ButtonActions(StaticTopPanel);
+            UmdButtonActions = new ButtonActions(StaticTopPanel,engine);
 
             UmdFilterButtons.TextFormatButton.IsEnabled = false; // Default selected option
             var umdValue = CheckUmdValue();
@@ -58,7 +57,7 @@
             All,
         }
 
-        public Tag Tag { get; set; }
+        public UmdEditorTag Tag { get; set; }
 
         public UmdRadioButtonPanel RadioButtonPanel { get; private set; }
 
@@ -133,14 +132,14 @@
             InitializeUI(FilteredBy.All);
         }
 
-        public void ApplySets(IEngine engine)
+        public void ApplySets()
         {
             var selectedUmd = RadioButtonPanel.UmdRadioButtons.Selected;
             var umdColumnId = GetParamIdBySelectedUmd(selectedUmd);
 
             if (Tag.isMCS)
             {
-                var layoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcs.LayoutsTable);
+                var layoutsTable = Tag.TagElement.GetTable((int)UmdEditor.TagMcs.LayoutsTable);
                 Tag.TagElement.GetStandaloneParameter<string>(5999).SetValue(Tag.SelectedLayout); // Layout Drop-down Write
                 Thread.Sleep(1000);
                 layoutsTable.GetColumn<string>(umdColumnId).SetValue(Tag.TitleIndex, StaticTopPanel.UmdTextBox.Text);
@@ -148,7 +147,7 @@
             else
             {
                 // TAG MCM Actions
-                var tallyLayoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcm.TallyLayouts);
+                var tallyLayoutsTable = Tag.TagElement.GetTable((int)UmdEditor.TagMcm.TallyLayouts);
                 var tallyLayoutRow = tallyLayoutsTable.GetRows().Where(x => Convert.ToString(x[0]).Contains($"{Tag.SelectedLayout}/{Tag.TitleIndex}"));
 
                 if (tallyLayoutRow.Any())
@@ -184,7 +183,7 @@
 
             if (Tag.isMCS)
             {
-                var layoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcs.LayoutsTable);
+                var layoutsTable = Tag.TagElement.GetTable((int)UmdEditor.TagMcs.LayoutsTable);
                 Tag.TagElement.GetStandaloneParameter<string>(5999).SetValue(Tag.SelectedLayout); // Layout Drop-down Write
                 Thread.Sleep(1000);
                 var umdElementValue = layoutsTable.GetColumn<string>(umdColumnId).GetValue(Tag.TitleIndex, KeyType.PrimaryKey);
@@ -193,7 +192,7 @@
             else
             {
                 // TAG MCM Actions
-                var tallyLayoutsTable = Tag.TagElement.GetTable((int)Tag.TagMcm.TallyLayouts).GetRows().Where(x => Convert.ToString(x[0]).Contains($"{Tag.SelectedLayout}/{Tag.TitleIndex}"));
+                var tallyLayoutsTable = Tag.TagElement.GetTable((int)UmdEditor.TagMcm.TallyLayouts).GetRows().Where(x => Convert.ToString(x[0]).Contains($"{Tag.SelectedLayout}/{Tag.TitleIndex}"));
 
                 if (tallyLayoutsTable.Any())
                 {
@@ -212,13 +211,13 @@
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return (int)Tag.TagMcs.Umd1Write; // Write
+                        return (int)UmdEditor.TagMcs.Umd1Write; // Write
                     case "UMD 2":
-                        return (int)Tag.TagMcs.Umd2Write; // Write
+                        return (int)UmdEditor.TagMcs.Umd2Write; // Write
                     case "UMD 3":
-                        return (int)Tag.TagMcs.Umd3Write; // Write
+                        return (int)UmdEditor.TagMcs.Umd3Write; // Write
                     case "UMD 4":
-                        return (int)Tag.TagMcs.Umd4Write; // Write
+                        return (int)UmdEditor.TagMcs.Umd4Write; // Write
                     default:
                         return 0;
                 }
@@ -228,9 +227,9 @@
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return (int)Tag.TagMcm.Umd1Read; // Read
+                        return (int)UmdEditor.TagMcm.Umd1Read; // Read
                     case "UMD 2":
-                        return (int)Tag.TagMcm.Umd2Read; // Read
+                        return (int)UmdEditor.TagMcm.Umd2Read; // Read
                     default:
                         return 0;
                 }
@@ -244,13 +243,13 @@
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return (int)Tag.TagMcs.Umd1Read;
+                        return (int)UmdEditor.TagMcs.Umd1Read;
                     case "UMD 2":
-                        return (int)Tag.TagMcs.Umd2Read;
+                        return (int)UmdEditor.TagMcs.Umd2Read;
                     case "UMD 3":
-                        return (int)Tag.TagMcs.Umd3Read;
+                        return (int)UmdEditor.TagMcs.Umd3Read;
                     case "UMD 4":
-                        return (int)Tag.TagMcs.Umd4Read;
+                        return (int)UmdEditor.TagMcs.Umd4Read;
                     default:
                         return 0;
                 }
@@ -260,9 +259,9 @@
                 switch (selectedValue)
                 {
                     case "UMD 1":
-                        return (int)Tag.TagMcm.Umd1Idx;
+                        return (int)UmdEditor.TagMcm.Umd1Idx;
                     case "UMD 2":
-                        return (int)Tag.TagMcm.Umd2Idx;
+                        return (int)UmdEditor.TagMcm.Umd2Idx;
                     default:
                         return 0;
                 }
@@ -304,62 +303,5 @@
 
             AddSection(BottomPanelButtons, new SectionLayout((int)StartRowSectionPosition.BottomPanelButtons, 1));
         }
-
-        internal void FocusCursor()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class Tag
-    {
-        public Tag(IEngine engine, IDms dms, string elementId, string selectedLayout, string titleIndex)
-        {
-            TagElement = dms.GetElement(new DmsElementId(elementId));
-            SelectedLayout = selectedLayout;
-            TitleIndex = titleIndex;
-
-            isMCS = TagElement.Protocol.Name.Contains("MCS");
-
-            if (!isMCS)
-            {
-                var splittedId = elementId.Split('/');
-                var dmaId = Convert.ToInt32(splittedId[0]);
-                var element = Convert.ToInt32(splittedId[1]);
-                TagEngineElement = engine.FindElement(dmaId,element);
-            }
-        }
-
-        public enum TagMcs
-        {
-            LayoutsTable = 5000,
-            Umd1Read = 5005,
-            Umd2Read = 5006,
-            Umd3Read = 5007,
-            Umd4Read = 5008,
-            Umd1Write = 5025,
-            Umd2Write = 5026,
-            Umd3Write = 5027,
-            Umd4Write = 5028,
-        }
-
-        public enum TagMcm
-        {
-            Umd1Idx = 5,
-            Umd2Idx = 6,
-            Umd1Read = 2806,
-            Umd2Read = 2807,
-            TallyLayouts = 2800,
-        }
-
-        public IDmsElement TagElement { get; set; }
-
-        public Element TagEngineElement { get; set; }
-
-        public string SelectedLayout { get; set; }
-
-        public string TitleIndex { get; set; }
-
-        public bool isMCS { get; set; }
     }
 }

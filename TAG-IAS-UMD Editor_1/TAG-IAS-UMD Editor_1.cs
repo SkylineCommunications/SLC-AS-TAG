@@ -94,6 +94,10 @@ namespace TAG_IAS_UMD_Editor_1
             {
                 // ignore abort
             }
+            catch (InteractiveUserDetachedException)
+            {
+                // ignore abort
+            }
             catch (Exception ex)
             {
                 engine.Log($"{ex}");
@@ -166,7 +170,7 @@ namespace TAG_IAS_UMD_Editor_1
             dialog.AlarmsSection.AlarmCount.Pressed += (sender, args) => dialog.UmdButtonActions.ValueButtonPressed(ButtonActions.ButtonValues.AlarmCount);
 
             // Bottom Panel
-            dialog.BottomPanelButtons.ApplyButton.Pressed += (sender, args) => dialog.ApplySets(engine);
+            dialog.BottomPanelButtons.ApplyButton.Pressed += (sender, args) => dialog.ApplySets();
             dialog.BottomPanelButtons.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("UMD Editor Canceled");
         }
     }

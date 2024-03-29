@@ -1,19 +1,29 @@
 ﻿namespace TAG_UMD_Editor
 {
+    using Skyline.DataMiner.Automation;
     using System.Collections.Generic;
 
     public class ButtonActions
     {
-        public ButtonActions(TopPanel staticTopPanel)
+        public ButtonActions(TopPanel staticTopPanel, IEngine engine)
         {
             StaticTopPanel = staticTopPanel;
         }
 
         public TopPanel StaticTopPanel { get; set; }
 
+        public IEngine Engine{ get; set; }
+
         public void ValueButtonPressed(ButtonValues buttonValue)
         {
-            StaticTopPanel.UmdTextBox.Text += TextDictionary[buttonValue];
+            if (TextDictionary.TryGetValue(buttonValue, out string value))
+            {
+                StaticTopPanel.UmdTextBox.Text += value;
+            }
+            else
+            {
+                Engine.ShowUI("HashTag Not Available");
+            }
         }
 
         public static readonly Dictionary<ButtonValues, string> TextDictionary = new Dictionary<ButtonValues, string>
