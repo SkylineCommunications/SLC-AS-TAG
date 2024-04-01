@@ -123,14 +123,12 @@
 
         internal void SetValues(string elementId, string outputId, string layoutId)
         {
-            engine.GenerateInformation("test1");
             dms = engine.GetDms();
             var tagElement = dms.GetElement(new DmsElementId(elementId));
             var tagElementName = tagElement.Name;
             var tagType = tagElement.Protocol.Name;
             string outputName;
             this.MonitoringTagValue.Text = tagElementName;
-            engine.GenerateInformation("test2");
             if (tagType.Contains("MCS"))
             {
                 var pidsOverviewTableData = tagElement.GetTable(2500).GetData();
