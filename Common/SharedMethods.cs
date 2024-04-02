@@ -5,6 +5,7 @@
     using System.Linq;
     using Newtonsoft.Json;
     using Skyline.DataMiner.Analytics.GenericInterface;
+    using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Net.Messages;
 
@@ -90,7 +91,7 @@
         }
     }
 
-    public class Tag
+    public class TAG
     {
         private readonly int outputsTableId;
         private readonly int outputs_LayoutsColumnId;
@@ -100,7 +101,7 @@
 
         public IDmsElement Element;
 
-        protected Tag(
+        protected TAG(
             int constOutputsTableId,
             int outputsLayoutsColumnId,
             int constLayoutsTableId,
@@ -139,12 +140,12 @@
             return protocolName.Contains("MCM") ? "MCM" : "MCS";
         }
 
-        public static Tag GetDeviceByType(IDmsElement element, string elementType)
+        public static TAG GetDeviceByType(IDmsElement element, string elementType)
         {
-            var deviceByName = new Dictionary<string, Tag>
+            var deviceByName = new Dictionary<string, TAG>
         {
-            { "MCM", new Mcm(element) },
-            { "MCS", new Mcs(element) },
+            { "MCM", new MCM(element) },
+            { "MCS", new MCS(element) },
         };
 
             return deviceByName[elementType];
@@ -158,7 +159,7 @@
         }
     }
 
-    public class Mcm : Tag
+    public class MCM : TAG
     {
         public static readonly int ChannelStatusOverview = 240;
         public static readonly int AllChannelsProfile = 8000;
@@ -222,7 +223,7 @@
             {"502","Not Monitored"},
         };
 
-        public Mcm(IDmsElement element) : base(
+        public MCM(IDmsElement element) : base(
         constOutputsTableId: 1500,
         outputsLayoutsColumnId: 1612,
         constLayoutsTableId: 1560,
@@ -233,7 +234,7 @@
         }
     }
 
-    public class Mcs : Tag
+    public class MCS : TAG
     {
         public static readonly int ChannelStatusOverview = 5300;
         public static readonly int ChannelsConfiguration = 2100;
@@ -293,7 +294,7 @@
             {"3","Extra Light"},
         };
 
-        public Mcs(IDmsElement element) : base(
+        public MCS(IDmsElement element) : base(
         constOutputsTableId: 3400,
         outputsLayoutsColumnId: 3456,
         constLayoutsTableId: 3600,
@@ -304,7 +305,7 @@
         }
     }
 
-    public class UmdEditor : TAG
+    public class UmdEditor
     {
         public UmdEditor(IEngine engine, IDms dms, string elementId, string selectedLayout, string titleIndex)
         {
@@ -354,15 +355,5 @@
         public string TitleIndex { get; set; }
 
         public bool isMCS { get; set; }
-
-        public override int OutputsTableId => throw new NotImplementedException();
-
-        public override int Outputs_LayoutsColumnId => throw new NotImplementedException();
-
-        public override int LayoutsTableId => throw new NotImplementedException();
-
-        public override int OutputsTable_OutputColumnId => throw new NotImplementedException();
-
-        public override int AllLayouts_TitleColumnId => throw new NotImplementedException();
     }
 }

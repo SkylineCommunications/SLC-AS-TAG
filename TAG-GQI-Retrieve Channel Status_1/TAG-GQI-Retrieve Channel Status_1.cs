@@ -122,7 +122,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var channelStatusOverviewTable = SharedMethods.GetTable(_dms, response, Mcs.ChannelStatusOverview);
+                    var channelStatusOverviewTable = SharedMethods.GetTable(_dms, response, MCS.ChannelStatusOverview);
                     GetChannelsMcsTableRows(rows, response, channelStatusOverviewTable);
                 }
 
@@ -132,7 +132,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, Mcm.ChannelStatusOverview);
+                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, MCM.ChannelStatusOverview);
                         GetChannelsMcmTableRows(rows, response, encoderConfigTable);
                     }
                 }
@@ -229,7 +229,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
         private void GetChannelsMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable)
         {
-            var channelEventsOverviewTable = SharedMethods.GetTable(_dms, response, Mcm.ChannelEventsOverview);
+            var channelEventsOverviewTable = SharedMethods.GetTable(_dms, response, MCM.ChannelEventsOverview);
 
             var eventNamesAdded = new List<string>();
 
@@ -245,8 +245,8 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
                 var channelEventsRows = channelEventsOverviewTable.Where(x => Convert.ToInt32(x[6 /* Status */]).Equals(1)).ToList();
                 var activeEvents = channelEventsRows.Count;
-                var type = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
-                var severity = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
+                var type = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
+                var severity = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
 
                 GQICell[] cells = new[]

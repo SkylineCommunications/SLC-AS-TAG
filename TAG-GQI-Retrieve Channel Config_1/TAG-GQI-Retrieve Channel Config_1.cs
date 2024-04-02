@@ -110,7 +110,7 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var channelConfigurationTable = SharedMethods.GetTable(_dms, response, Mcs.ChannelsConfiguration);
+                    var channelConfigurationTable = SharedMethods.GetTable(_dms, response, MCS.ChannelsConfiguration);
                     GetChannelsMcsTableRows(rows, response, channelConfigurationTable);
                 }
 
@@ -120,7 +120,7 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var allChannelsProfileTable = SharedMethods.GetTable(_dms, response, Mcm.AllChannelsProfile);
+                        var allChannelsProfileTable = SharedMethods.GetTable(_dms, response, MCM.AllChannelsProfile);
                         GetChannelConfigMcmTableRows(rows, response, allChannelsProfileTable);
                     }
                 }
@@ -141,10 +141,10 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
             foreach (var tableRow in channelConfigurationTable)
             {
                 var deviceName = Convert.ToString(tableRow[6]).Equals("Not Set") ? "Unmonitored" : Convert.ToString(tableRow[6]);
-                var accessType = SharedMethods.GetValueFromStringDictionary(Mcs.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[2]));
-                var serviceType = SharedMethods.GetValueFromStringDictionary(Mcs.ChannelConfigServiceTypeDict, Convert.ToString(tableRow[3]));
-                var recording = SharedMethods.GetValueFromStringDictionary(Mcs.ChannelConfigRecordingDict, Convert.ToString(tableRow[4]));
-                var monitoringLevel = SharedMethods.GetValueFromStringDictionary(Mcs.ChannelConfigMonitoringLevelDict, Convert.ToString(tableRow[12]));
+                var accessType = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[2]));
+                var serviceType = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigServiceTypeDict, Convert.ToString(tableRow[3]));
+                var recording = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigRecordingDict, Convert.ToString(tableRow[4]));
+                var monitoringLevel = SharedMethods.GetValueFromStringDictionary(MCS.ChannelConfigMonitoringLevelDict, Convert.ToString(tableRow[12]));
 
                 GQICell[] cells = new[]
                 {
@@ -172,7 +172,7 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
 
         private void GetChannelConfigMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] allChannelsProfileTable)
         {
-            var channelStatusTable = SharedMethods.GetTable(_dms, response, Mcm.ChannelStatusOverview);
+            var channelStatusTable = SharedMethods.GetTable(_dms, response, MCM.ChannelStatusOverview);
             foreach (var tableRow in allChannelsProfileTable)
             {
                 var matchingRow = channelStatusTable.FirstOrDefault(x => Convert.ToString(x[12]).Equals(Convert.ToString(tableRow[9])));
@@ -187,9 +187,9 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
                     continue;
                 }
 
-                var accessType = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[13]));
-                var serviceType = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigServiceTypeDict, Convert.ToString(tableRow[19]));
-                var monitoringLevel = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigMonitoringLevelDict, Convert.ToString(tableRow[32]));
+                var accessType = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[13]));
+                var serviceType = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigServiceTypeDict, Convert.ToString(tableRow[19]));
+                var monitoringLevel = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigMonitoringLevelDict, Convert.ToString(tableRow[32]));
 
                 GQICell[] cells = new[]
                 {

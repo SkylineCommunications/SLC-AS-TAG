@@ -94,9 +94,9 @@ namespace TAG_IAS_Modify_Output_Layout_1
                 var dms = engine.GetDms();
                 var dmsElement = dms.GetElement(new DmsElementId(Convert.ToInt32(elementData[0]), Convert.ToInt32(elementData[1])));
                 var element = engine.FindElementByKey(elementId);
-                var elementType = Tag.GetElementType(element.Protocol.Name);
+                var elementType = TAG.GetElementType(element.Protocol.Name);
 
-                var tag = Tag.GetDeviceByType(dmsElement, elementType);
+                var tag = TAG.GetDeviceByType(dmsElement, elementType);
                 var layoutsList = tag.LayoutsFromElement;
                 var layoutsPerOutput = tag.GetLayoutsByOutput(outputId);
 
@@ -117,7 +117,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
             }
         }
 
-        private static void UpdateLayout(IEngine engine, OutputDialog outputDialog, Element element, Tag tag)
+        private static void UpdateLayout(IEngine engine, OutputDialog outputDialog, Element element, TAG tag)
         {
             outputDialog.SendLayoutUpdate(element, tag.Outputs_LayoutsColumnId);
             engine.ExitSuccess("Update finished");
