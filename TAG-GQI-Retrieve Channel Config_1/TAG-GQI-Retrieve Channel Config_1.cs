@@ -154,7 +154,7 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
                     new GQICell { Value = recording }, // Recording
                     new GQICell { Value = deviceName }, // Device
                     new GQICell { Value = monitoringLevel}, // Monitoring Level
-                    new GQICell { Value = Convert.ToString(tableRow[1]) }, // More Info (Index)
+                    new GQICell { Value = "Info" }, // More Info (Index)
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);

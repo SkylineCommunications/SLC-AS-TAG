@@ -94,7 +94,6 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                 new GQIStringColumn("CPU Usage"),
                 new GQIStringColumn("Memory Allocated"),
                 new GQIStringColumn("Memory Usage"),
-                new GQIStringColumn("More Info"),
                 new GQIStringColumn("Profile"),
                 new GQIStringColumn("Channel ID"),
                 new GQIStringColumn("Element ID"),
@@ -211,7 +210,6 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     new GQICell { Value = cpuUsage}, // CPU Usage
                     new GQICell { Value = memoryAllocated }, // Memory Allocated
                     new GQICell { Value = memoryUsage }, // Memory Usage
-                    new GQICell { Value = "Info" }, // More Info (Index)
                     new GQICell { Value = Convert.ToString(tableRow[13]) }, // Profile
                     new GQICell { Value = Convert.ToString(tableRow[0]) }, // ChannelId
                     new GQICell { Value = Convert.ToString(elementID)}, // ElementId
@@ -262,7 +260,6 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     new GQICell { Value = "N/A" }, // CPU Usage
                     new GQICell { Value = "N/A" }, // Memory Allocated
                     new GQICell { Value = "N/A" }, // Memory Usage
-                    new GQICell { Value = "Info" }, // More Info (Index)
                     new GQICell { Value = "N/A" }, // Profile
                     new GQICell { Value = Convert.ToString(tableRow[0]) }, // ChannelId
                     new GQICell { Value = Convert.ToString(elementID)}, // ElementId
