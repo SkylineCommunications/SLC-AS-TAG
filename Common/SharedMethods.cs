@@ -154,6 +154,12 @@
         {
             var positionChannelDict = new Dictionary<string, AllLayoutValues>();
             var allLayoutsTable = element.GetTable(AllLayoutsTableId).GetData();
+
+            if (!allLayoutsTable.Any())
+            {
+                return positionChannelDict;
+            }
+
             var matchingRows = allLayoutsTable.Values.Where(x => Convert.ToString(x[AllLayouts_LayoutName_Idx]).Equals(layoutName));
             foreach (var row in matchingRows)
             {

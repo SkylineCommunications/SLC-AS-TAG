@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using SharedMethods;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
@@ -23,29 +24,41 @@
             var selectedChannel = Tag.GetChannelById(channelId);
 
             Title = "Send Channel To Layout";
+
             SelectedChannel = new Label(selectedChannel);
             ChannelLabel = new Label($"Selected Channel:");
             LayoutLabel = new Label("Select a Layout:");
             LayoutsDropDown = new DropDown(layoutsInElement);
             WarningLabel = new Label("Warning") { Style = TextStyle.Bold, IsVisible = false,};
             LayoutInfoLabel = new Label();
-            UpdateButton = new Button("Update");
+            UpdateButton = new Button("Apply");
             CancelButton = new Button("Cancel");
-            AddWidget(ChannelLabel, 0, 0);
-            AddWidget(SelectedChannel, 0, 1);
-            AddWidget(LayoutLabel, 1, 0);
-            AddWidget(LayoutsDropDown, 1, 1, 1, 2);
-            AddWidget(WarningLabel, 2, 1, 1, 2);
-            AddWidget(LayoutInfoLabel, 3, 1, 1, 2);
-            AddWidget(CancelButton, 5, 1, HorizontalAlignment.Left);
-            AddWidget(UpdateButton, 5, 2, HorizontalAlignment.Right);
 
             ChannelLabel.Width = 150;
             LayoutsDropDown.Width = 400;
             UpdateButton.Width = 110;
             CancelButton.Width = 110;
 
-            CheckLayoutOption();
+            if (!layoutsInElement.Any())
+            {
+                CancelButton = new Button("Cancel");
+                LayoutInfoLabel = new Label($"No Layouts available in element {TagElement.Name}");
+                AddWidget(LayoutInfoLabel, 0, 1, 1, 2);
+                AddWidget(CancelButton, 5, 1, HorizontalAlignment.Left);
+            }
+            else
+            {
+                AddWidget(ChannelLabel, 0, 0);
+                AddWidget(SelectedChannel, 0, 1);
+                AddWidget(LayoutLabel, 1, 0);
+                AddWidget(LayoutsDropDown, 1, 1, 1, 2);
+                AddWidget(WarningLabel, 2, 1, 1, 2);
+                AddWidget(LayoutInfoLabel, 3, 1, 1, 2);
+                AddWidget(CancelButton, 5, 1, HorizontalAlignment.Left);
+                AddWidget(UpdateButton, 5, 2, HorizontalAlignment.Right);
+
+                CheckLayoutOption();
+            }
         }
 
         public void CheckLayoutOption()

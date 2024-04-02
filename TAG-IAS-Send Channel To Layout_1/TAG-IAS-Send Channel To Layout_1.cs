@@ -83,14 +83,14 @@ namespace TAG_IAS_Send_Channel_To_Layout_1
                 var channelId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Channel ID").Value);
 
                 //// IAS Toolkit code
+
                 var controller = new InteractiveController(engine);
                 var dialog = new LayoutDialog(engine, elementId, channelId);
 
                 dialog.LayoutsDropDown.Changed += (sender, args) => dialog.CheckLayoutOption();
-
                 dialog.UpdateButton.Pressed += (sender, args) => dialog.SetChannelToLayout();
-
                 dialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Script Aborted.");
+
                 controller.Run(dialog);
             }
             catch (ScriptAbortException)
