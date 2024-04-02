@@ -120,7 +120,7 @@
                 tagElement.GetStandaloneParameter<double?>(2176).SetValue(1); // Set Audio Channel Button
             }
 
-            engine.ShowUI($"Mosaic Audio for Selected Layout changed to {selectedAudioEncoderPID}",false);
+            engine.ShowUI($"Mosaic Audio for Selected Layout changed to {selectedAudioEncoderPID}", false);
             Thread.Sleep(3000);
             engine.ExitSuccess("Script completed");
         }
@@ -161,7 +161,6 @@
             if (listChannelsPerLayout.Count > 0)
             {
                 this.ChannelOutputDropDown.Options = listChannelsPerLayout;
-                //this.ChannelOutputDropDown.Selected = listChannelsPerLayout.FirstOrDefault();
             }
             else
             {
@@ -195,15 +194,17 @@
 
         private string GetOutputNameById(IDictionary<string, object[]> enconderTable, string outputId)
         {
-            foreach (var row in enconderTable.Values)
-            {
-                if (Convert.ToString(row[0]).Equals(outputId))
-                {
-                    return Convert.ToString(row[1]);
-                }
-            }
+            var row = enconderTable.Values.Where(x => Convert.ToString(x[0]).Equals(outputId));
 
-            return string.Empty;
+            if (row.Any())
+            {
+                var singleRow = row.First();
+                return Convert.ToString(singleRow[1]);
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
 
         internal void UpdateChannelAudioEncoderOptions()
