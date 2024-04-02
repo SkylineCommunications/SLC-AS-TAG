@@ -102,8 +102,8 @@ namespace TAG_IAS_Layout_Position_Editor_1
                 var dmsElement = dms.GetElement(new DmsElementId(Convert.ToInt32(elementData[0]), Convert.ToInt32(elementData[1])));
                 var element = engine.FindElementByKey(elementId);
 
-                var elementType = TAG.GetElementType(element.Protocol.Name);
-                var tag = TAG.GetDeviceByType(dmsElement, elementType);
+                var elementType = Tag.GetElementType(element.Protocol.Name);
+                var tag = Tag.GetDeviceByType(dmsElement, elementType);
 
                 if (action.ToUpperInvariant().Equals("EDIT"))
                 {
