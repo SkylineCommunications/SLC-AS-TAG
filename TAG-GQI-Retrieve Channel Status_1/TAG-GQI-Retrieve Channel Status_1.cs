@@ -96,6 +96,8 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                 new GQIStringColumn("Memory Usage"),
                 new GQIStringColumn("More Info"),
                 new GQIStringColumn("Profile"),
+                new GQIStringColumn("Channel ID"),
+                new GQIStringColumn("Element ID"),
             };
         }
 
@@ -197,7 +199,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                 var memoryAllocated = GetFormattedValue(Convert.ToString(tableRow[10]), FormattedValueType.MemoryAllocated);
                 var memoryUsage = GetFormattedValue(Convert.ToString(tableRow[11]), FormattedValueType.MemoryUsage);
                 var cpuUsage = GetFormattedValue(Convert.ToString(tableRow[9]), FormattedValueType.CpuUsage);
-
+                var elementID = new ElementID(response.DataMinerID, response.ElementID);
                 GQICell[] cells = new[]
                 {
                     new GQICell { Value = Convert.ToString(tableRow[2]) }, // Label
@@ -211,9 +213,10 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     new GQICell { Value = memoryUsage }, // Memory Usage
                     new GQICell { Value = "Info" }, // More Info (Index)
                     new GQICell { Value = Convert.ToString(tableRow[13]) }, // Profile
+                    new GQICell { Value = Convert.ToString(tableRow[0]) }, // ChannelId
+                    new GQICell { Value = Convert.ToString(elementID)}, // ElementId
                 };
 
-                var elementID = new ElementID(response.DataMinerID, response.ElementID);
                 var elementMetadata = new ObjectRefMetadata { Object = elementID };
                 var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
 
@@ -246,6 +249,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                 var activeEvents = channelEventsRows.Count;
                 var type = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
                 var severity = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
+                var elementID = new ElementID(response.DataMinerID, response.ElementID);
 
                 GQICell[] cells = new[]
                 {
@@ -260,9 +264,10 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     new GQICell { Value = "N/A" }, // Memory Usage
                     new GQICell { Value = "Info" }, // More Info (Index)
                     new GQICell { Value = "N/A" }, // Profile
+                    new GQICell { Value = Convert.ToString(tableRow[0]) }, // ChannelId
+                    new GQICell { Value = Convert.ToString(elementID)}, // ElementId
                 };
 
-                var elementID = new ElementID(response.DataMinerID, response.ElementID);
                 var elementMetadata = new ObjectRefMetadata { Object = elementID };
                 var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
 
