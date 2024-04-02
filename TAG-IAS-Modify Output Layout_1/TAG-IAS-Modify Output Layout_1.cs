@@ -97,7 +97,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
                 var elementType = TAG.GetElementType(element.Protocol.Name);
 
                 var tag = TAG.GetDeviceByType(dmsElement, elementType);
-                var layoutsList = tag.GetLayoutsFromElement();
+                var layoutsList = tag.LayoutsFromElement;
                 var layoutsPerOutput = tag.GetLayoutsByOutput(outputId);
 
                 var outputDialog = new OutputDialog(engine, layoutsPerOutput, layoutsList, elementType);
