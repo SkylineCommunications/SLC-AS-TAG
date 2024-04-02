@@ -57,9 +57,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
     using SharedMethods;
     using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.Messages;
-    using static TAG_GQI_Retrieve_Channel_Details_1.GetTagOutputs;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -69,14 +67,12 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
     {
         private GQIDMS _dms;
 
-        private enum Severity
+        public enum FormattedValueType
         {
-            Critical = 1,
-            Major = 2,
-            Minor = 3,
-            Warning = 4,
-            Notice = 5,
-            Info = 6,
+            Bitrate,
+            MemoryUsage,
+            MemoryAllocated,
+            CpuUsage,
         }
 
         public OnInitOutputArgs OnInit(OnInitInputArgs args)
@@ -103,11 +99,6 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             };
         }
 
-        public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-        {
-            return new OnArgumentsProcessedOutputArgs();
-        }
-
         public GQIPage GetNextPage(GetNextPageInputArgs args)
         {
             var rows = new List<GQIRow>();
@@ -130,7 +121,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var channelStatusOverviewTable = SharedMethods.GetTable(_dms, response, MCS.ChannelStatusOverview);
+                    var channelStatusOverviewTable = SharedMethods.GetTable(_dms, response, Mcs.ChannelStatusOverview);
                     GetChannelsMcsTableRows(rows, response, channelStatusOverviewTable);
                 }
 
@@ -140,14 +131,14 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, MCM.ChannelStatusOverview);
+                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, Mcm.ChannelStatusOverview);
                         GetChannelsMcmTableRows(rows, response, encoderConfigTable);
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                CreateDebugRow(rows, $"exception: {e}");
+                // CreateDebugRow(rows, $"exception: {e}");
             }
 
             return new GQIPage(rows.ToArray())
@@ -156,44 +147,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             };
         }
 
-        private void GetChannelsMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable)
-        {
-            foreach (var tableRow in channelStatusOverviewTable)
-            {
-                var bitrate = GetFormattedValue(Convert.ToString(tableRow[7]), FormattedValueType.Bitrate);
-                var memoryAllocated = GetFormattedValue(Convert.ToString(tableRow[10]), FormattedValueType.MemoryAllocated);
-                var memoryUsage = GetFormattedValue(Convert.ToString(tableRow[11]), FormattedValueType.MemoryUsage);
-                var cpuUsage = GetFormattedValue(Convert.ToString(tableRow[9]), FormattedValueType.CpuUsage);
-
-                GQICell[] cells = new[]
-                {
-                    new GQICell { Value = Convert.ToString(tableRow[2]) }, // Label
-                    new GQICell { Value = Convert.ToString(tableRow[4]) }, // Thumbnail
-                    new GQICell { Value = Convert.ToString(tableRow[5]) }, // Severity
-                    new GQICell { Value = Convert.ToString(tableRow[6]) }, // Active Events
-                    new GQICell { Value = bitrate }, // Bitrate
-                    new GQICell { Value = Convert.ToString(tableRow[8]) }, // Type
-                    new GQICell { Value = cpuUsage}, // CPU Usage
-                    new GQICell { Value = memoryAllocated }, // Memory Allocated
-                    new GQICell { Value = memoryUsage }, // Memory Usage
-                    new GQICell { Value = "info" }, // More Info (Index)
-                    new GQICell { Value = Convert.ToString(tableRow[13]) }, // Profile
-                };
-
-                var elementID = new ElementID(response.DataMinerID, response.ElementID);
-                var elementMetadata = new ObjectRefMetadata { Object = elementID };
-                var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
-
-                var row = new GQIRow(cells)
-                {
-                    Metadata = rowMetadata,
-                };
-
-                rows.Add(row);
-            }
-        }
-
-        private string GetFormattedValue(string valueToCheck, FormattedValueType formattedValueType)
+        private static string GetFormattedValue(string valueToCheck, FormattedValueType formattedValueType)
         {
             if (double.TryParse(valueToCheck, out double parsedDouble))
             {
@@ -235,17 +189,46 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             }
         }
 
-        public enum FormattedValueType
+        private void GetChannelsMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable)
         {
-            Bitrate,
-            MemoryUsage,
-            MemoryAllocated,
-            CpuUsage,
+            foreach (var tableRow in channelStatusOverviewTable)
+            {
+                var bitrate = GetFormattedValue(Convert.ToString(tableRow[7]), FormattedValueType.Bitrate);
+                var memoryAllocated = GetFormattedValue(Convert.ToString(tableRow[10]), FormattedValueType.MemoryAllocated);
+                var memoryUsage = GetFormattedValue(Convert.ToString(tableRow[11]), FormattedValueType.MemoryUsage);
+                var cpuUsage = GetFormattedValue(Convert.ToString(tableRow[9]), FormattedValueType.CpuUsage);
+
+                GQICell[] cells = new[]
+                {
+                    new GQICell { Value = Convert.ToString(tableRow[2]) }, // Label
+                    new GQICell { Value = Convert.ToString(tableRow[4]) }, // Thumbnail
+                    new GQICell { Value = Convert.ToString(tableRow[5]) }, // Severity
+                    new GQICell { Value = Convert.ToString(tableRow[6]) }, // Active Events
+                    new GQICell { Value = bitrate }, // Bitrate
+                    new GQICell { Value = Convert.ToString(tableRow[8]) }, // Type
+                    new GQICell { Value = cpuUsage}, // CPU Usage
+                    new GQICell { Value = memoryAllocated }, // Memory Allocated
+                    new GQICell { Value = memoryUsage }, // Memory Usage
+                    new GQICell { Value = "Info" }, // More Info (Index)
+                    new GQICell { Value = Convert.ToString(tableRow[13]) }, // Profile
+                };
+
+                var elementID = new ElementID(response.DataMinerID, response.ElementID);
+                var elementMetadata = new ObjectRefMetadata { Object = elementID };
+                var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
+
+                var row = new GQIRow(cells)
+                {
+                    Metadata = rowMetadata,
+                };
+
+                rows.Add(row);
+            }
         }
 
         private void GetChannelsMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable)
         {
-            var channelEventsOverviewTable = SharedMethods.GetTable(_dms, response, MCM.ChannelEventsOverview);
+            var channelEventsOverviewTable = SharedMethods.GetTable(_dms, response, Mcm.ChannelEventsOverview);
 
             var eventNamesAdded = new List<string>();
 
@@ -261,8 +244,8 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
                 var channelEventsRows = channelEventsOverviewTable.Where(x => Convert.ToInt32(x[6 /* Status */]).Equals(1)).ToList();
                 var activeEvents = channelEventsRows.Count;
-                var type = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
-                var severity = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
+                var type = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
+                var severity = SharedMethods.GetValueFromStringDictionary(Mcm.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
 
                 GQICell[] cells = new[]
                 {
@@ -292,25 +275,25 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             }
         }
 
-        private static void CreateDebugRow(List<GQIRow> rows, string message)
-        {
-            var debugCells = new[]
-            {
-                new GQICell { Value = message },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-            };
+        // private static void CreateDebugRow(List<GQIRow> rows, string message)
+        // {
+        //    var debugCells = new[]
+        //    {
+        //        new GQICell { Value = message },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //        new GQICell { Value = null },
+        //    };
 
-            var row = new GQIRow(debugCells);
-            rows.Add(row);
-        }
+        // var row = new GQIRow(debugCells);
+        //    rows.Add(row);
+        // }
     }
 }

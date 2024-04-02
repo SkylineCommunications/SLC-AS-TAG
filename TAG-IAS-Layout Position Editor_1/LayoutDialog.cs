@@ -52,14 +52,14 @@
 
             if (elementType.Equals("MCM"))
             {
-                var channelsTableData = element.GetTable(MCM.ChannelStatusTableId);
+                var channelsTableData = element.GetTable(Mcm.ChannelStatusTableId);
                 var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 256, Value = Convert.ToString((int)Monitored.Yes) } };
                 var matchedChannels = channelsTableData.QueryData(filter).ToList();
                 channelsList.AddRange(matchedChannels.Select(row => Convert.ToString(row[12 /* Name */])));
             }
             else
             {
-                foreach (var tableId in MCS.ChannelsTableIds)
+                foreach (var tableId in Mcs.ChannelsTableIds)
                 {
                     var channelsTableData = element.GetTable(tableId);
                     var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.NotEqual, Pid = 2107, Value = "Not Set" } };
