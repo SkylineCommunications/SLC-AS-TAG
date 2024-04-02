@@ -13,10 +13,8 @@
     {
         public LayoutDialog(IEngine engine, string elementId, string channelId) : base(engine)
         {
-            Engine = engine;
             Dms = engine.GetDms();
             TagElement = Dms.GetElement(new DmsElementId(elementId));
-
             var protocolName = TagElement.Protocol.Name;
             var tagType = TAG.GetElementType(protocolName);
             Tag = TAG.GetDeviceByType(TagElement, tagType);
@@ -29,7 +27,7 @@
             ChannelLabel = new Label($"Selected Channel:");
             LayoutLabel = new Label("Select a Layout:");
             LayoutsDropDown = new DropDown(layoutsInElement);
-            WarningLabel = new Label("Warning") { Style = TextStyle.Bold, IsVisible = false,};
+            WarningLabel = new Label("Warning") { Style = TextStyle.Bold, IsVisible = false, };
             LayoutInfoLabel = new Label();
             UpdateButton = new Button("Apply");
             CancelButton = new Button("Cancel");
@@ -43,8 +41,8 @@
             {
                 CancelButton = new Button("Cancel");
                 LayoutInfoLabel = new Label($"No Layouts available in element {TagElement.Name}");
-                AddWidget(LayoutInfoLabel, 0, 1, 1, 2);
-                AddWidget(CancelButton, 5, 1, HorizontalAlignment.Left);
+                AddWidget(LayoutInfoLabel, 0, 0);
+                AddWidget(CancelButton, 5, 0, HorizontalAlignment.Left);
             }
             else
             {
@@ -61,39 +59,9 @@
             }
         }
 
-        public void CheckLayoutOption()
-        {
-            WarningLabel.IsVisible = false;
-            var positionsDict = Tag.GetPositionsAndChannelsInLayout(LayoutsDropDown.Selected);
-
-            var availablePosition = positionsDict.FirstOrDefault(x => x.Value.ChannelTitle.Equals("None"));
-
-            if (availablePosition.Key == null)
-            {
-                availablePosition = positionsDict.First();
-                WarningLabel.IsVisible = true;
-                LayoutInfoLabel.Text = $"No available empty position in {LayoutsDropDown.Selected} Layout. The selected channel, {SelectedChannel.Text}, will replace {availablePosition.Value.ChannelTitle} in position {availablePosition.Value.Position}.";
-            }
-            else
-            {
-                LayoutInfoLabel.Text = $"Position {availablePosition.Value.Position} in Layout {LayoutsDropDown.Selected} available for channel {SelectedChannel.Text}";
-            }
-
-            LayoutIndex = availablePosition.Value.Index;
-        }
-
-        internal void SetChannelToLayout()
-        {
-            var allLayoutsTable = TagElement.GetTable(Tag.AllLayoutsTableId);
-            allLayoutsTable.GetColumn<string>(Tag.AllLayouts_TitleColumnId).SetValue(LayoutIndex, SelectedChannel.Text);
-            Engine.ExitSuccess("Channel Set to Layout");
-        }
-
         public IDmsElement TagElement { get; set; }
 
         public IDms Dms { get; set; }
-
-        public IEngine Engine { get; set; }
 
         public Label ChannelLabel { get; private set; }
 
@@ -114,5 +82,33 @@
         public TAG Tag { get; private set; }
 
         public string LayoutIndex { get; private set; }
+
+        public void CheckLayoutOption()
+        {
+            WarningLabel.IsVisible = false;
+            var positionsDict = Tag.GetPositionsAndChannelsInLayout(LayoutsDropDown.Selected);
+
+            var availablePosition = positionsDict.FirstOrDefault(x => x.Value.ChannelTitle.Equals("None") || x.Value.ChannelTitle.Equals("0"));
+
+            if (availablePosition.Key == null)
+            {
+                availablePosition = positionsDict.First();
+                WarningLabel.IsVisible = true;
+                LayoutInfoLabel.Text = $"No available empty position in {LayoutsDropDown.Selected} Layout. The selected channel, {SelectedChannel.Text}, will replace {availablePosition.Value.ChannelTitle} in position {availablePosition.Value.Position}.";
+            }
+            else
+            {
+                LayoutInfoLabel.Text = $"Position {availablePosition.Value.Position} in Layout {LayoutsDropDown.Selected} available for channel {SelectedChannel.Text}";
+            }
+
+            LayoutIndex = availablePosition.Value.Index;
+        }
+
+        public void SetChannelToLayout()
+        {
+            var allLayoutsTable = TagElement.GetTable(Tag.AllLayoutsTableId);
+            allLayoutsTable.GetColumn<string>(Tag.AllLayouts_TitleColumnId).SetValue(LayoutIndex, SelectedChannel.Text);
+            Engine.ExitSuccess("Channel Set to Layout");
+        }
     }
 }
