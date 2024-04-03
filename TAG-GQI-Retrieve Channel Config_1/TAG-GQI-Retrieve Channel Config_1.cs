@@ -85,6 +85,7 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
                 new GQIStringColumn("Device"),
                 new GQIStringColumn("Monitoring Level"),
                 new GQIStringColumn("More Info"),
+                new GQIStringColumn("Channel ID"),
             };
         }
 
@@ -155,6 +156,7 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
                     new GQICell { Value = deviceName }, // Device
                     new GQICell { Value = monitoringLevel}, // Monitoring Level
                     new GQICell { Value = "Info" }, // More Info (Index)
+                    new GQICell { Value = Convert.ToString(tableRow[0]) }, // More Info (Index)
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
@@ -200,6 +202,7 @@ namespace TAG_GQI_Retrieve_Channel_Config_1
                     new GQICell { Value = deviceName }, // Device
                     new GQICell { Value = monitoringLevel}, // Monitoring Level
                     new GQICell { Value = "Info" }, // More Info (Index)
+                    new GQICell { Value = Convert.ToString(tableRow[0]) }, // Channel ID
                 };
 
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
