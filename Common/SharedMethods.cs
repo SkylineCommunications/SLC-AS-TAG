@@ -102,6 +102,10 @@
 
         public abstract int AllChannelsProfile_ChannelId_Idx { get; }
 
+        public abstract int AllChannelsProfile_ChannelId_Pid{ get; }
+
+        public abstract int AllLayouts_LayoutName_Pid { get; }
+
         public static string GetElementType(string protocolName)
         {
             return protocolName.Contains("MCM") ? "MCM" : "MCS";
@@ -139,29 +143,32 @@
 
         public string GetChannelById(string channelId)
         {
-            var tableData = element.GetTable(AllChannelsProfileId).GetData();
-            var matchingChannel = tableData.Values.FirstOrDefault(x => Convert.ToString(x[AllChannelsProfile_ChannelId_Idx/*ChannelId idx*/]).Equals(channelId));
+            var tableData = element.GetTable(AllChannelsProfileId);
+            var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = AllChannelsProfile_ChannelId_Pid, Value = channelId } };
+            var matchingChannels = tableData.QueryData(filter).ToList();
 
-            if (matchingChannel == null)
+            if (!matchingChannels.Any())
             {
                 return "N/A";
             }
 
+            var matchingChannel = matchingChannels.First();
             return Convert.ToString(matchingChannel[AllChannelsProfile_ChannelTitle_Idx/*Channel Title idx*/]);
         }
 
         public Dictionary<string, AllLayoutValues> GetPositionsAndChannelsInLayout(string layoutName)
         {
             var positionChannelDict = new Dictionary<string, AllLayoutValues>();
-            var allLayoutsTable = element.GetTable(AllLayoutsTableId).GetData();
+            var allLayoutsTable = element.GetTable(AllLayoutsTableId);
+            var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = AllLayouts_LayoutName_Pid, Value = layoutName } };
+            var allLayoutsTableRows = allLayoutsTable.QueryData(filter);
 
-            if (!allLayoutsTable.Any())
+            if (!allLayoutsTableRows.Any())
             {
                 return positionChannelDict;
             }
 
-            var matchingRows = allLayoutsTable.Values.Where(x => Convert.ToString(x[AllLayouts_LayoutName_Idx]).Equals(layoutName));
-            foreach (var row in matchingRows)
+            foreach (var row in allLayoutsTableRows)
             {
                 var primaryKey = Convert.ToString(row[0]);
                 var layoutPosition = Convert.ToString(row[AllLayouts_Position_Idx /*positionIdx*/]);
@@ -213,11 +220,15 @@
 
         public override int AllLayouts_LayoutName_Idx { get => 4; }
 
+        public override int AllLayouts_LayoutName_Pid { get => 10305; }
+
         public override int AllChannelsProfileId { get => 8000; }
 
         public override int AllChannelsProfile_ChannelTitle_Idx { get => 9; }
 
         public override int AllChannelsProfile_ChannelId_Idx { get => 0; }
+
+        public override int AllChannelsProfile_ChannelId_Pid { get => 8001; }
 
     }
 
@@ -252,11 +263,15 @@
 
         public override int AllLayouts_LayoutName_Idx { get => 4; }
 
+        public override int AllLayouts_LayoutName_Pid { get => 5605; }
+
         public override int AllChannelsProfileId { get => 2400; }
 
         public override int AllChannelsProfile_ChannelTitle_Idx { get => 3; }
 
         public override int AllChannelsProfile_ChannelId_Idx { get => 2; }
+
+        public override int AllChannelsProfile_ChannelId_Pid { get => 2403; }
     }
 
     public class UmdEditor : TAG
@@ -335,5 +350,8 @@
         public override int AllChannelsProfile_ChannelId_Idx => throw new NotImplementedException();
 
         public override int AllLayoutsTableId => throw new NotImplementedException();
+        public override int AllChannelsProfile_ChannelId_Pid => throw new NotImplementedException();
+
+        public override int AllLayouts_LayoutName_Pid => throw new NotImplementedException();
     }
 }
