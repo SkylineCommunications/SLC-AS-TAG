@@ -23,14 +23,7 @@
             }
         }
 
-        public static string GetParameter(GQIDMS _dms, LiteElementInfoEvent response, int parameterId)
-        {
-            var parameterRequest = new GetParameterMessage(response.DataMinerID, response.ElementID, parameterId);
-            var messageResponse = _dms.SendMessage(parameterRequest) as GetParameterResponseMessage;
-            return messageResponse.DisplayValue;
-        }
-
-        public static object[][] GetTable(GQIDMS _dms, LiteElementInfoEvent response, int tableId)
+        public static object[][] GetTable(GQIDMS dms, LiteElementInfoEvent response, int tableId)
         {
             var partialTableRequest = new GetPartialTableMessage
             {
