@@ -157,7 +157,7 @@ namespace TAG_GQI_Infrastructure_1
             }
             catch (Exception e)
             {
-                //CreateDebugRow(rows, $"exception: {e}");
+                CreateDebugRow(rows, $"exception: {e}");
             }
 
             return new GQIPage(rows.ToArray())
@@ -168,7 +168,11 @@ namespace TAG_GQI_Infrastructure_1
 
         private void GetMCMRows(List<GQIRow> rows, LiteElementInfoEvent response)
         {
-            var devicesRows = SharedMethods.GetTable(_dms,response, (int)MCMTableId.DeviceOverview);
+            var devicesRows = SharedMethods.GetTable(_dms, response, (int)MCMTableId.DeviceOverview);
+            var cpu = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, MCM.CPU_Pid));
+            var memory = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, MCM.Memory_Pid));
+
+            var cloudLicenseRow = devicesRows.FirstOrDefault(x => Convert.ToString(x[0]) == "Cloud License");
 
             for (int i = 0; i < devicesRows.Length; i++)
             {
@@ -178,7 +182,7 @@ namespace TAG_GQI_Infrastructure_1
                 {
                     continue;
                 }
-
+                //CreateDebugRow(rows, $"channelsinfo : {devicesRows[i].Length}");
                 var cells = new[]
                 {
                     new GQICell { Value = deviceName }, // Name
@@ -188,22 +192,22 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = Convert.ToString(deviceRow[14]) == "1" ? "Enabled" : "Disabled" }, // License Sharing
                     new GQICell { Value = DateTime.FromOADate(Convert.ToDouble(deviceRow[9])).ToUniversalTime() }, // Up time
                     new GQICell { Value = Convert.ToString(deviceRow[3]) == "4" || Convert.ToString(deviceRow[3]) == "1" ? "Up" : "Down" }, // Status
-                    new GQICell { Value = CheckUsage(deviceRow, 17, 16) }, // Capacity
-                    new GQICell { Value = "N/A"/*CheckUsage(deviceRow, 18, 19)*/ }, // Licenses
-                    new GQICell { Value = "N/A"/*CheckUsage(deviceRow, 18, 19)*/ }, // Channels
-                    new GQICell { Value = "N/A"/*CheckUsage(deviceRow, 10, 11)*/ }, // Uncompressed
-                    new GQICell { Value = "N/A"/*CheckUsage(deviceRow, 14, 15)*/ }, // Outputs
-                    new GQICell { Value = "N/A"/*CheckUsage(deviceRow, 16, 17)*/ }, // Descramblers
-                    new GQICell { Value = CheckUsage(deviceRow, 21, 20) }, // Recorders
-                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // CPU
+                    new GQICell { Value = CheckUsage(deviceRow, 17, 16, cloudLicenseRow) }, // Capacity
+                    new GQICell { Value = CheckUsage(deviceRow, 27, 28, cloudLicenseRow) }, // Licenses
+                    new GQICell { Value = CheckUsage(deviceRow, 26, 7, cloudLicenseRow) }, // Channels
+                    new GQICell { Value = "N/A"}, // Uncompressed
+                    new GQICell { Value = CheckUsage(deviceRow, 14, -1, cloudLicenseRow) }, // Outputs
+                    new GQICell { Value = "N/A" }, // Descramblers
+                    new GQICell { Value = CheckUsage(deviceRow, 21, 20, cloudLicenseRow) }, // Recorders
+                    new GQICell { Value = cpu, DisplayValue = cpu == -1 ? "N/A" : Convert.ToString(cpu) + " %" }, // CPU
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Temperature
-                    new GQICell { Value = "-1", DisplayValue = "N/A" }, // Clock Offset
+                    new GQICell { Value = Convert.ToString(deviceRow[25]), DisplayValue = CheckValue(Convert.ToDouble(deviceRow[25])) }, // Clock Offset
                     new GQICell { Value = Convert.ToString(deviceRow[2]) }, // Model
-                    new GQICell { Value = "N/A" }, // Memory
-                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Used Outputs
+                    new GQICell { Value = Convert.ToString(memory), DisplayValue = memory == -1 ? "N/A" : Convert.ToString(memory) }, // Memory
+                    new GQICell { Value = Convert.ToDouble(deviceRow[29]), DisplayValue = CheckValue(Convert.ToDouble(deviceRow[29])) }, // Used Outputs
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Limit Outputs
-                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Used Channels
-                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Limit Channels
+                    new GQICell { Value = Convert.ToDouble(deviceRow[26]), DisplayValue = CheckValue(Convert.ToDouble(deviceRow[26])) }, // Used Channels
+                    new GQICell { Value = Convert.ToDouble(ExtractNumberFromString(deviceRow[7])), DisplayValue = CheckValue(Convert.ToDouble(ExtractNumberFromString(deviceRow[7]))) }, // Limit Channels
                     new GQICell { Value = Convert.ToString(deviceRow[0]) }, // Device Key
                 };
 
@@ -292,17 +296,45 @@ namespace TAG_GQI_Infrastructure_1
 
         private static string CheckUsage(object[] deviceInfoRow, int usedAmountPosition, int limitPosition)
         {
-            return Convert.ToDouble(deviceInfoRow[usedAmountPosition]) < 0 ? "N/A" : GetFormattedUsage(deviceInfoRow, usedAmountPosition, limitPosition);
+            return CheckUsage(deviceInfoRow, usedAmountPosition, limitPosition, null);
         }
 
-        private static string GetFormattedUsage(object[] deviceInfoRow, int usedAmountPosition, int limitPosition)
+        private static string CheckUsage(object[] deviceInfoRow, int usedAmountPosition, int limitPosition, object[] cloudLicenseRow)
         {
-            return Convert.ToInt32(deviceInfoRow[usedAmountPosition]) + " / " + Convert.ToInt32(deviceInfoRow[limitPosition]);
+            if (limitPosition == -1)
+            {
+                return Convert.ToDouble(deviceInfoRow[usedAmountPosition]) < 0 ? "N/A" : deviceInfoRow[usedAmountPosition] + " / 0";
+            }
+
+            var deviceLimit = Convert.ToDouble(ExtractNumberFromString(deviceInfoRow[limitPosition]));
+            var cloudLimit = cloudLicenseRow != null ? ExtractNumberFromString(cloudLicenseRow[limitPosition]) : double.MinValue;
+
+            var maxLimit = Math.Max(deviceLimit, cloudLimit);
+
+            return Convert.ToDouble(deviceInfoRow[usedAmountPosition]) < 0 ? "N/A" : GetFormattedUsage(deviceInfoRow, usedAmountPosition, maxLimit);
+        }
+
+        private static string GetFormattedUsage(object[] deviceInfoRow, int usedAmountPosition, double limitValue)
+        {
+            return Convert.ToInt32(deviceInfoRow[usedAmountPosition]) + " / " + limitValue;
         }
 
         private static string CheckUsageModified(object[] deviceInfoRow, int usedAmountPosition, int limitPosition, int modifier)
         {
             return Convert.ToDouble(deviceInfoRow[usedAmountPosition]) < 0 ? "N/A" : GetFormattedUsageModified(deviceInfoRow, usedAmountPosition, limitPosition, modifier);
+        }
+
+        private static double ExtractNumberFromString(object value)
+        {
+            var stringValue = Convert.ToString(value);
+            double number;
+
+            if (!String.IsNullOrWhiteSpace(stringValue) && Double.TryParse(Regex.Match(stringValue, @"[0-9]*\.?[0-9]+").Value, out number))
+            {
+                return number;
+            }
+
+            return 0d;
         }
 
         private static string GetFormattedUsageModified(object[] deviceInfoRow, int usedAmountPosition, int limitPosition, int modifier)
@@ -358,6 +390,7 @@ namespace TAG_GQI_Infrastructure_1
                 new GQICell { Value = null},
                 new GQICell { Value = null },
                 new GQICell { Value = null },
+                new GQICell { Value = null},
                 new GQICell { Value = null},
                 new GQICell { Value = null},
                 new GQICell { Value = null},

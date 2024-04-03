@@ -39,7 +39,7 @@
                 ParameterID = tableId,
             };
 
-            var messageResponse = _dms.SendMessage(partialTableRequest) as ParameterChangeEventMessage;
+            var messageResponse = dms.SendMessage(partialTableRequest) as ParameterChangeEventMessage;
             if (messageResponse.NewValue.ArrayValue != null && messageResponse.NewValue.ArrayValue.Length > 0)
             {
                 return BuildRows(messageResponse.NewValue.ArrayValue);
@@ -60,6 +60,24 @@
             {
                 return "N/A";
             }
+        }
+
+        public static object GetParameter(GQIDMS dms, LiteElementInfoEvent response, int parameterId)
+        {
+            var partialTableRequest = new GetParameterMessage
+            {
+                DataMinerID = response.DataMinerID,
+                ElId = response.ElementID,
+                ParameterId = parameterId,
+            };
+
+            var messageResponse = dms.SendMessage(partialTableRequest) as GetParameterResponseMessage;
+            if (messageResponse?.Value?.InteropValue == null)
+            {
+                return -1;
+            }
+
+            return messageResponse.Value.InteropValue;
         }
 
         private static object[][] BuildRows(ParameterValue[] columns)
@@ -278,6 +296,10 @@
             {"12","HD/50/60/HEVC/J2K"},
             {"13","Contribution UHD/HEVC"},
         };
+        public const int CPU_Pid = 9401;
+        public const int Memory_Pid = 9401;
+
+        public static int ChannelStatusTableId { get => 240; }
 
         public static readonly IReadOnlyDictionary<string, string> ChannelConfigRecordingDict = new Dictionary<string, string>
         {
