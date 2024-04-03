@@ -108,38 +108,41 @@
         private readonly int outputs_LayoutsColumnId;
         private readonly int layoutsTableId;
         private readonly int outputsTable_OutputColumnId;
-        private readonly int allLayouts_TitleColumnId;
+        public readonly int allLayoutsTableId;
+        private readonly int allLayouts_LayoutName_Pid;
+        private readonly int allLayouts_Position_Idx;
+        private readonly int allLayouts_ChannelTitle_Idx;
+        private readonly int allChannelsProfileId;
+        private readonly int allChannelsProfile_ChannelId_Pid;
+        private readonly int allChannelsProfile_ChannelTitle_Idx;
 
-        public IDmsElement Element;
+        private IDmsElement element;
 
         protected TAG(
             int constOutputsTableId,
             int outputsLayoutsColumnId,
             int constLayoutsTableId,
             int outputsTableOutputColumnId,
-            int allLayoutsTitleColumnId,
-            IDmsElement element)
+            AllLayoutIds allLayoutsIds,
+            AllChannelsProfileIds allChannelsProfileIds,
+            IDmsElement idmsElement)
         {
             outputsTableId = constOutputsTableId;
             outputs_LayoutsColumnId = outputsLayoutsColumnId;
             layoutsTableId = constLayoutsTableId;
             outputsTable_OutputColumnId = outputsTableOutputColumnId;
-            allLayouts_TitleColumnId = allLayoutsTitleColumnId;
-            Element = element;
-        }
 
-        public List<string> LayoutsFromElement
-        {
-            get
-            {
-                var layoutsList = new List<string>();
-                var tableData = Element.GetTable(layoutsTableId).GetData();
-                var layoutsToAdd = tableData.Values.Select(row => Convert.ToString(row[1 /* Title */])).ToList();
-                layoutsList.AddRange(layoutsToAdd);
-                layoutsList.Sort();
-                var distinctList = layoutsList.Distinct().ToList();
-                return distinctList;
-            }
+            allLayoutsTableId = allLayoutsIds.AllLayoutsTableId;
+            allLayouts_LayoutName_Pid = allLayoutsIds.AllLayoutsTableId;
+            allLayouts_Position_Idx = allLayoutsIds.Position_Idx;
+            allLayouts_ChannelTitle_Idx = allLayoutsIds.ChannelTitle_Idx;
+            AllLayouts_TitleColumnId = allLayoutsIds.TitleColumnPid;
+
+            allChannelsProfileId = allChannelsProfileIds.AllChannelsProfileId;
+            allChannelsProfile_ChannelId_Pid = allChannelsProfileIds.ChannelId_Pid;
+            allChannelsProfile_ChannelTitle_Idx = allChannelsProfileIds.ChannelTitle_Idx;
+
+            element = idmsElement;
         }
 
         public int AllLayouts_TitleColumnId { get; internal set; }
@@ -164,9 +167,106 @@
 
         public List<object[]> GetLayoutsByOutput(string outputId)
         {
-            var outputsLayoutsTable = Element.GetTable(outputsTableId);
+            var outputsLayoutsTable = element.GetTable(outputsTableId);
             var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = outputsTable_OutputColumnId, Value = outputId } };
             return outputsLayoutsTable.QueryData(filter).ToList();
+        }
+
+        public List<string> GetLayoutsFromElement()
+        {
+            var layoutsList = new List<string>();
+
+            var tableData = element.GetTable(layoutsTableId).GetData();
+            var layoutsToAdd = tableData.Values.Select(row => Convert.ToString(row[1 /* Title */])).ToList();
+            layoutsList.AddRange(layoutsToAdd);
+
+            layoutsList.Sort();
+            return layoutsList.Distinct().ToList();
+        }
+
+        public string GetChannelById(string channelId)
+        {
+            var tableData = element.GetTable(allChannelsProfileId);
+            var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = allChannelsProfile_ChannelId_Pid, Value = channelId } };
+            var matchingChannels = tableData.QueryData(filter).ToList();
+
+            if (!matchingChannels.Any())
+            {
+                return "N/A";
+            }
+
+            var matchingChannel = matchingChannels.First();
+            return Convert.ToString(matchingChannel[allChannelsProfile_ChannelTitle_Idx/*Channel Title idx*/]);
+        }
+
+        public Dictionary<string, AllLayoutRowValues> GetPositionsAndChannelsInLayout(string layoutName)
+        {
+            var positionChannelDict = new Dictionary<string, AllLayoutRowValues>();
+            var allLayoutsTable = element.GetTable(allLayoutsTableId);
+            var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = allLayouts_LayoutName_Pid, Value = layoutName } };
+            var allLayoutsTableRows = allLayoutsTable.QueryData(filter);
+
+            if (!allLayoutsTableRows.Any())
+            {
+                return positionChannelDict;
+            }
+
+            foreach (var row in allLayoutsTableRows)
+            {
+                var primaryKey = Convert.ToString(row[0]);
+                var layoutPosition = Convert.ToString(row[allLayouts_Position_Idx /*positionIdx*/]);
+                var channelName = Convert.ToString(row[allLayouts_ChannelTitle_Idx /*Channel Title*/]);
+                positionChannelDict[primaryKey] = new AllLayoutRowValues { Index = primaryKey, ChannelTitle = channelName, Position = layoutPosition };
+            }
+
+            return positionChannelDict;
+        }
+
+        public class AllLayoutRowValues
+        {
+            public string Index { get; set; }
+
+            public string ChannelTitle { get; set; }
+
+            public string Position { get; set; }
+        }
+
+        public class AllLayoutIds
+        {
+            public AllLayoutIds(int allLayoutsTableId, int positionIdx, int channelTitleIdx, int layourNamePid, int titleColumnPid)
+            {
+                AllLayoutsTableId = allLayoutsTableId;
+                Position_Idx = positionIdx;
+                ChannelTitle_Idx = channelTitleIdx;
+                LayoutName_Pid = layourNamePid;
+                TitleColumnPid = layourNamePid;
+            }
+
+            public int AllLayoutsTableId { get; }
+
+            public int LayoutName_Pid { get; }
+
+            public int Position_Idx { get; }
+
+            public int ChannelTitle_Idx { get; }
+
+            public int TitleColumnPid { get; }
+        }
+
+        public class AllChannelsProfileIds
+        {
+            public AllChannelsProfileIds(int allChannelsProfileTableId, int channelIdPid, int channelTitleIdx)
+            {
+                AllChannelsProfileId = allChannelsProfileTableId;
+                ChannelId_Pid = channelIdPid;
+                ChannelTitle_Idx = channelTitleIdx;
+            }
+
+            public int AllChannelsProfileId { get; }
+
+            public int ChannelId_Pid { get; }
+
+            public int ChannelTitle_Idx { get; }
         }
     }
 
@@ -255,8 +355,9 @@
         outputsLayoutsColumnId: 1612,
         constLayoutsTableId: 1560,
         outputsTableOutputColumnId: 1501,
-        allLayoutsTitleColumnId: 10353,
-        element: element)
+        new AllLayoutIds(allLayoutsTableId: 10300, positionIdx: 5, channelTitleIdx: 2, layourNamePid: 10305, titleColumnPid: 10353),
+        new AllChannelsProfileIds(allChannelsProfileTableId: 8000, channelIdPid: 8001, channelTitleIdx: 9),
+        idmsElement: element)
         {
         }
     }
@@ -272,6 +373,8 @@
         public static readonly int LayoutsTableId = 3600;
         public static readonly int OutputsTable_OutputColumnId = 3403;
         public static new readonly int AllLayouts_TitleColumnId = 5653;
+        public static readonly int CPU_Pid = 9401;
+        public static readonly int Memory_Pid = 9401;
 
         public static readonly IReadOnlyDictionary<string, string> ChannelConfigAccessTypeDict = new Dictionary<string, string>
         {
@@ -307,11 +410,6 @@
             {"13","Contribution UHD/HEVC"},
         };
 
-        public const int CPU_Pid = 9401;
-        public const int Memory_Pid = 9401;
-
-        public static int ChannelStatusTableId { get => 240; }
-
         public static readonly IReadOnlyDictionary<string, string> ChannelConfigRecordingDict = new Dictionary<string, string>
         {
             {"-1","N/A"},
@@ -346,8 +444,9 @@
         outputsLayoutsColumnId: 3456,
         constLayoutsTableId: 3600,
         outputsTableOutputColumnId: 3403,
-        allLayoutsTitleColumnId: 5653,
-        element: element)
+        new AllLayoutIds(allLayoutsTableId: 5600, positionIdx: 5, channelTitleIdx: 2, layourNamePid: 5605, titleColumnPid: 5653),
+        new AllChannelsProfileIds(allChannelsProfileTableId: 2400, channelIdPid: 2403, channelTitleIdx: 3),
+        idmsElement: element)
         {
         }
     }

@@ -49,85 +49,63 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace TAG_IAS_Modify_Output_Layout_1
+namespace TAG_IAS_Send_Channel_To_Layout_1
 {
     using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Text;
     using SharedMethods;
     using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+    using TAG_Send_Channel_To_Layout;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
     /// </summary>
     public class Script
-	{
+    {
         /// <summary>
         /// The script entry point.
         /// </summary>
         /// <param name="engine">Link with SLAutomation process.</param>
-        public static void Run(IEngine engine)
-		{
+        public void Run(IEngine engine)
+        {
             // DO NOT REMOVE THIS COMMENTED-OUT CODE OR THE SCRIPT WON'T RUN!
             // DataMiner evaluates if the script needs to launch in interactive mode.
             // This is determined by a simple string search looking for "engine.ShowUI" in the source code.
             // However, because of the toolkit NuGet package, this string cannot be found here.
             // So this comment is here as a workaround.
             //// engine.ShowUI();
-            engine.SetFlag(RunTimeFlags.NoCheckingSets);
-
             try
             {
                 var elementId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Element ID").Value);
-                var outputId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Output ID").Value);
+                var channelId = SharedMethods.GetOneDeserializedValue(engine.GetScriptParam("Channel ID").Value);
+
+                //// IAS Toolkit code
 
                 var controller = new InteractiveController(engine);
+                var dialog = new LayoutDialog(engine, elementId, channelId);
 
-                var elementData = elementId.Split('/');
-                if (elementData.Length < 2)
-                {
-                    engine.ShowUI("Element ID format not supported. Please check the incoming data. [Format: DMA ID/Element ID]");
-                    return;
-                }
+                dialog.LayoutsDropDown.Changed += (sender, args) => dialog.CheckLayoutOption();
+                dialog.UpdateButton.Pressed += (sender, args) => dialog.SetChannelToLayout();
+                dialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Script Aborted.");
 
-                var dms = engine.GetDms();
-                var dmsElement = dms.GetElement(new DmsElementId(Convert.ToInt32(elementData[0]), Convert.ToInt32(elementData[1])));
-                var element = engine.FindElementByKey(elementId);
-                var elementType = TAG.GetElementType(element.Protocol.Name);
-
-                var tag = TAG.GetDeviceByType(dmsElement, elementType);
-                var layoutsList = tag.GetLayoutsFromElement();
-                var layoutsPerOutput = tag.GetLayoutsByOutput(outputId);
-
-                var outputDialog = new OutputDialog(engine, layoutsPerOutput, layoutsList, elementType);
-
-                outputDialog.UpdateButton.Pressed += (sender, args) => UpdateLayout(engine, outputDialog, element, tag);
-                outputDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
-
-                controller.Run(outputDialog);
+                controller.Run(dialog);
             }
             catch (ScriptAbortException)
             {
-                // no action
+                // ignore abort
+            }
+            catch (InteractiveUserDetachedException)
+            {
+                // ignore abort
             }
             catch (Exception ex)
             {
-                engine.ShowUI($"Exception thrown: {ex}");
+                engine.Log($"{ex}");
+                engine.GenerateInformation($"{ex}");
             }
         }
-
-        private static void UpdateLayout(IEngine engine, OutputDialog outputDialog, Element element, TAG tag)
-        {
-            outputDialog.SendLayoutUpdate(element, tag.Outputs_LayoutsColumnId);
-            engine.ExitSuccess("Update finished");
-        }
-    }
-
-    public class LayoutData
-    {
-        public string RowId { get; set; }
-
-        public string Layout { get; set; }
     }
 }
