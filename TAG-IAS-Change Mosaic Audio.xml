@@ -23,6 +23,9 @@
 		<ScriptParameter id="3" type="string" values="">
 			<Description>Layout ID</Description>
 		</ScriptParameter>
+		<ScriptParameter id="4" type="string" values="">
+			<Description>Channel ID</Description>
+		</ScriptParameter>
 	</Parameters>
 
 	<Script>

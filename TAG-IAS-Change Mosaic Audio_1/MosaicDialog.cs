@@ -3,9 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     internal class MosaicDialog : Dialog
@@ -81,7 +83,7 @@
 
         public Label OutputEncoderValue { get; private set; }
 
-        public DropDown ChannelOutputDropDown { get; private set; }
+        public DropDown ChannelOutputDropDown { get; set; }
 
         public DropDown ChannelAudioEncodingDropDown { get; private set; }
 
@@ -118,10 +120,12 @@
                 tagElement.GetStandaloneParameter<double?>(2176).SetValue(1); // Set Audio Channel Button
             }
 
+            engine.ShowUI($"Mosaic Audio for Selected Layout changed to {selectedAudioEncoderPID}", false);
+            Thread.Sleep(3000);
             engine.ExitSuccess("Script completed");
         }
 
-        internal void SetValues(string elementId, string outputId, string layoutId)
+        internal void SetValues(string elementId, string outputId, string layoutId, string channelId)
         {
             dms = engine.GetDms();
             var tagElement = dms.GetElement(new DmsElementId(elementId));
@@ -133,7 +137,7 @@
             {
                 var pidsOverviewTableData = tagElement.GetTable(2500).GetData();
                 var allLayoutsTableData = tagElement.GetTable(5600).GetData();
-                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId);
+                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId, channelId, ChannelOutputDropDown);
                 audioPidList = CreateMcsAudioPidList(pidsOverviewTableData);
                 var outputTable = tagElement.GetTable(3100).GetData();
                 outputName = GetOutputNameById(outputTable, outputId);
@@ -147,7 +151,7 @@
                 var enconderTable = tagElement.GetTable(1500).GetData();
 
                 outputName = GetOutputNameById(enconderTable, outputId);
-                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId);
+                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId, channelId, ChannelOutputDropDown);
                 audioPidList = CreateMcmAudioPidList(pidsOverviewTable);
             }
 
@@ -157,7 +161,6 @@
             if (listChannelsPerLayout.Count > 0)
             {
                 this.ChannelOutputDropDown.Options = listChannelsPerLayout;
-                this.ChannelOutputDropDown.Selected = listChannelsPerLayout.FirstOrDefault();
             }
             else
             {
@@ -174,6 +177,10 @@
             {
                 this.ChannelAudioEncodingDropDown.Options = audiopidList;
                 this.ChannelAudioEncodingDropDown.Selected = audiopidList[0];
+                if (audiopidList.Count == 1 && !channelId.Equals("None")) // Only one option available
+                {
+                    ChangeAudio();
+                }
             }
             else
             {
@@ -187,15 +194,17 @@
 
         private string GetOutputNameById(IDictionary<string, object[]> enconderTable, string outputId)
         {
-            foreach (var row in enconderTable.Values)
-            {
-                if (Convert.ToString(row[0]).Equals(outputId))
-                {
-                    return Convert.ToString(row[1]);
-                }
-            }
+            var row = enconderTable.Values.Where(x => Convert.ToString(x[0]).Equals(outputId));
 
-            return string.Empty;
+            if (row.Any())
+            {
+                var singleRow = row.First();
+                return Convert.ToString(singleRow[1]);
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
 
         internal void UpdateChannelAudioEncoderOptions()
@@ -222,7 +231,7 @@
             }
         }
 
-        private static List<string> CreateAllLayoutsList(IDictionary<string, object[]> allLayoutsTableData, string selectedLayoutID)
+        private static List<string> CreateAllLayoutsList(IDictionary<string, object[]> allLayoutsTableData, string selectedLayoutID, string selectedChannelID, DropDown channelOutputDropDown)
         {
             var channelsInLayout = new List<string>();
             foreach (var row in allLayoutsTableData.Values)
@@ -230,6 +239,7 @@
                 var layoutId = Convert.ToString(row[3]);
                 var layoutName = Convert.ToString(row[4 /*Layout*/]);
                 var channel = Convert.ToString(row[2 /*Title*/]);
+                var channelSource = Convert.ToString(row[1]/*Channel Source */);
                 if (channel.Equals("0" /*None*/) || channel.Equals("Reserved"))
                 {
                     continue;
@@ -238,6 +248,11 @@
                 if (!channelsInLayout.Contains(layoutName) && layoutId.Equals(selectedLayoutID))
                 {
                     channelsInLayout.Add(channel);
+
+                    if (channelSource.Equals(selectedChannelID))
+                    {
+                        channelOutputDropDown.Selected = channel;
+                    }
                 }
             }
 
