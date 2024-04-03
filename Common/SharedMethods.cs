@@ -183,6 +183,8 @@
         public static readonly int LayoutsTableId = 1560;
         public static readonly int OutputsTable_OutputColumnId = 1501;
         public static new readonly int AllLayouts_TitleColumnId = 10353;
+        public static readonly int CPU_Pid = 9401;
+        public static readonly int Memory_Pid = 9401;
 
         public static readonly IReadOnlyDictionary<string, string> ChannelConfigAccessTypeDict = new Dictionary<string, string>
         {
