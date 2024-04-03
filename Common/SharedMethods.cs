@@ -223,6 +223,20 @@
             {"502","Not Monitored"},
         };
 
+        public static readonly IReadOnlyDictionary<string, string> ChannelEventsStatus = new Dictionary<string, string>
+        {
+            {"-1","N/A"},
+            {"0","Not Active"},
+            {"1","Active"},
+        };
+
+        public static readonly IReadOnlyDictionary<string, string> ChannelEventsAcknowledge = new Dictionary<string, string>
+        {
+            {"-1","N/A"},
+            {"0","No"},
+            {"1","Yes"},
+        };
+
         public MCM(IDmsElement element) : base(
         constOutputsTableId: 1500,
         outputsLayoutsColumnId: 1612,
@@ -237,6 +251,7 @@
     public class MCS : TAG
     {
         public static readonly int ChannelStatusOverview = 5300;
+        public static readonly int ChannelEventsOverview = 5100;
         public static readonly int ChannelsConfiguration = 2100;
         public static readonly IReadOnlyList<int> ChannelsTableIds = new List<int> { 2100, 2200 };
         public static readonly int OutputsTableId = 3400;
@@ -292,6 +307,20 @@
             {"1","Full"},
             {"2","Light"},
             {"3","Extra Light"},
+        };
+
+        public static readonly IReadOnlyDictionary<string, string> ChannelEventsStatus = new Dictionary<string, string>
+        {
+            {"-1","N/A"},
+            {"0","Not Active"},
+            {"1","Active"},
+        };
+
+        public static readonly IReadOnlyDictionary<string, string> ChannelEventsAcknowledge = new Dictionary<string, string>
+        {
+            {"-1","N/A"},
+            {"0","No"},
+            {"1","Yes"},
         };
 
         public MCS(IDmsElement element) : base(
