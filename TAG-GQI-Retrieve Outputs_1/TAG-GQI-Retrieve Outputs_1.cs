@@ -61,6 +61,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.Messages;
     using SharedMethods;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -156,6 +157,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 new GQIStringColumn("Frame Rate"),
                 new GQIStringColumn("Layout"),
                 new GQIStringColumn("Layout ID"),
+                new GQIStringColumn("Device IP"),
             };
         }
 
@@ -250,6 +252,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         new GQICell { Value = McsFrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
                         new GQICell { Value = layoutName }, // Layout
                         new GQICell { Value = layoutId }, // Layout ID
+                        new GQICell { Value = response.PollingIP }, // Device IP
                     };
 
                     var row = new GQIRow(cells)
@@ -273,6 +276,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
                             new GQICell { Value = McsFrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
                             new GQICell { Value = layout.LayoutName }, // Layout
                             new GQICell { Value = layout.LayoutId }, // Layout ID
+                            new GQICell { Value = response.PollingIP }, // Device IP
                         };
 
                         var row = new GQIRow(cells)
@@ -330,6 +334,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         new GQICell { Value = McmFrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[11]) }, // Layout
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[17]) }, // Layout ID
+                        new GQICell { Value = response.PollingIP }, // Device IP
                     };
 
                     var row = new GQIRow(cells)
@@ -356,6 +361,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
                             new GQICell { Value = McmFrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
                             new GQICell { Value = Convert.ToString(layoutNameList[j]) }, // Layout
                             new GQICell { Value = Convert.ToString(layoutIdList[j]) }, // Layout ID
+                            new GQICell { Value = response.PollingIP }, // Device IP
                         };
 
                         var row = new GQIRow(cells)
