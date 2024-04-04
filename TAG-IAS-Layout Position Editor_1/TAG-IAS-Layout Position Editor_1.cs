@@ -52,6 +52,7 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 namespace TAG_IAS_Layout_Position_Editor_1
 {
     using System;
+    using System.Threading;
     using SharedMethods;
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
@@ -144,6 +145,7 @@ namespace TAG_IAS_Layout_Position_Editor_1
             }
 
             element.SetParameterByPrimaryKey(columnPid, $"{layoutId}/{position}", value);
+            Thread.Sleep(1000);
             engine.ExitSuccess("Layout Title updated");
         }
     }
