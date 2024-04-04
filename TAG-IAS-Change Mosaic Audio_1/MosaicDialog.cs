@@ -8,17 +8,14 @@
     using Skyline.DataMiner.Core.DataMinerSystem.Automation;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.VirtualFunctions;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     internal class MosaicDialog : Dialog
     {
         private readonly IEngine engine;
-        private IDms dms;
-        private List<AudioPidData> audioPidList;
-        private List<OutputConfigData> outputList;
-        private List<string> listChannelsPerLayout;
-
-        public Dictionary<string, string> AudioDec = new Dictionary<string, string>
+        private readonly Dictionary<string, string> audioDec = new Dictionary<string, string>
         {
             {"0","Don't Care"},
             { "1","MPEG"},
@@ -31,6 +28,10 @@
             { "8","LATM/HE-AAC"},
             { "9","ATMOS"},
         };
+
+        private IDms dms;
+        private List<AudioPidData> audioPidList;
+        private List<string> listChannelsPerLayout;
 
         public MosaicDialog(IEngine engine) : base(engine)
         {
@@ -91,7 +92,7 @@
 
         public Button CancelButton { get; private set; }
 
-        internal void ChangeAudio()
+        public void ChangeAudio()
         {
             var tagElementName = this.MonitoringTagValue.Text;
             var selectedOutput = this.OutputEncoderValue.Text;
@@ -104,11 +105,11 @@
             if (tagType.Contains("MCS"))
             {
                 var outputAudiosTable = tagElement.GetTable(3302);
-                var outputAudiosTableData = outputAudiosTable.GetData().Values;
-                var outputAudioRow = outputAudiosTableData.FirstOrDefault(x => Convert.ToString(x[1]).Equals($"{selectedOutput}/1"));
+                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 3302, Value = $"{selectedOutput}/1" } };
+                var matchingRows = outputAudiosTable.QueryData(filter).ToList();
+                var singleRow = matchingRows.FirstOrDefault();
 
-                var primaryKey = Convert.ToString(outputAudioRow[0]);
-
+                var primaryKey = Convert.ToString(singleRow[0]);
                 outputAudiosTable.GetColumn<string>(3356).SetValue(primaryKey, this.ChannelOutputDropDown.Selected);
                 outputAudiosTable.GetColumn<double?>(3358).SetValue(primaryKey, Convert.ToInt32(audioId)); // Setting Write to execute QA
                 outputAudiosTable.GetColumn<double?>(3360).SetValue(primaryKey, Convert.ToInt32(audioId)); // Setting Write to execute QA
@@ -125,7 +126,7 @@
             engine.ExitSuccess("Script completed");
         }
 
-        internal void SetValues(string elementId, string outputId, string layoutId, string channelId)
+        public void SetValues(string elementId, string outputId, string layoutId, string channelId)
         {
             dms = engine.GetDms();
             var tagElement = dms.GetElement(new DmsElementId(elementId));
@@ -135,27 +136,42 @@
             this.MonitoringTagValue.Text = tagElementName;
             if (tagType.Contains("MCS"))
             {
-                var pidsOverviewTableData = tagElement.GetTable(2500).GetData();
-                var allLayoutsTableData = tagElement.GetTable(5600).GetData();
-                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId, channelId, ChannelOutputDropDown);
-                audioPidList = CreateMcsAudioPidList(pidsOverviewTableData);
-                var outputTable = tagElement.GetTable(3100).GetData();
-                outputName = GetOutputNameById(outputTable, outputId);
+                var allLayoutsTable = tagElement.GetTable(5600);
+                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 5604, Value = layoutId } };
+                var matchingRows = allLayoutsTable.QueryData(filter).ToList();
+                listChannelsPerLayout = CreateAllLayoutsList(matchingRows, channelId, ChannelOutputDropDown);
+
+                var outputTable = tagElement.GetTable(3100);
+                var outputFilter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 3101, Value = outputId } };
+                var outputMatchingRows = outputTable.QueryData(outputFilter).ToList();
+                outputName = GetOutputNameByFilteredTable(outputMatchingRows);
+
+                var pidsOverviewTableData = tagElement.GetTable(2500);
+                var pidsOverviewFilter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 2503, Value = "2" /*Type = Audio*/ } };
+                var matchingPidsOverviewRows = pidsOverviewTableData.QueryData(pidsOverviewFilter).ToList();
+                audioPidList = CreateMcsAudioPidList(matchingPidsOverviewRows);
             }
             else
             {
                 this.MonitoringTagValue.Text = tagElementName;
 
-                var pidsOverviewTable = tagElement.GetTable(1200).GetData();
-                var allLayoutsTableData = tagElement.GetTable(10300).GetData();
-                var enconderTable = tagElement.GetTable(1500).GetData();
+                var allLayoutsTable = tagElement.GetTable(10300);
+                var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 10304, Value = layoutId } };
+                var matchingRows = allLayoutsTable.QueryData(filter).ToList();
+                listChannelsPerLayout = CreateAllLayoutsList(matchingRows, channelId, ChannelOutputDropDown);
 
-                outputName = GetOutputNameById(enconderTable, outputId);
-                listChannelsPerLayout = CreateAllLayoutsList(allLayoutsTableData, layoutId, channelId, ChannelOutputDropDown);
-                audioPidList = CreateMcmAudioPidList(pidsOverviewTable);
+                var enconderTable = tagElement.GetTable(1500);
+                var encoderFilter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 1501, Value = outputId } };
+                var encoderMatchingRows = enconderTable.QueryData(encoderFilter).ToList();
+                outputName = GetOutputNameByFilteredTable(encoderMatchingRows);
+
+                var pidsOverviewTable = tagElement.GetTable(1200);
+                var pidsOverviewFilter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 1204, Value = "Audio" } };
+                var matchingPidsOverviewRows = pidsOverviewTable.QueryData(pidsOverviewFilter).ToList();
+                audioPidList = CreateMcmAudioPidList(matchingPidsOverviewRows);
             }
 
-            outputList = new List<OutputConfigData> { new OutputConfigData { OutputLabel = outputName } };
+            var outputList = new List<OutputConfigData> { new OutputConfigData { OutputLabel = outputName } };
             this.OutputEncoderValue.Text = outputList[0].OutputLabel;
 
             if (listChannelsPerLayout.Count > 0)
@@ -192,22 +208,7 @@
             }
         }
 
-        private string GetOutputNameById(IDictionary<string, object[]> enconderTable, string outputId)
-        {
-            var row = enconderTable.Values.Where(x => Convert.ToString(x[0]).Equals(outputId));
-
-            if (row.Any())
-            {
-                var singleRow = row.First();
-                return Convert.ToString(singleRow[1]);
-            }
-            else
-            {
-                return string.Empty;
-            }
-        }
-
-        internal void UpdateChannelAudioEncoderOptions()
+        public void UpdateChannelAudioEncoderOptions()
         {
             var selectedChannelOutput = this.ChannelOutputDropDown.Selected;
 
@@ -231,12 +232,24 @@
             }
         }
 
-        private static List<string> CreateAllLayoutsList(IDictionary<string, object[]> allLayoutsTableData, string selectedLayoutID, string selectedChannelID, DropDown channelOutputDropDown)
+        private static string GetOutputNameByFilteredTable(List<object[]> filteredTable)
+        {
+            if (filteredTable.Any())
+            {
+                var singleRow = filteredTable.First();
+                return Convert.ToString(singleRow[1]);
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        private static List<string> CreateAllLayoutsList(List<object[]> allLayoutsTableData, string selectedChannelID, DropDown channelOutputDropDown)
         {
             var channelsInLayout = new List<string>();
-            foreach (var row in allLayoutsTableData.Values)
+            foreach (var row in allLayoutsTableData)
             {
-                var layoutId = Convert.ToString(row[3]);
                 var layoutName = Convert.ToString(row[4 /*Layout*/]);
                 var channel = Convert.ToString(row[2 /*Title*/]);
                 var channelSource = Convert.ToString(row[1]/*Channel Source */);
@@ -245,7 +258,7 @@
                     continue;
                 }
 
-                if (!channelsInLayout.Contains(layoutName) && layoutId.Equals(selectedLayoutID))
+                if (!channelsInLayout.Contains(layoutName))
                 {
                     channelsInLayout.Add(channel);
 
@@ -261,13 +274,13 @@
             return channelsInLayout;
         }
 
-        private List<AudioPidData> CreateMcmAudioPidList(IDictionary<string, object[]> audioPids)
+        private List<AudioPidData> CreateMcmAudioPidList(List<object[]> audioPids)
         {
             var list = new List<AudioPidData>();
-            foreach (var row in audioPids.Values)
+            foreach (var row in audioPids)
             {
                 var channelLabel = Convert.ToString(row[1]);
-                if (listChannelsPerLayout.Any(x => channelLabel.Contains(x)) && Convert.ToString(row[3]).Equals("Audio" /*Type*/))
+                if (listChannelsPerLayout.Any(x => channelLabel.Contains(x)))
                 {
                     list.Add(new AudioPidData
                     {
@@ -282,10 +295,10 @@
             return list;
         }
 
-        private List<AudioPidData> CreateMcsAudioPidList(IDictionary<string, object[]> audioPids)
+        private List<AudioPidData> CreateMcsAudioPidList(List<object[]> audioPids)
         {
             var list = new List<AudioPidData>();
-            foreach (var row in audioPids.Values)
+            foreach (var row in audioPids)
             {
                 var channelLabel = Convert.ToString(row[29]).Split('/')[0];
 
@@ -294,16 +307,16 @@
                     continue;
                 }
 
-                if (AudioDec.TryGetValue(Convert.ToString(row[18 /*Audio DEC*/]), out string audioDec))
+                if (audioDec.TryGetValue(Convert.ToString(row[18 /*Audio DEC*/]), out string audioDecValue))
                 {
-                    if (listChannelsPerLayout.Contains(channelLabel) && Convert.ToString(row[2]).Equals("2" /*Type = Audio*/))
+                    if (listChannelsPerLayout.Contains(channelLabel))
                     {
                         list.Add(new AudioPidData
                         {
                             Index = Convert.ToString(row[29 /*Index*/]),
                             Id = Convert.ToString(row[1 /*ID*/]),
                             Encoding = Convert.ToString(row[18 /*Encoding*/]),
-                            FormattedString = $"{audioDec} (PID: {Convert.ToString(row[1 /*ID*/])})",
+                            FormattedString = $"{audioDecValue} (PID: {Convert.ToString(row[1 /*ID*/])})",
                         });
                     }
                 }
@@ -311,7 +324,6 @@
 
             return list;
         }
-
     }
 
     internal class EncoderData

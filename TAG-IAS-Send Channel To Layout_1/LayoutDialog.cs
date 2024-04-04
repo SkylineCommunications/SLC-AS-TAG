@@ -88,15 +88,15 @@
         public void CheckLayoutOption()
         {
             WarningLabel.IsVisible = false;
-            var positionsDict = Tag.GetPositionsAndChannelsInLayout(LayoutsDropDown.Selected);
-
+            var positionsDict = Tag.GetPositionsAndChannelsInLayout(LayoutsDropDown.Selected, Engine);
             var availablePosition = positionsDict.FirstOrDefault(x => x.Value.ChannelTitle.Equals("None") || x.Value.ChannelTitle.Equals("0"));
 
             if (availablePosition.Key == null)
             {
                 availablePosition = positionsDict.First();
                 WarningLabel.IsVisible = true;
-                LayoutInfoLabel.Text = $"No available empty position in {LayoutsDropDown.Selected} Layout. The selected channel, {SelectedChannel.Text}, will replace {availablePosition.Value.ChannelTitle} in position {availablePosition.Value.Position}.";
+                LayoutInfoLabel.Text = $"No available empty position in {LayoutsDropDown.Selected} Layout. " +
+                                       $"The selected channel, {SelectedChannel.Text}, will replace {availablePosition.Value.ChannelTitle} in position {availablePosition.Value.Position}.";
             }
             else
             {

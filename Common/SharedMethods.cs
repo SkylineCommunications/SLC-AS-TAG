@@ -104,11 +104,11 @@
 
     public class TAG
     {
+        public readonly int allLayoutsTableId;
         private readonly int outputsTableId;
         private readonly int outputs_LayoutsColumnId;
         private readonly int layoutsTableId;
         private readonly int outputsTable_OutputColumnId;
-        public readonly int allLayoutsTableId;
         private readonly int allLayouts_LayoutName_Pid;
         private readonly int allLayouts_Position_Idx;
         private readonly int allLayouts_ChannelTitle_Idx;
@@ -116,7 +116,7 @@
         private readonly int allChannelsProfile_ChannelId_Pid;
         private readonly int allChannelsProfile_ChannelTitle_Idx;
 
-        private IDmsElement element;
+        private readonly IDmsElement element;
 
         protected TAG(
             int constOutputsTableId,
@@ -133,7 +133,7 @@
             outputsTable_OutputColumnId = outputsTableOutputColumnId;
 
             allLayoutsTableId = allLayoutsIds.AllLayoutsTableId;
-            allLayouts_LayoutName_Pid = allLayoutsIds.AllLayoutsTableId;
+            allLayouts_LayoutName_Pid = allLayoutsIds.LayoutName_Pid;
             allLayouts_Position_Idx = allLayoutsIds.Position_Idx;
             allLayouts_ChannelTitle_Idx = allLayoutsIds.ChannelTitle_Idx;
             AllLayouts_TitleColumnId = allLayoutsIds.TitleColumnPid;
@@ -199,13 +199,13 @@
             return Convert.ToString(matchingChannel[allChannelsProfile_ChannelTitle_Idx/*Channel Title idx*/]);
         }
 
-        public Dictionary<string, AllLayoutRowValues> GetPositionsAndChannelsInLayout(string layoutName)
+        public Dictionary<string, AllLayoutRowValues> GetPositionsAndChannelsInLayout(string layoutName, IEngine engine)
         {
             var positionChannelDict = new Dictionary<string, AllLayoutRowValues>();
             var allLayoutsTable = element.GetTable(allLayoutsTableId);
             var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = allLayouts_LayoutName_Pid, Value = layoutName } };
             var allLayoutsTableRows = allLayoutsTable.QueryData(filter);
-
+            engine.GenerateInformation($"All Layouts after filter count: {allLayoutsTableRows.Count()} | Selected Layout name: {layoutName} | LayoutName column PID: {allLayouts_LayoutName_Pid}");
             if (!allLayoutsTableRows.Any())
             {
                 return positionChannelDict;
@@ -233,13 +233,13 @@
 
         public class AllLayoutIds
         {
-            public AllLayoutIds(int allLayoutsTableId, int positionIdx, int channelTitleIdx, int layourNamePid, int titleColumnPid)
+            public AllLayoutIds(int allLayoutsTableId, int positionIdx, int channelTitleIdx, int layoutNamePid, int titleColumnPid)
             {
                 AllLayoutsTableId = allLayoutsTableId;
                 Position_Idx = positionIdx;
                 ChannelTitle_Idx = channelTitleIdx;
-                LayoutName_Pid = layourNamePid;
-                TitleColumnPid = layourNamePid;
+                LayoutName_Pid = layoutNamePid;
+                TitleColumnPid = titleColumnPid;
             }
 
             public int AllLayoutsTableId { get; }
@@ -355,7 +355,7 @@
         outputsLayoutsColumnId: 1612,
         constLayoutsTableId: 1560,
         outputsTableOutputColumnId: 1501,
-        new AllLayoutIds(allLayoutsTableId: 10300, positionIdx: 5, channelTitleIdx: 2, layourNamePid: 10305, titleColumnPid: 10353),
+        new AllLayoutIds(allLayoutsTableId: 10300, positionIdx: 5, channelTitleIdx: 2, layoutNamePid: 10305, titleColumnPid: 10353),
         new AllChannelsProfileIds(allChannelsProfileTableId: 8000, channelIdPid: 8001, channelTitleIdx: 9),
         idmsElement: element)
         {
@@ -444,7 +444,7 @@
         outputsLayoutsColumnId: 3456,
         constLayoutsTableId: 3600,
         outputsTableOutputColumnId: 3403,
-        new AllLayoutIds(allLayoutsTableId: 5600, positionIdx: 5, channelTitleIdx: 2, layourNamePid: 5605, titleColumnPid: 5653),
+        new AllLayoutIds(allLayoutsTableId: 5600, positionIdx: 5, channelTitleIdx: 2, layoutNamePid: 5605, titleColumnPid: 5653),
         new AllChannelsProfileIds(allChannelsProfileTableId: 2400, channelIdPid: 2403, channelTitleIdx: 3),
         idmsElement: element)
         {
