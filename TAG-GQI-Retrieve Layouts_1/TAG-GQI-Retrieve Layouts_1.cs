@@ -54,29 +54,42 @@ namespace TAG_GQI_Retrieve_Layouts_1
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.RegularExpressions;
+    using GQI_TAG_GetEndpoints_1.RealTimeUpdates;
+    using SharedMethods;
     using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages;
-    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
     /// </summary>
     [GQIMetaData(Name = "Get TAG All Layouts")]
-    public class GetTagLayouts : IGQIDataSource, IGQIOnInit
+    public class GetTagLayouts : IGQIDataSource, IGQIOnInit, IGQIUpdateable
     {
         private readonly int mcsAllLayoutTable = 5600;
 
         private readonly int mcmAllLayoutTable = 10300;
 
+        private int dataminerId;
+        private int elementId;
+
         private GQIDMS _dms;
+
+        private DataProvider _dataProvider;
+
+        private ICollection<GQIRow> _currentRows = Array.Empty<GQIRow>();
+        private IGQIUpdater _updater;
+        private IEnumerable<LiteElementInfoEvent> _mcsLiteElementsInfoEvents;
 
         public OnInitOutputArgs OnInit(OnInitInputArgs args)
         {
             _dms = args.DMS;
-            return default;
+            GetTagArgument();
+
+            StaticDataProvider.Initialize(_dms, dataminerId, elementId);
+            _dataProvider = StaticDataProvider.Instance;
+
+            return new OnInitOutputArgs();
         }
 
         public GQIColumn[] GetColumns()
@@ -93,52 +106,32 @@ namespace TAG_GQI_Retrieve_Layouts_1
             };
         }
 
+        public void OnStartUpdates(IGQIUpdater updater)
+        {
+            _updater = updater;
+            _dataProvider.AllLayoutsMcsTable.Changed += TableData_OnChanged;
+        }
+
+        public void OnStopUpdates()
+        {
+            _dataProvider.AllLayoutsMcsTable.Changed -= TableData_OnChanged;
+            _updater = null;
+        }
+
         public GQIPage GetNextPage(GetNextPageInputArgs args)
         {
-            var rows = new List<GQIRow>();
-
+            var newRows = CalculateNewRows();
             try
             {
-                var mcmRequest = new GetLiteElementInfo
+                return new GQIPage(newRows.ToArray())
                 {
-                    ProtocolName = "TAG Video Systems MCM-9000",
-                    ProtocolVersion = "Production",
+                    HasNextPage = false,
                 };
-
-                var mcsRequest = new GetLiteElementInfo
-                {
-                    ProtocolName = "TAG Video Systems Media control System (MCS)",
-                    ProtocolVersion = "Production",
-                };
-
-                var mcsResponses = _dms.SendMessages(mcsRequest);
-
-                foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
-                {
-                    var allLayoutsTable = SharedMethods.GetTable(_dms, response, mcsAllLayoutTable);
-                    GetAllLayoutsTableRows(rows, response, allLayoutsTable);
-                }
-
-                // if no MCS in the system, gather MCM data
-                if (rows.Count == 0)
-                {
-                    var mcmResponses = _dms.SendMessages(mcmRequest);
-                    foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
-                    {
-                        var allLayoutsTable = SharedMethods.GetTable(_dms,response, mcmAllLayoutTable);
-                        GetAllLayoutsTableRows(rows, response, allLayoutsTable);
-                    }
-                }
             }
-            catch (Exception e)
+            finally
             {
-                CreateDebugRow(rows, $"exception: {e}");
+                _currentRows = newRows.ToList();
             }
-
-            return new GQIPage(rows.ToArray())
-            {
-                HasNextPage = false,
-            };
         }
 
         private void GetAllLayoutsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] allLayoutsTable)
@@ -173,27 +166,95 @@ namespace TAG_GQI_Retrieve_Layouts_1
             }
         }
 
-        private void CreateDebugRow(List<GQIRow> rows, string message)
+        private void TableData_OnChanged(object sender, ParameterTableUpdateEventMessage e)
+        {
+            var newRows = CalculateNewRows().ToList();
+            CreateDebugRow(newRows,"update");
+            try
+            {
+                var comparison = new GqiTableComparer(_currentRows, newRows);
+
+                foreach (var row in comparison.RemovedRows)
+                {
+                    _updater.RemoveRow(row.Key);
+                }
+
+                foreach (var row in comparison.UpdatedRows)
+                {
+                    _updater.UpdateRow(row);
+                }
+
+                foreach (var row in comparison.AddedRows)
+                {
+                    _updater.AddRow(row);
+                }
+            }
+            finally
+            {
+                _currentRows = newRows;
+            }
+        }
+
+        private IEnumerable<GQIRow> CalculateNewRows()
+        {
+            var rows = new List<GQIRow>();
+            var mcmRequest = new GetLiteElementInfo
+            {
+                ProtocolName = "TAG Video Systems MCM-9000",
+                ProtocolVersion = "Production",
+            };
+
+            foreach (var response in _mcsLiteElementsInfoEvents)
+            {
+                var allLayoutsTable = SharedMethods.GetTable(_dms, response, mcsAllLayoutTable);
+                GetAllLayoutsTableRows(rows, response, allLayoutsTable);
+            }
+
+            // if no MCS in the system, gather MCM data
+            if (rows.Count == 0)
+            {
+                var mcmResponses = _dms.SendMessages(mcmRequest);
+                foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
+                {
+                    var allLayoutsTable = SharedMethods.GetTable(_dms, response, mcmAllLayoutTable);
+                    GetAllLayoutsTableRows(rows, response, allLayoutsTable);
+                }
+            }
+
+            return rows;
+        }
+
+        private void GetTagArgument()
+        {
+            dataminerId = -1;
+            elementId = -1;
+
+            var mcsRequest = new GetLiteElementInfo
+            {
+                ProtocolName = "TAG Video Systems Media control System (MCS)",
+                ProtocolVersion = "Production",
+            };
+
+            var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
+            _mcsLiteElementsInfoEvents = mcsResponses.Select(x => (LiteElementInfoEvent)x);
+            foreach (var response in _mcsLiteElementsInfoEvents)
+            {
+                if (response == null)
+                {
+                    continue;
+                }
+
+                dataminerId = response.DataMinerID;
+                elementId = response.ElementID;
+                break;
+            }
+        }
+
+        private static void CreateDebugRow(List<GQIRow> rows, string message)
         {
             var debugCells = new[]
             {
                 new GQICell { Value = message },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
                 new GQICell { Value = null },
                 new GQICell { Value = null },
                 new GQICell { Value = null },
