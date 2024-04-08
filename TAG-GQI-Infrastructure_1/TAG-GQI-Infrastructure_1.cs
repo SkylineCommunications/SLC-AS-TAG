@@ -205,7 +205,7 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = Convert.ToString(deviceRow[2]) }, // Model
                     new GQICell { Value = Convert.ToString(memory), DisplayValue = memory == -1 ? "N/A" : Convert.ToString(memory) }, // Memory
                     new GQICell { Value = Convert.ToDouble(deviceRow[29]), DisplayValue = CheckValue(Convert.ToDouble(deviceRow[29])) }, // Used Outputs
-                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Limit Outputs
+                    new GQICell { Value = 0d, DisplayValue = "N/A" }, // Limit Outputs
                     new GQICell { Value = Convert.ToDouble(deviceRow[26]), DisplayValue = CheckValue(Convert.ToDouble(deviceRow[26])) }, // Used Channels
                     new GQICell { Value = Convert.ToDouble(ExtractNumberFromString(deviceRow[7])), DisplayValue = CheckValue(Convert.ToDouble(ExtractNumberFromString(deviceRow[7]))) }, // Limit Channels
                     new GQICell { Value = Convert.ToString(deviceRow[0]) }, // Device Key

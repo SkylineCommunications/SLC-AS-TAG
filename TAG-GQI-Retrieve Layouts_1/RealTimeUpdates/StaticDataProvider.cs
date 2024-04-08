@@ -1,4 +1,4 @@
-﻿namespace GQI_TAG_GetEndpoints_1.RealTimeUpdates
+﻿namespace TAG_GQI_Retrieve_Layouts_1.RealTimeUpdates
 {
     using System;
     using System.Threading;
@@ -49,7 +49,7 @@
 
         private static Connection CreateConnection(GQIDMS gqiDms)
         {
-            var connection = ConnectionHelper.CreateConnection(gqiDms, "TAG_GQI (GQIDS)");
+            var connection = ConnectionHelper.CreateConnection(gqiDms, "TAG-AllLayouts-Subscription(GQIDS)");
             connection.OnClose += (reason) => Reset();
             connection.OnAbnormalClose += (s, e) => Reset();
             connection.OnEventsDropped += (s, e) => Reset();

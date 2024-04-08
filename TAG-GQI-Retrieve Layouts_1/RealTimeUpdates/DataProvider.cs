@@ -1,20 +1,13 @@
-﻿namespace GQI_TAG_GetEndpoints_1.RealTimeUpdates
+﻿namespace TAG_GQI_Retrieve_Layouts_1.RealTimeUpdates
 {
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Protobuf.Shared.IdObjects.v1;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Skyline.DataMiner.Analytics.GenericInterface;
+    using Skyline.DataMiner.Net;
 
     internal sealed class DataProvider : IDisposable
     {
         private readonly int _dataminerId;
         private readonly int _elementId;
-
         private readonly GQIDMS _gqiDms;
         private readonly Connection _connection;
 
@@ -24,11 +17,10 @@
             _dataminerId = dataminerId;
             _elementId = elementId;
             _gqiDms = gqiDms;
-
             InstantiateCache();
         }
 
-        public ElementTableCache AllLayoutsMcsTable { get; private set; }
+        public ElementTableCache AllLayoutsTable { get; private set; }
 
         private void InstantiateCache()
         {
@@ -37,12 +29,12 @@
                 throw new ArgumentNullException(nameof(_connection));
             }
 
-            AllLayoutsMcsTable = new ElementTableCache(_connection, _gqiDms, _dataminerId, _elementId, 5600, "1");
+            AllLayoutsTable = new ElementTableCache(_connection, _gqiDms, _dataminerId, _elementId, 5600, "1");
         }
 
         public void Dispose()
         {
-            AllLayoutsMcsTable?.Dispose();
+            AllLayoutsTable?.Dispose();
         }
     }
 }

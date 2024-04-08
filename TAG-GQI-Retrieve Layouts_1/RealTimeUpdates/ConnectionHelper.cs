@@ -1,4 +1,4 @@
-﻿namespace GQI_TAG_GetEndpoints_1.RealTimeUpdates
+﻿namespace TAG_GQI_Retrieve_Layouts_1.RealTimeUpdates
 {
     using System;
     using System.IO;

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GQI_TAG_GetEndpoints_1
+namespace TAG_GQI_Retrieve_Layouts_1
 {
     internal class Category
     {
