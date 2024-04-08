@@ -20,7 +20,7 @@
             InstantiateCache();
         }
 
-        public ElementTableCache AllLayoutsTable { get; private set; }
+        public ElementTableCache SourceTable { get; private set; }
 
         private void InstantiateCache()
         {
@@ -29,12 +29,12 @@
                 throw new ArgumentNullException(nameof(_connection));
             }
 
-            AllLayoutsTable = new ElementTableCache(_connection, _gqiDms, _dataminerId, _elementId, 5600, "1");
+            SourceTable = new ElementTableCache(_connection, _gqiDms, _dataminerId, _elementId, 5600, "1");
         }
 
         public void Dispose()
         {
-            AllLayoutsTable?.Dispose();
+            SourceTable?.Dispose();
         }
     }
 }

@@ -119,7 +119,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
             _updater = updater;
             if (elementId != -1 && dataminerId != -1)
             {
-                _dataProvider.AllLayoutsTable.Changed += TableData_OnChanged;
+                _dataProvider.SourceTable.Changed += TableData_OnChanged;
             }
         }
 
@@ -127,7 +127,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
         {
             if (elementId != -1 && dataminerId != -1)
             {
-                _dataProvider.AllLayoutsTable.Changed -= TableData_OnChanged;
+                _dataProvider.SourceTable.Changed -= TableData_OnChanged;
             }
 
             _updater = null;
@@ -195,7 +195,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
             var response = dms.SendMessage(mcsRequest) as LiteElementInfoEvent;
             if (response != null)
             {
-                var mcsAllLayoutTableData = _dataProvider.AllLayoutsTable.GetData();
+                var mcsAllLayoutTableData = _dataProvider.SourceTable.GetData();
                 GetMcsAllLayoutsTableRows(rows, response, mcsAllLayoutTableData);
             }
 
@@ -257,11 +257,13 @@ namespace TAG_GQI_Retrieve_Layouts_1
 
             var response = dms.SendMessage(mcsRequest) as LiteElementInfoEvent;
 
-            if (response != null)
+            if (response == null || !response.Protocol.Contains("MCS"))
             {
-                dataminerId = response.DataMinerID;
-                elementId = response.ElementID;
+                return;
             }
+
+            dataminerId = response.DataMinerID;
+            elementId = response.ElementID;
         }
 
         private void GetAllLayoutsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] allLayoutsTable)
