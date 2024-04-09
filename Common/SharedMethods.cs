@@ -106,7 +106,6 @@
     {
         public readonly int allLayoutsTableId;
         private readonly int outputsTableId;
-        private readonly int outputs_LayoutsColumnId;
         private readonly int layoutsTableId;
         private readonly int outputsTable_OutputColumnId;
         private readonly int allLayouts_LayoutName_Pid;
@@ -128,7 +127,7 @@
             IDmsElement idmsElement)
         {
             outputsTableId = constOutputsTableId;
-            outputs_LayoutsColumnId = outputsLayoutsColumnId;
+            Outputs_LayoutsColumnId = outputsLayoutsColumnId;
             layoutsTableId = constLayoutsTableId;
             outputsTable_OutputColumnId = outputsTableOutputColumnId;
 
@@ -147,7 +146,7 @@
 
         public int AllLayouts_TitleColumnId { get; internal set; }
 
-        public int Outputs_LayoutsColumnId { get; internal set; }
+        public int Outputs_LayoutsColumnId { get; set; }
 
         public static string GetElementType(string protocolName)
         {
@@ -205,7 +204,7 @@
             var allLayoutsTable = element.GetTable(allLayoutsTableId);
             var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = allLayouts_LayoutName_Pid, Value = layoutName } };
             var allLayoutsTableRows = allLayoutsTable.QueryData(filter);
-            engine.GenerateInformation($"All Layouts after filter count: {allLayoutsTableRows.Count()} | Selected Layout name: {layoutName} | LayoutName column PID: {allLayouts_LayoutName_Pid}");
+
             if (!allLayoutsTableRows.Any())
             {
                 return positionChannelDict;
