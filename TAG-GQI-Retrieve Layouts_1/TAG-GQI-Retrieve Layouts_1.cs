@@ -54,14 +54,11 @@ namespace TAG_GQI_Retrieve_Layouts_1
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using TAG_GQI_Retrieve_Layouts_1.RealTimeUpdates;
     using SharedMethods;
     using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.Protobuf.Shared.IdObjects.v1;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using TAG_GQI_Retrieve_Layouts_1.RealTimeUpdates;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -82,13 +79,6 @@ namespace TAG_GQI_Retrieve_Layouts_1
         public OnInitOutputArgs OnInit(OnInitInputArgs args)
         {
             dms = args.DMS;
-            GetTagArgument();
-
-            if (elementId != -1 && dataminerId != -1)
-            {
-                StaticDataProvider.Initialize(dms, dataminerId, elementId);
-                _dataProvider = StaticDataProvider.Instance;
-            }
 
             return new OnInitOutputArgs();
         }
@@ -116,9 +106,12 @@ namespace TAG_GQI_Retrieve_Layouts_1
 
         public void OnStartUpdates(IGQIUpdater updater)
         {
+            GetTagArgument();
             _updater = updater;
             if (elementId != -1 && dataminerId != -1)
             {
+                StaticDataProvider.Initialize(dms, dataminerId, elementId);
+                _dataProvider = StaticDataProvider.Instance;
                 _dataProvider.SourceTable.Changed += TableData_OnChanged;
             }
         }
