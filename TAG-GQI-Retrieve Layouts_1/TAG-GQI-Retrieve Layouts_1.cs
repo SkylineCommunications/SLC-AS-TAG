@@ -64,8 +64,10 @@ namespace TAG_GQI_Retrieve_Layouts_1
     /// Represents a DataMiner Automation script.
     /// </summary>
     [GQIMetaData(Name = "Get TAG All Layouts")]
-    public class GetTagLayouts : IGQIDataSource, IGQIOnInit, IGQIUpdateable
+    public class GetTagLayouts : IGQIDataSource, IGQIOnInit, IGQIUpdateable, IGQIInputArguments
     {
+        private readonly GQIStringArgument inputElementId = new GQIStringArgument("Element ID") { IsRequired = true };
+        private string _elementId;
         private GQIDMS dms;
 
         private int dataminerId;
@@ -75,6 +77,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
 
         private ICollection<GQIRow> _currentRows = Array.Empty<GQIRow>();
         private IGQIUpdater _updater;
+        private bool _isMcs;
 
         public OnInitOutputArgs OnInit(OnInitInputArgs args)
         {
@@ -85,9 +88,14 @@ namespace TAG_GQI_Retrieve_Layouts_1
 
         public GQIArgument[] GetInputArguments()
         {
-            return new GQIArgument[]
-            {
-            };
+            return new GQIArgument[] { inputElementId };
+        }
+
+        public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+        {
+            _elementId = args.GetArgumentValue(inputElementId);
+
+            return new OnArgumentsProcessedOutputArgs();
         }
 
         public GQIColumn[] GetColumns()
@@ -108,20 +116,14 @@ namespace TAG_GQI_Retrieve_Layouts_1
         {
             GetTagArgument();
             _updater = updater;
-            if (elementId != -1 && dataminerId != -1)
-            {
-                StaticDataProvider.Initialize(dms, dataminerId, elementId);
-                _dataProvider = StaticDataProvider.Instance;
-                _dataProvider.SourceTable.Changed += TableData_OnChanged;
-            }
+            StaticDataProvider.Initialize(dms, dataminerId, elementId, _isMcs);
+            _dataProvider = StaticDataProvider.Instance;
+            _dataProvider.SourceTable.Changed += TableData_OnChanged;
         }
 
         public void OnStopUpdates()
         {
-            if (elementId != -1 && dataminerId != -1)
-            {
-                _dataProvider.SourceTable.Changed -= TableData_OnChanged;
-            }
+            _dataProvider.SourceTable.Changed -= TableData_OnChanged;
 
             _updater = null;
         }
@@ -173,40 +175,29 @@ namespace TAG_GQI_Retrieve_Layouts_1
         private IEnumerable<GQIRow> CalculateNewRows()
         {
             var rows = new List<GQIRow>();
-            var mcmRequest = new GetLiteElementInfo
-            {
-                ProtocolName = "TAG Video Systems MCM-9000",
-                ProtocolVersion = "Production",
-            };
 
-            var mcsRequest = new GetLiteElementInfo
+            var tagRequest = new GetLiteElementInfo
             {
                 DataMinerID = dataminerId,
                 ElementID = elementId,
             };
 
-            var response = dms.SendMessage(mcsRequest) as LiteElementInfoEvent;
+            var response = dms.SendMessage(tagRequest) as LiteElementInfoEvent;
+            var tagTableData = _dataProvider.SourceTable.GetData();
+
             if (response != null)
             {
-                var mcsAllLayoutTableData = _dataProvider.SourceTable.GetData();
-                GetMcsAllLayoutsTableRows(rows, response, mcsAllLayoutTableData);
+                GetAllLayoutsTableRows(rows, response, tagTableData);
             }
-
-            // if no MCS in the system, gather MCM data
-            if (rows.Count == 0)
+            else
             {
-                var mcmResponses = dms.SendMessages(mcmRequest);
-                foreach (var mcmResponse in mcmResponses.Select(x => (LiteElementInfoEvent)x))
-                {
-                    var allLayoutsTable = SharedMethods.GetTable(dms, mcmResponse, 10300);
-                    GetAllLayoutsTableRows(rows, mcmResponse, allLayoutsTable);
-                }
+                CreateDebugRow(rows, "response == null");
             }
 
             return rows;
         }
 
-        private void GetMcsAllLayoutsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, ParameterValue[] allLayoutsTable)
+        private void GetAllLayoutsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, ParameterValue[] allLayoutsTable)
         {
             for (int i = 0; i < allLayoutsTable[0].ArrayValue.Length; i++)
             {
@@ -241,54 +232,22 @@ namespace TAG_GQI_Retrieve_Layouts_1
         {
             dataminerId = -1;
             elementId = -1;
-
-            var mcsRequest = new GetLiteElementInfo
+            var splittedElementId = _elementId.Split('/');
+            var tagRequest = new GetLiteElementInfo
             {
-                ProtocolName = "TAG Video Systems Media control System (MCS)",
-                ProtocolVersion = "Production",
+                DataMinerID = Convert.ToInt32(splittedElementId[0]),
+                ElementID = Convert.ToInt32(splittedElementId[1]),
             };
 
-            var response = dms.SendMessage(mcsRequest) as LiteElementInfoEvent;
+            var response = dms.SendMessage(tagRequest) as LiteElementInfoEvent;
 
-            if (response == null || !response.Protocol.Contains("MCS"))
+            if (response.Protocol.Contains("MCS"))
             {
-                return;
+                _isMcs = true;
             }
 
             dataminerId = response.DataMinerID;
             elementId = response.ElementID;
-        }
-
-        private void GetAllLayoutsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] allLayoutsTable)
-        {
-            for (int i = 0; i < allLayoutsTable.Length; i++)
-            {
-                var deviceAllLayoutsRow = allLayoutsTable[i];
-                var title = Convert.ToString(deviceAllLayoutsRow[2]) == "0" ? "None" : Convert.ToString(deviceAllLayoutsRow[2]);
-                var channelSource = Convert.ToString(deviceAllLayoutsRow[1]) == "0" ? "None" : Convert.ToString(deviceAllLayoutsRow[1]);
-
-                var cells = new[]
-                {
-                    new GQICell { Value = Convert.ToString(deviceAllLayoutsRow[0]) }, // Index
-                    new GQICell { Value = Convert.ToString(deviceAllLayoutsRow[4]) }, // Layout
-                    new GQICell { Value = Convert.ToString(deviceAllLayoutsRow[5]) }, // Position
-                    new GQICell { Value = channelSource }, // Channel Source
-                    new GQICell { Value = title }, // Title
-                    new GQICell { Value = Convert.ToString(deviceAllLayoutsRow[3]) }, // Layout Id
-                    new GQICell { Value = Convert.ToString($"{response.DataMinerID}/{response.ElementID}") }, // Element ID
-                };
-
-                var elementID = new ElementID(response.DataMinerID, response.ElementID);
-                var elementMetadata = new ObjectRefMetadata { Object = elementID };
-                var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
-
-                var row = new GQIRow(Convert.ToString(deviceAllLayoutsRow[0]), cells)
-                {
-                    Metadata = rowMetadata,
-                };
-
-                rows.Add(row);
-            }
         }
 
         private static void CreateDebugRow(List<GQIRow> rows, string message)

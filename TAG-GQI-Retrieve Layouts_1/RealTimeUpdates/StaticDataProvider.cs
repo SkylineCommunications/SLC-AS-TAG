@@ -12,14 +12,16 @@
         private static GQIDMS _gqiDms;
         private static int _dataminerId;
         private static int _elementId;
+        private static bool _isMcs;
 
         public static DataProvider Instance => _lazyDataProvider.Value;
 
-        public static void Initialize(GQIDMS gqiDms, int dataminerId, int elementId)
+        public static void Initialize(GQIDMS gqiDms, int dataminerId, int elementId, bool isMcs)
         {
             _gqiDms = gqiDms ?? throw new ArgumentNullException(nameof(gqiDms));
             _dataminerId = dataminerId;
             _elementId = elementId;
+            _isMcs = isMcs;
         }
 
         public static void Reset()
@@ -42,7 +44,7 @@
             }
 
             var connection = CreateConnection(_gqiDms);
-            var dataProvider = new DataProvider(connection, _gqiDms, _dataminerId, _elementId);
+            var dataProvider = new DataProvider(connection, _gqiDms, _dataminerId, _elementId, _isMcs);
 
             return dataProvider;
         }

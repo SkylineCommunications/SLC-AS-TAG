@@ -144,6 +144,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{86A7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-IAS-Send Channel To Layout_1", "TAG-IAS-Send Channel To Layout_1\TAG-IAS-Send Channel To Layout_1.csproj", "{DC84D6CE-BFE6-46E0-9453-CF03D4DF2B00}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TAG-Merge Dashboard Themes", "TAG-Merge Dashboard Themes", "{C6BE437C-9EB7-4DDD-91C8-48C27F92A770}"
+	ProjectSection(SolutionItems) = preProject
+		TAG-Merge Dashboard Themes.xml = TAG-Merge Dashboard Themes.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{7F0BC428-27FE-4DF4-AB64-179DDBFCD092}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TAG-Merge Dashboard Themes_1", "TAG-Merge Dashboard Themes_1\TAG-Merge Dashboard Themes_1.csproj", "{2DFD0A16-5455-497A-9179-02D5985AC89C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -194,6 +203,10 @@ Global
 		{DC84D6CE-BFE6-46E0-9453-CF03D4DF2B00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC84D6CE-BFE6-46E0-9453-CF03D4DF2B00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC84D6CE-BFE6-46E0-9453-CF03D4DF2B00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DFD0A16-5455-497A-9179-02D5985AC89C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DFD0A16-5455-497A-9179-02D5985AC89C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DFD0A16-5455-497A-9179-02D5985AC89C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DFD0A16-5455-497A-9179-02D5985AC89C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -238,6 +251,9 @@ Global
 		{3557EF7C-86EE-447B-9391-1240E5D64934} = {C8BD98A1-7A48-4A16-87F1-0BBF8013B3F7}
 		{86A70015-E4E1-4AEA-B3CE-FCF913CA6F4A} = {3557EF7C-86EE-447B-9391-1240E5D64934}
 		{DC84D6CE-BFE6-46E0-9453-CF03D4DF2B00} = {86A70015-E4E1-4AEA-B3CE-FCF913CA6F4A}
+		{C6BE437C-9EB7-4DDD-91C8-48C27F92A770} = {82876D1A-BF8E-42F5-B21F-68270190C345}
+		{7F0BC428-27FE-4DF4-AB64-179DDBFCD092} = {C6BE437C-9EB7-4DDD-91C8-48C27F92A770}
+		{2DFD0A16-5455-497A-9179-02D5985AC89C} = {7F0BC428-27FE-4DF4-AB64-179DDBFCD092}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7A356EBC-DCA5-45C1-88F9-EA3577E6920E}

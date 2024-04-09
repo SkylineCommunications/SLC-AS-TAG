@@ -10,13 +10,15 @@
         private readonly int _elementId;
         private readonly GQIDMS _gqiDms;
         private readonly Connection _connection;
+        private readonly bool _isMcs;
 
-        public DataProvider(Connection connection, GQIDMS gqiDms, int dataminerId, int elementId)
+        public DataProvider(Connection connection, GQIDMS gqiDms, int dataminerId, int elementId, bool isMcs)
         {
             _connection = connection;
             _dataminerId = dataminerId;
             _elementId = elementId;
             _gqiDms = gqiDms;
+            _isMcs = isMcs;
             InstantiateCache();
         }
 
@@ -29,7 +31,14 @@
                 throw new ArgumentNullException(nameof(_connection));
             }
 
-            SourceTable = new ElementTableCache(_connection, _gqiDms, _dataminerId, _elementId, 5600, "1");
+            if (_isMcs)
+            {
+                SourceTable = new ElementTableCache(_connection, _gqiDms, _dataminerId, _elementId, 5600, "1");
+            }
+            else
+            {
+                SourceTable = new ElementTableCache(_connection, _gqiDms, _dataminerId, _elementId, 10300, "1");
+            }
         }
 
         public void Dispose()
