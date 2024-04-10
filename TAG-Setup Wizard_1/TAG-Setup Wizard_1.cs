@@ -51,27 +51,33 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_Merge_Dashboard_Themes_1
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Text;
-	using Skyline.DataMiner.Automation;
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Text;
+    using Skyline.DataMiner.Automation;
 
-	/// <summary>
-	/// Represents a DataMiner Automation script.
-	/// </summary>
-	public class Script
-	{
-		/// <summary>
-		/// The script entry point.
-		/// </summary>
-		/// <param name="engine">Link with SLAutomation process.</param>
-		public void Run(IEngine engine)
-		{
-			var subScript = engine.PrepareSubScript("Merge LCA themes");
-			subScript.SelectScriptParam("New Themes File Path", @"C:\Skyline DataMiner\dashboards\Themes\TAG Video Systems Theme.json");
-			subScript.Synchronous = true;
-			subScript.StartScript();
-		}
-	}
+    /// <summary>
+    /// Represents a DataMiner Automation script.
+    /// </summary>
+    public class Script
+    {
+        /// <summary>
+        /// The script entry point.
+        /// </summary>
+        /// <param name="engine">Link with SLAutomation process.</param>
+        public void Run(IEngine engine)
+        {
+            //Scripts to run when package is installed
+            ExecuteMergeLcaThemes(engine);
+        }
+
+        private static void ExecuteMergeLcaThemes(IEngine engine)
+        {
+            var subScript = engine.PrepareSubScript("Merge LCA themes");
+            subScript.SelectScriptParam("New Themes File Path", @"C:\Skyline DataMiner\dashboards\Themes\TAG Video Systems Theme.json");
+            subScript.Synchronous = true;
+            subScript.StartScript();
+        }
+    }
 }

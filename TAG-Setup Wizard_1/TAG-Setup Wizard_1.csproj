@@ -20,8 +20,6 @@
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.3.3" />
   </ItemGroup>
   <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties DisLinkedXmlFile="..\TAG-Merge Dashboard Themes.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
-    </VisualStudio>
+    <VisualStudio><UserProperties DisLinkedXmlFile="..\TAG-Setup Wizard.xml" DisLinkId="1" DisProjectType="automationScriptProject" /></VisualStudio>
   </ProjectExtensions>
 </Project>
