@@ -21,7 +21,7 @@
 			<Value><![CDATA[[Project:TAG-GQI-Infrastructure_1]]]></Value>
 			<!--<Param type="debug">true</Param>-->
 			<Param type="preCompile">true</Param>
-			<Param type="libraryName">TAG Infrastructure</Param>
+			<Param type="libraryName">Get TAG Infrastructure</Param>
 		</Exe>
 	</Script>
 </DMSScript>
