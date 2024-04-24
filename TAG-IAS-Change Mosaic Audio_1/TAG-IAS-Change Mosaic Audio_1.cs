@@ -51,10 +51,10 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_IAS_Change_Mosaic_Audio_1
 {
-    using SharedMethods;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using System;
+	using System;
+	using SharedMethods;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     /// <summary>
     /// Represents a DataMiner Automation script.

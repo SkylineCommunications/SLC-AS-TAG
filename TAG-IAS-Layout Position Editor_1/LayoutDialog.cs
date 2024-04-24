@@ -1,12 +1,12 @@
 ﻿namespace TAG_IAS_Layout_Position_Editor_1
 {
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using TagLibrary_1;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using TagLibrary_1;
 
     public enum Monitored
     {

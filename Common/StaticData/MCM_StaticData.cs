@@ -1,9 +1,9 @@
 ﻿namespace Common.StaticData
 {
-    using Common.TableClasses;
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+	using System;
+	using System.Collections.Generic;
+	using System.Text;
+	using Common.TableClasses;
 
     public class MCM_StaticData : IStaticData
     {
@@ -125,8 +125,8 @@
 
         public Outputs Outputs => new Outputs(outputsTableId: 1500, outputs_LayoutsColumnId: 1612, outputsTable_OutputColumnId: 1501);
 
-        public IReadOnlyDictionary<string, string> ChannelConfigRecordingDict => throw new NotImplementedException();
+        public IReadOnlyDictionary<string, string> ChannelConfigRecordingDict => throw new NotSupportedException();
 
-        public IReadOnlyList<int> ChannelsTableIds => throw new NotImplementedException();
+        public IReadOnlyList<int> ChannelsTableIds => throw new NotSupportedException();
     }
 }

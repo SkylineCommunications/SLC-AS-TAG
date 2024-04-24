@@ -1,11 +1,11 @@
-﻿using Skyline.DataMiner.Analytics.GenericInterface;
-using Skyline.DataMiner.Net.Messages;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Skyline.DataMiner.Analytics.GenericInterface;
+using Skyline.DataMiner.Net.Messages;
 
 namespace TAG_GQI_Retrieve_Layouts_1
 {

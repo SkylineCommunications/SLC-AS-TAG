@@ -1,8 +1,8 @@
 ﻿namespace Common.StaticData
 {
-    using Common.TableClasses;
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
+	using Common.TableClasses;
 
     public class MCS_StaticData : IStaticData
     {
@@ -127,6 +127,6 @@
 
         public Outputs Outputs => new Outputs(outputsTableId: 3400, outputs_LayoutsColumnId: 3456, outputsTable_OutputColumnId: 3403);
 
-        public IReadOnlyDictionary<string, string> ChannelConfigSeverityDict => throw new NotImplementedException();
+        public IReadOnlyDictionary<string, string> ChannelConfigSeverityDict => throw new NotSupportedException();
     }
 }

@@ -51,14 +51,14 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_GQI_Retrieve_Outputs_1
 {
-    using Common.StaticData;
-    using SharedMethods;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Common.StaticData;
+	using SharedMethods;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -147,10 +147,10 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 if (rows.Count == 0)
                 {
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    var mcmStaticData = new MCM_StaticData();
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
                         var encoderConfigTable = SharedMethods.GetTable(_dms, response, (int)McmTableId.DeviceEncoderConfig);
-                        var mcmStaticData = new MCM_StaticData();
                         GetOutputMcmTableRows(rows, response, encoderConfigTable, mcmStaticData);
                     }
                 }

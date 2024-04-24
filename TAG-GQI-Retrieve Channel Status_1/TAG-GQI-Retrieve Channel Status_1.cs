@@ -51,14 +51,14 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_GQI_Retrieve_Channel_Details_1
 {
-    using Common.StaticData;
-    using SharedMethods;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Common.StaticData;
+	using SharedMethods;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.

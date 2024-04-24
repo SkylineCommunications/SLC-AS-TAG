@@ -1,12 +1,12 @@
 ﻿namespace TAG_UMD_Editor
 {
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using System;
-    using System.Linq;
-    using System.Threading;
+	using System;
+	using System.Linq;
+	using System.Threading;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     public class UmdDialog : Dialog
     {

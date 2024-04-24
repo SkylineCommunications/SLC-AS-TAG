@@ -51,15 +51,15 @@ DATE		VERSION		AUTHOR			COMMENTS
 
 namespace TAG_GQI_Infrastructure_1
 {
-    using Common.StaticData;
-    using SharedMethods;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text.RegularExpressions;
+	using Common.StaticData;
+	using SharedMethods;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -182,7 +182,7 @@ namespace TAG_GQI_Infrastructure_1
                 {
                     continue;
                 }
-                //CreateDebugRow(rows, $"channelsinfo : {devicesRows[i].Length}");
+
                 var cells = new[]
                 {
                     new GQICell { Value = deviceName }, // Name
@@ -244,9 +244,9 @@ namespace TAG_GQI_Infrastructure_1
             for (int i = 0; i < devicesRows.Length; i++)
             {
                 var deviceRow = devicesRows[i];
-                var deviceHardwareRow = deviceHardwareRows[i];
-                var deviceInfoRow = deviceInfoRows[i];
-                var deviceCpuRow = deviceCpuTable[i];
+                var deviceHardwareRow = CheckForRowInTable(deviceHardwareRows, i, 10);
+                var deviceInfoRow = CheckForRowInTable(deviceInfoRows, i, 25);
+                var deviceCpuRow = CheckForRowInTable(deviceCpuTable, i, 5);
 
                 var deviceKey = Convert.ToString(deviceRow[0]);
                 if (!averagedTemperaturesByDevice.TryGetValue(deviceKey, out double temperature))
@@ -292,6 +292,11 @@ namespace TAG_GQI_Infrastructure_1
                 };
                 rows.Add(row);
             }
+        }
+
+        private static object[] CheckForRowInTable(object[][] deviceCpuTable, int i, int rowLength)
+        {
+            return i < deviceCpuTable.Length ? deviceCpuTable[i] : Enumerable.Repeat((object)null, rowLength).ToArray();
         }
 
         private static string CheckUsage(object[] deviceInfoRow, int usedAmountPosition, int limitPosition)

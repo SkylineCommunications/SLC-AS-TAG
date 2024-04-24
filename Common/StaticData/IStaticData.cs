@@ -1,9 +1,9 @@
 ﻿namespace Common.StaticData
 {
-    using Common.TableClasses;
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+	using System;
+	using System.Collections.Generic;
+	using System.Text;
+	using Common.TableClasses;
 
     public interface IStaticData
     {

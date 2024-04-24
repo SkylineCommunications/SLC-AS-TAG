@@ -1,10 +1,10 @@
 ﻿namespace GQI_EVSCerebrum_GetRoutesForDestination_1
 {
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Net.Messages;
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
+	using System;
+	using System.Collections.Generic;
+	using System.Net;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net.Messages;
 
     internal class Route
     {
