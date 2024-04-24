@@ -51,17 +51,14 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_GQI_Retrieve_Outputs_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Helper;
-    using Skyline.DataMiner.Net.Messages;
-    using SharedMethods;
-    using System.Runtime.InteropServices;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Common.StaticData;
+	using SharedMethods;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -69,59 +66,6 @@ namespace TAG_GQI_Retrieve_Outputs_1
     [GQIMetaData(Name = "Get TAG All Outputs")]
     public class GetTagOutputs : IGQIDataSource, IGQIOnInit, IGQIInputArguments
     {
-        private readonly Dictionary<string, string> McsResolutionDict = new Dictionary<string, string>
-        {
-            {"0","1920x1080"},
-            {"1","1080x1920 (90deg)"},
-            {"2","1280x720"},
-            {"3","800x488"},
-            {"4","640x480"},
-            {"5","640x360"},
-            {"6","3840x2160"},
-            {"7","2160x3840 (90deg)"},
-        };
-
-        private readonly Dictionary<string, string> McsFrameRateDict = new Dictionary<string, string>
-        {
-            {"1","1/25 fps"},
-            {"2","2/25 fps"},
-            {"3","2.5/25 fps"},
-            {"4","5/25 fps"},
-            {"5","12.5/25 fps"},
-            {"6","23.976 fps"},
-            {"7","24 fps"},
-            {"8","25 fps"},
-            {"9","29.97 fps"},
-            {"10","30 fps"},
-            {"11","50 fps"},
-            {"12","59.94 fps"},
-            {"13","60 fps"},
-        };
-
-        private readonly Dictionary<string, string> McmResolutionDict = new Dictionary<string, string>
-        {
-            {"1","1920x1080px"},
-            {"2","1080x1920px"},
-            {"3","1280x720px"},
-            {"4","800x488px"},
-            {"5","640x480px"},
-            {"6","640x360px"},
-        };
-
-        private readonly Dictionary<string, string> McmFrameRateDict = new Dictionary<string, string>
-        {
-            {"1","25 fps"},
-            {"2","12.5/25 fps"},
-            {"3","5/25 fps"},
-            {"4","2.5/25 fps"},
-            {"5","2/25 fps"},
-            {"6","1/25 fps"},
-            {"7","23.976 fps"},
-            {"8","24 fps"},
-            {"9","29.97 fps"},
-            {"10","30 fps"},
-        };
-
         private readonly GQIBooleanArgument individualRowsLayout = new GQIBooleanArgument("Individual Rows Per Layout") { IsRequired = true };
         private bool isIndividualRowsLayout;
 
@@ -192,21 +136,22 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 };
 
                 var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
-
+                var mcsStaticData = new MCS_StaticData();
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
                     var outputConfigTable = SharedMethods.GetTable(_dms, response, (int)McsTableId.DeviceOutputConfig);
-                    GetOutputMcsTableRows(rows, response, outputConfigTable);
+                    GetOutputMcsTableRows(rows, response, outputConfigTable, mcsStaticData);
                 }
 
                 // if no MCS in the system, gather MCM data
                 if (rows.Count == 0)
                 {
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    var mcmStaticData = new MCM_StaticData();
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
                         var encoderConfigTable = SharedMethods.GetTable(_dms, response, (int)McmTableId.DeviceEncoderConfig);
-                        GetOutputMcmTableRows(rows, response, encoderConfigTable);
+                        GetOutputMcmTableRows(rows, response, encoderConfigTable, mcmStaticData);
                     }
                 }
             }
@@ -221,7 +166,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
             };
         }
 
-        private void GetOutputMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] outputConfigTable)
+        private void GetOutputMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] outputConfigTable, IStaticData staticData)
         {
             var outputLayoutsTable = SharedMethods.GetTable(_dms, response, (int)McsTableId.OutputLayouts);
 
@@ -248,8 +193,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
                         new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
                         new GQICell { Value = outputName }, // Output
-                        new GQICell { Value = McsResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                        new GQICell { Value = McsFrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                        new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                        new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
                         new GQICell { Value = layoutName }, // Layout
                         new GQICell { Value = layoutId }, // Layout ID
                         new GQICell { Value = response.PollingIP }, // Device IP
@@ -272,8 +217,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                             new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
                             new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
                             new GQICell { Value = outputName }, // Output
-                            new GQICell { Value = McsResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                            new GQICell { Value = McsFrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                            new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
+                            new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
                             new GQICell { Value = layout.LayoutName }, // Layout
                             new GQICell { Value = layout.LayoutId }, // Layout ID
                             new GQICell { Value = response.PollingIP }, // Device IP
@@ -305,7 +250,7 @@ namespace TAG_GQI_Retrieve_Outputs_1
             return layoutsInOutput;
         }
 
-        private void GetOutputMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] encoderConfigTable)
+        private void GetOutputMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] encoderConfigTable, IStaticData staticData)
         {
             var deviceOverviewTable = SharedMethods.GetTable(_dms, response, (int)McmTableId.DeviceOverview);
             var deviceRows = deviceOverviewTable.Where(x => !Convert.ToString(x[0]).Equals("Cloud License"));
@@ -330,8 +275,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         new GQICell { Value = Convert.ToString(deviceName) }, // Device
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[0]) }, // Output ID
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                        new GQICell { Value = McmResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
-                        new GQICell { Value = McmFrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
+                        new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
+                        new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[11]) }, // Layout
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[17]) }, // Layout ID
                         new GQICell { Value = response.PollingIP }, // Device IP
@@ -357,8 +302,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                             new GQICell { Value = Convert.ToString(deviceName) }, // Device
                             new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[0]) }, // Output ID
                             new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                            new GQICell { Value = McmResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
-                            new GQICell { Value = McmFrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
+                            new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
+                            new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
                             new GQICell { Value = Convert.ToString(layoutNameList[j]) }, // Layout
                             new GQICell { Value = Convert.ToString(layoutIdList[j]) }, // Layout ID
                             new GQICell { Value = response.PollingIP }, // Device IP

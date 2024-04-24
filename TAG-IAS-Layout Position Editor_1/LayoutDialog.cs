@@ -1,12 +1,12 @@
 ﻿namespace TAG_IAS_Layout_Position_Editor_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using SharedMethods;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using TagLibrary_1;
 
     public enum Monitored
     {
@@ -46,22 +46,22 @@
 
         public Button CancelButton { get; private set; }
 
-        public void GetLayoutsFromElement(IDmsElement element, string elementType)
+        public void GetLayoutsFromElement(TAG tagInfo, string elementType)
         {
             var channelsList = new List<string> { "< None >" };
 
             if (elementType.Equals("MCM"))
             {
-                var channelsTableData = element.GetTable(MCM.ChannelStatusTableId);
+                var channelsTableData = tagInfo.Element.GetTable(tagInfo.StaticInfo.ChannelStatusOverview);
                 var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.Equal, Pid = 256, Value = Convert.ToString((int)Monitored.Yes) } };
                 var matchedChannels = channelsTableData.QueryData(filter).ToList();
                 channelsList.AddRange(matchedChannels.Select(row => Convert.ToString(row[12 /* Name */])));
             }
             else
             {
-                foreach (var tableId in MCS.ChannelsTableIds)
+                foreach (var tableId in tagInfo.StaticInfo.ChannelsTableIds)
                 {
-                    var channelsTableData = element.GetTable(tableId);
+                    var channelsTableData = tagInfo.Element.GetTable(tableId);
                     var filter = new List<ColumnFilter> { new ColumnFilter { ComparisonOperator = ComparisonOperator.NotEqual, Pid = 2107, Value = "Not Set" } };
                     var matchedChannels = channelsTableData.QueryData(filter).ToList();
                     channelsList.AddRange(matchedChannels.Select(row => Convert.ToString(row[1 /* Label */])));

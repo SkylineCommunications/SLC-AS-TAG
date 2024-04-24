@@ -51,15 +51,15 @@ DATE		VERSION		AUTHOR			COMMENTS
 
 namespace TAG_GQI_Infrastructure_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages;
-    using SharedMethods;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text.RegularExpressions;
+	using Common.StaticData;
+	using SharedMethods;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -139,7 +139,6 @@ namespace TAG_GQI_Infrastructure_1
                 };
 
                 var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
-
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
                     GetMCSRows(rows, response);
@@ -149,9 +148,10 @@ namespace TAG_GQI_Infrastructure_1
                 if (rows.Count == 0)
                 {
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    var mcmStaticData = new MCM_StaticData();
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        GetMCMRows(rows, response);
+                        GetMCMRows(rows, response, mcmStaticData);
                     }
                 }
             }
@@ -166,11 +166,11 @@ namespace TAG_GQI_Infrastructure_1
             };
         }
 
-        private void GetMCMRows(List<GQIRow> rows, LiteElementInfoEvent response)
+        private void GetMCMRows(List<GQIRow> rows, LiteElementInfoEvent response, IStaticData staticInfo)
         {
             var devicesRows = SharedMethods.GetTable(_dms, response, (int)MCMTableId.DeviceOverview);
-            var cpu = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, MCM.CPU_Pid));
-            var memory = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, MCM.Memory_Pid));
+            var cpu = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, staticInfo.CPU_Pid));
+            var memory = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, staticInfo.Memory_Pid));
 
             var cloudLicenseRow = devicesRows.FirstOrDefault(x => Convert.ToString(x[0]) == "Cloud License");
 
@@ -182,7 +182,7 @@ namespace TAG_GQI_Infrastructure_1
                 {
                     continue;
                 }
-                //CreateDebugRow(rows, $"channelsinfo : {devicesRows[i].Length}");
+
                 var cells = new[]
                 {
                     new GQICell { Value = deviceName }, // Name
@@ -244,9 +244,9 @@ namespace TAG_GQI_Infrastructure_1
             for (int i = 0; i < devicesRows.Length; i++)
             {
                 var deviceRow = devicesRows[i];
-                var deviceHardwareRow = deviceHardwareRows[i];
-                var deviceInfoRow = deviceInfoRows[i];
-                var deviceCpuRow = deviceCpuTable[i];
+                var deviceHardwareRow = CheckForRowInTable(deviceHardwareRows, i, 10);
+                var deviceInfoRow = CheckForRowInTable(deviceInfoRows, i, 25);
+                var deviceCpuRow = CheckForRowInTable(deviceCpuTable, i, 5);
 
                 var deviceKey = Convert.ToString(deviceRow[0]);
                 if (!averagedTemperaturesByDevice.TryGetValue(deviceKey, out double temperature))
@@ -292,6 +292,11 @@ namespace TAG_GQI_Infrastructure_1
                 };
                 rows.Add(row);
             }
+        }
+
+        private static object[] CheckForRowInTable(object[][] deviceCpuTable, int i, int rowLength)
+        {
+            return i < deviceCpuTable.Length ? deviceCpuTable[i] : Enumerable.Repeat((object)null, rowLength).ToArray();
         }
 
         private static string CheckUsage(object[] deviceInfoRow, int usedAmountPosition, int limitPosition)

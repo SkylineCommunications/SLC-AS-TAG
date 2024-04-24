@@ -51,13 +51,14 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_GQI_Retrieve_Channel_Details_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using SharedMethods;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Common.StaticData;
+	using SharedMethods;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -119,10 +120,10 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                 };
 
                 var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
-
+                var mcsIds = new MCS_StaticData();
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var channelStatusOverviewTable = SharedMethods.GetTable(_dms, response, MCS.ChannelStatusOverview);
+                    var channelStatusOverviewTable = SharedMethods.GetTable(_dms, response, mcsIds.ChannelStatusOverview);
                     GetChannelsMcsTableRows(rows, response, channelStatusOverviewTable);
                 }
 
@@ -130,10 +131,11 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                 if (rows.Count == 0)
                 {
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    var mcmIds = new MCM_StaticData();
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, MCM.ChannelStatusOverview);
-                        GetChannelsMcmTableRows(rows, response, encoderConfigTable);
+                        var encoderConfigTable = SharedMethods.GetTable(_dms, response, mcmIds.ChannelStatusOverview);
+                        GetChannelsMcmTableRows(rows, response, encoderConfigTable, mcmIds);
                     }
                 }
             }
@@ -167,6 +169,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
                     case FormattedValueType.MemoryUsage:
                         return (parsedDouble * 1000).ToString("F3") + " kb";
+
                     case FormattedValueType.MemoryAllocated:
                         if (parsedDouble > 1000)
                         {
@@ -227,9 +230,9 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
             }
         }
 
-        private void GetChannelsMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable)
+        private void GetChannelsMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelStatusOverviewTable, IStaticData staticData)
         {
-            var channelEventsOverviewTable = SharedMethods.GetTable(_dms, response, MCM.ChannelEventsOverview);
+            var channelEventsOverviewTable = SharedMethods.GetTable(_dms, response, staticData.ChannelEventsOverview);
 
             var eventNamesAdded = new List<string>();
 
@@ -245,8 +248,8 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
 
                 var channelEventsRows = channelEventsOverviewTable.Where(x => Convert.ToInt32(x[6 /* Status */]).Equals(1)).ToList();
                 var activeEvents = channelEventsRows.Count;
-                var type = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
-                var severity = SharedMethods.GetValueFromStringDictionary(MCM.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
+                var type = SharedMethods.GetValueFromStringDictionary(staticData.ChannelConfigAccessTypeDict, Convert.ToString(tableRow[16]));
+                var severity = SharedMethods.GetValueFromStringDictionary(staticData.ChannelConfigSeverityDict, Convert.ToString(tableRow[4]));
                 var elementID = new ElementID(response.DataMinerID, response.ElementID);
 
                 GQICell[] cells = new[]

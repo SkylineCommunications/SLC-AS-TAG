@@ -1,13 +1,12 @@
 ﻿namespace TAG_UMD_Editor
 {
-    using System;
-    using System.Linq;
-    using System.Threading;
-    using SharedMethods;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using System;
+	using System.Linq;
+	using System.Threading;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     public class UmdDialog : Dialog
     {
@@ -26,7 +25,7 @@
             TallyAndUmdSection = new TallyAndUmdSection();
             AlarmsSection = new AlarmSection();
             BottomPanelButtons = new BottomPanelButtons();
-            UmdButtonActions = new ButtonActions(StaticTopPanel,engine);
+            UmdButtonActions = new ButtonActions(StaticTopPanel, engine);
 
             UmdFilterButtons.TextFormatButton.IsEnabled = false; // Default selected option
             var umdValue = CheckUmdValue();
@@ -244,12 +243,16 @@
                 {
                     case "UMD 1":
                         return (int)UmdEditor.TagMcs.Umd1Read;
+
                     case "UMD 2":
                         return (int)UmdEditor.TagMcs.Umd2Read;
+
                     case "UMD 3":
                         return (int)UmdEditor.TagMcs.Umd3Read;
+
                     case "UMD 4":
                         return (int)UmdEditor.TagMcs.Umd4Read;
+
                     default:
                         return 0;
                 }
@@ -260,8 +263,10 @@
                 {
                     case "UMD 1":
                         return (int)UmdEditor.TagMcm.Umd1Idx;
+
                     case "UMD 2":
                         return (int)UmdEditor.TagMcm.Umd2Idx;
+
                     default:
                         return 0;
                 }
@@ -281,21 +286,26 @@
                 case FilteredBy.TextFormat:
                     AddSection(TextFormatSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
                     break;
+
                 case FilteredBy.SpecialValue:
                     AddSection(SpecialValuesSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
                     break;
+
                 case FilteredBy.TallyAndUmd:
                     AddSection(TallyAndUmdSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
                     break;
+
                 case FilteredBy.Alarm:
                     AddSection(AlarmsSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
                     break;
+
                 case FilteredBy.All:
                     AddSection(TextFormatSection, new SectionLayout((int)StartRowSectionPosition.InitialFilteredSection, 1));
                     AddSection(SpecialValuesSection, new SectionLayout((int)StartRowSectionPosition.SpecialValuesSection, 1));
                     AddSection(TallyAndUmdSection, new SectionLayout((int)StartRowSectionPosition.TallySection, 1));
                     AddSection(AlarmsSection, new SectionLayout((int)StartRowSectionPosition.AlarmSection, 1));
                     break;
+
                 default:
                     // no action
                     break;

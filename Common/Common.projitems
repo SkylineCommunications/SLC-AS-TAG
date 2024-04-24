@@ -10,5 +10,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)SharedMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StaticData\MCM_StaticData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StaticData\MCS_StaticData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StaticData\IStaticData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TableClasses\AllChannelProfileIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TableClasses\AllLayoutRowValues.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TableClasses\AllLayouts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TableClasses\Outputs.cs" />
   </ItemGroup>
 </Project>

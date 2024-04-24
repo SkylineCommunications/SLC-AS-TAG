@@ -1,15 +1,11 @@
 ﻿namespace TAG_Send_Channel_To_Layout
 {
-    using System;
-    using System.Configuration;
-    using System.Linq;
-    using System.Threading;
-    using SharedMethods;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using System.Linq;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using TagLibrary_1;
 
     public class LayoutDialog : Dialog
     {
@@ -108,8 +104,8 @@
 
         public void SetChannelToLayout()
         {
-            var allLayoutsTable = TagElement.GetTable(Tag.allLayoutsTableId);
-            allLayoutsTable.GetColumn<string>(Tag.AllLayouts_TitleColumnId).SetValue(LayoutIndex, SelectedChannel.Text);
+            var allLayoutsTable = TagElement.GetTable(Tag.StaticInfo.AllLayouts.TableId);
+            allLayoutsTable.GetColumn<string>(Tag.StaticInfo.AllLayouts.TitleColumnPid).SetValue(LayoutIndex, SelectedChannel.Text);
             Engine.ExitSuccess("Channel Set to Layout");
         }
     }

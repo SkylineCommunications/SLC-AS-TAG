@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+	<Name>TagLibrary</Name>
+	<Description></Description>
+	<Type>Automation</Type>
+	<Author>SKYLINE2\BlakeSM</Author>
+	<CheckSets>FALSE</CheckSets>
+	<Folder>TAG</Folder>
+
+	<Protocols>
+	</Protocols>
+
+	<Memory>
+	</Memory>
+
+	<Parameters>
+	</Parameters>
+
+	<Script>
+		<Exe id="1" type="csharp">
+			<Value><![CDATA[[Project:TagLibrary_1]]]></Value>
+			<!--<Param type="debug">true</Param>-->
+			<Param type="preCompile">true</Param>
+			<Param type="libraryName">TagLibrary</Param>
+		</Exe>
+	</Script>
+</DMSScript>

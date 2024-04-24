@@ -51,24 +51,25 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_IAS_Modify_Output_Layout_1
 {
-    using System;
-    using SharedMethods;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using System;
+	using SharedMethods;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using TagLibrary_1;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
     /// </summary>
     public class Script
-	{
+    {
         /// <summary>
         /// The script entry point.
         /// </summary>
         /// <param name="engine">Link with SLAutomation process.</param>
         public static void Run(IEngine engine)
-		{
+        {
             // DO NOT REMOVE THIS COMMENTED-OUT CODE OR THE SCRIPT WON'T RUN!
             // DataMiner evaluates if the script needs to launch in interactive mode.
             // This is determined by a simple string search looking for "engine.ShowUI" in the source code.
@@ -119,7 +120,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
 
         private static void UpdateLayout(IEngine engine, OutputDialog outputDialog, Element element, TAG tag)
         {
-            outputDialog.SendLayoutUpdate(element, tag.Outputs_LayoutsColumnId);
+            outputDialog.SendLayoutUpdate(element, tag.StaticInfo.Outputs.LayoutsColumnId);
             engine.ExitSuccess("Update finished");
         }
     }

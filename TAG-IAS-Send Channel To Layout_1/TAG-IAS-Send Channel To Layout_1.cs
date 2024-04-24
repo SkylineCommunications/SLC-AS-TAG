@@ -51,14 +51,11 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_IAS_Send_Channel_To_Layout_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Text;
-    using SharedMethods;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using TAG_Send_Channel_To_Layout;
+	using System;
+	using SharedMethods;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using TAG_Send_Channel_To_Layout;
 
     /// <summary>
     /// Represents a DataMiner Automation script.

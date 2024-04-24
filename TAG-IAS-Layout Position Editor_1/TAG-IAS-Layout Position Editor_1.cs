@@ -51,29 +51,30 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_IAS_Layout_Position_Editor_1
 {
-    using System;
-    using System.Threading;
-    using SharedMethods;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-    using Skyline.DataMiner.Core.DataMinerSystem.Common;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using System;
+	using System.Threading;
+	using SharedMethods;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using TagLibrary_1;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
     /// </summary>
     public class Script
-	{
-		private static string layoutId;
-		private static string position;
-		private static LayoutDialog layoutDialog;
+    {
+        private static string layoutId;
+        private static string position;
+        private static LayoutDialog layoutDialog;
 
-		/// <summary>
-		/// The script entry point.
-		/// </summary>
-		/// <param name="engine">Link with SLAutomation process.</param>
-		public static void Run(IEngine engine)
-		{
+        /// <summary>
+        /// The script entry point.
+        /// </summary>
+        /// <param name="engine">Link with SLAutomation process.</param>
+        public static void Run(IEngine engine)
+        {
             // DO NOT REMOVE THIS COMMENTED-OUT CODE OR THE SCRIPT WON'T RUN!
             // DataMiner evaluates if the script needs to launch in interactive mode.
             // This is determined by a simple string search looking for "engine.ShowUI" in the source code.
@@ -108,16 +109,16 @@ namespace TAG_IAS_Layout_Position_Editor_1
 
                 if (action.ToUpperInvariant().Equals("EDIT"))
                 {
-                    layoutDialog.GetLayoutsFromElement(dmsElement, elementType);
+                    layoutDialog.GetLayoutsFromElement(tag, elementType);
 
-                    layoutDialog.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, tag.AllLayouts_TitleColumnId, layoutDialog.ChannelsDropDown.Selected);
+                    layoutDialog.UpdateButton.Pressed += (sender, args) => UpdateLayoutChannel(engine, element, tag.StaticInfo.AllLayouts.TitleColumnPid, layoutDialog.ChannelsDropDown.Selected);
                     layoutDialog.CancelButton.Pressed += (sender, args) => engine.ExitSuccess("Layout Update Canceled");
 
                     controller.Run(layoutDialog);
                 }
                 else
                 {
-                    UpdateLayoutChannel(engine, element, tag.AllLayouts_TitleColumnId, "None");
+                    UpdateLayoutChannel(engine, element, tag.StaticInfo.AllLayouts.TitleColumnPid, "None");
                 }
             }
             catch (ScriptAbortException)
@@ -130,7 +131,7 @@ namespace TAG_IAS_Layout_Position_Editor_1
             }
         }
 
-		private static void UpdateLayoutChannel(IEngine engine, Element element, int columnPid, string value)
+        private static void UpdateLayoutChannel(IEngine engine, Element element, int columnPid, string value)
         {
             if (String.IsNullOrWhiteSpace(value))
             {

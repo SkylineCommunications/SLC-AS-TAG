@@ -1,7 +1,7 @@
 ﻿namespace TAG_UMD_Editor
 {
-    using Skyline.DataMiner.Automation;
-    using System.Collections.Generic;
+	using System.Collections.Generic;
+	using Skyline.DataMiner.Automation;
 
     public class ButtonActions
     {
