@@ -17,15 +17,13 @@
     <DefineConstants>$(DefineConstants);DCFv1;DBInfo;ALARM_SQUASHING</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Automation" Version="1.1.1.9" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.3.3" />
-    <PackageReference Include="Skyline.DataMiner.Utils.InteractiveAutomationScriptToolkit" Version="8.0.3" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TagLibrary_1\TagLibrary_1.csproj" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties DisLinkedXmlFile="..\TAG-IAS-Modify Output Layout.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
+      <UserProperties DisLinkedXmlFile="..\TagLibrary.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="..\Common\Common.projitems" Label="Shared" />
 </Project>

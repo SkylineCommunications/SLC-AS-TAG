@@ -51,15 +51,15 @@ DATE		VERSION		AUTHOR			COMMENTS
 
 namespace TAG_GQI_Infrastructure_1
 {
+    using Common.StaticData;
+    using SharedMethods;
+    using Skyline.DataMiner.Analytics.GenericInterface;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages;
-    using SharedMethods;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -139,7 +139,6 @@ namespace TAG_GQI_Infrastructure_1
                 };
 
                 var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
-
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
                     GetMCSRows(rows, response);
@@ -149,9 +148,10 @@ namespace TAG_GQI_Infrastructure_1
                 if (rows.Count == 0)
                 {
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    var mcmStaticData = new MCM_StaticData();
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        GetMCMRows(rows, response);
+                        GetMCMRows(rows, response, mcmStaticData);
                     }
                 }
             }
@@ -166,11 +166,11 @@ namespace TAG_GQI_Infrastructure_1
             };
         }
 
-        private void GetMCMRows(List<GQIRow> rows, LiteElementInfoEvent response)
+        private void GetMCMRows(List<GQIRow> rows, LiteElementInfoEvent response, IStaticData staticInfo)
         {
             var devicesRows = SharedMethods.GetTable(_dms, response, (int)MCMTableId.DeviceOverview);
-            var cpu = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, MCM.CPU_Pid));
-            var memory = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, MCM.Memory_Pid));
+            var cpu = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, staticInfo.CPU_Pid));
+            var memory = Convert.ToDouble(SharedMethods.GetParameter(_dms, response, staticInfo.Memory_Pid));
 
             var cloudLicenseRow = devicesRows.FirstOrDefault(x => Convert.ToString(x[0]) == "Cloud License");
 

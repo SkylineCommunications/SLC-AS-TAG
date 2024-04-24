@@ -51,13 +51,12 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_GQI_Retrieve_Layouts_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using SharedMethods;
     using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using TAG_GQI_Retrieve_Layouts_1.RealTimeUpdates;
 
     /// <summary>

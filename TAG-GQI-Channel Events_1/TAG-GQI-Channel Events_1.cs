@@ -54,9 +54,9 @@ namespace TAG_GQI_Channel_Severity_1
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Common.StaticData;
     using SharedMethods;
     using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.Messages;
@@ -65,7 +65,6 @@ namespace TAG_GQI_Channel_Severity_1
     /// Represents a DataMiner Automation script.
     /// </summary>
     [GQIMetaData(Name = "Get Channel Events")]
-
     public class GetChannelEvents : IGQIDataSource, IGQIOnInit, IGQIInputArguments
     {
         private readonly GQIStringArgument channelId = new GQIStringArgument("Channel ID") { IsRequired = true };
@@ -123,20 +122,22 @@ namespace TAG_GQI_Channel_Severity_1
 
                 var mcsResponses = _dms.SendMessages(new DMSMessage[] { mcsRequest });
 
+                var mcsStaticData = new MCS_StaticData();
                 foreach (var response in mcsResponses.Select(x => (LiteElementInfoEvent)x))
                 {
-                    var channelEventsTable = SharedMethods.GetTable(_dms, response, MCS.ChannelEventsOverview);
-                    GetChannelStatusMcsTableRows(rows, response, channelEventsTable);
+                    var channelEventsTable = SharedMethods.GetTable(_dms, response, mcsStaticData.ChannelEventsOverview);
+                    GetChannelStatusMcsTableRows(rows, response, channelEventsTable, mcsStaticData);
                 }
 
                 // if no MCS in the system, gather MCM data
                 if (rows.Count == 0)
                 {
                     var mcmResponses = _dms.SendMessages(new DMSMessage[] { mcmRequest });
+                    var mcmStaticData = new MCM_StaticData();
                     foreach (var response in mcmResponses.Select(x => (LiteElementInfoEvent)x))
                     {
-                        var channelsEventsTable = SharedMethods.GetTable(_dms, response, MCM.ChannelEventsOverview);
-                        GetChannelStatusMcmTableRows(rows, response, channelsEventsTable);
+                        var channelsEventsTable = SharedMethods.GetTable(_dms, response, mcmStaticData.ChannelEventsOverview);
+                        GetChannelStatusMcmTableRows(rows, response, channelsEventsTable, mcmStaticData);
                     }
                 }
             }
@@ -151,15 +152,15 @@ namespace TAG_GQI_Channel_Severity_1
             };
         }
 
-        private void GetChannelStatusMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelEventsTable)
+        private void GetChannelStatusMcsTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelEventsTable, IStaticData staticData)
         {
             var filteredRows = channelEventsTable.Where(x => Convert.ToString(x[14]).Equals(_channelId));
             foreach (var channelEventRow in filteredRows)
             {
                 var severity = Convert.ToString(channelEventRow[7]).IsNullOrEmpty() ? "N/A" : Convert.ToString(channelEventRow[7]);
                 var extraDescription = Convert.ToString(channelEventRow[6]).IsNullOrEmpty() ? "N/A" : Convert.ToString(channelEventRow[6]);
-                var status = Convert.ToString(channelEventRow[9]).IsNullOrEmpty() ? "N/A" : MCS.ChannelEventsStatus[Convert.ToString(channelEventRow[9])];
-                var acknowledge = Convert.ToString(channelEventRow[10]).IsNullOrEmpty() ? "N/A" : MCS.ChannelEventsAcknowledge[Convert.ToString(channelEventRow[10])];
+                var status = Convert.ToString(channelEventRow[9]).IsNullOrEmpty() ? "N/A" : staticData.ChannelEventsStatus[Convert.ToString(channelEventRow[9])];
+                var acknowledge = Convert.ToString(channelEventRow[10]).IsNullOrEmpty() ? "N/A" : staticData.ChannelEventsAcknowledge[Convert.ToString(channelEventRow[10])];
                 var occurrences = Convert.ToString(channelEventRow[11]);
 
                 if (occurrences.IsNullOrEmpty() || occurrences.Equals("-1"))
@@ -201,15 +202,15 @@ namespace TAG_GQI_Channel_Severity_1
             }
         }
 
-        private void GetChannelStatusMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelEventsTable)
+        private void GetChannelStatusMcmTableRows(List<GQIRow> rows, LiteElementInfoEvent response, object[][] channelEventsTable, IStaticData staticData)
         {
             var filteredRows = channelEventsTable.Where(x => Convert.ToString(x[15]).Equals(_channelId));
             foreach (var channelEventRow in filteredRows)
             {
-                var severity = Convert.ToString(channelEventRow[2]).IsNullOrEmpty() ? "N/A" : MCM.ChannelConfigSeverityDict[Convert.ToString(channelEventRow[2])];
+                var severity = Convert.ToString(channelEventRow[2]).IsNullOrEmpty() ? "N/A" : staticData.ChannelConfigSeverityDict[Convert.ToString(channelEventRow[2])];
                 var extraDescription = Convert.ToString(channelEventRow[5]).IsNullOrEmpty() ? "N/A" : Convert.ToString(channelEventRow[5]);
-                var status = Convert.ToString(channelEventRow[6]).IsNullOrEmpty() ? "N/A" : MCM.ChannelEventsStatus[Convert.ToString(channelEventRow[6])];
-                var acknowledge = Convert.ToString(channelEventRow[8]).IsNullOrEmpty() ? "N/A" : MCM.ChannelEventsAcknowledge[Convert.ToString(channelEventRow[8])];
+                var status = Convert.ToString(channelEventRow[6]).IsNullOrEmpty() ? "N/A" : staticData.ChannelEventsStatus[Convert.ToString(channelEventRow[6])];
+                var acknowledge = Convert.ToString(channelEventRow[8]).IsNullOrEmpty() ? "N/A" : staticData.ChannelEventsAcknowledge[Convert.ToString(channelEventRow[8])];
                 var occurrences = Convert.ToString(channelEventRow[9]);
 
                 if (occurrences.IsNullOrEmpty() || occurrences.Equals("-1"))
@@ -269,15 +270,15 @@ namespace TAG_GQI_Channel_Severity_1
                 new GQICell { Value = null },
                 new GQICell { Value = null },
                 new GQICell { Value = null },
-                new GQICell { Value = null},
-                new GQICell { Value = null},
                 new GQICell { Value = null },
                 new GQICell { Value = null },
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
+                new GQICell { Value = null },
             };
 
             var row = new GQIRow(debugCells);

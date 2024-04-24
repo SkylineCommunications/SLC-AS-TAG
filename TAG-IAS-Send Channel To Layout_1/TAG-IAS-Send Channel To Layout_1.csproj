@@ -18,15 +18,15 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Automation" Version="1.1.1.8" />
-    <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Common" Version="1.1.1.8" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.4.3.3" />
     <PackageReference Include="Skyline.DataMiner.Utils.InteractiveAutomationScriptToolkit" Version="8.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TagLibrary_1\TagLibrary_1.csproj" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties DisLinkedXmlFile="..\TAG-IAS-Send Channel To Layout.xml" DisProjectType="automationScriptProject" DisLinkId="1" />
     </VisualStudio>
   </ProjectExtensions>
-  <Import Project="..\Common\Common.projitems" Label="Shared" />
 </Project>
