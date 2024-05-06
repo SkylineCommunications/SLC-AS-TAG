@@ -201,7 +201,7 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = CheckUsage(deviceRow, 21, 20, cloudLicenseRow) }, // Recorders
                     new GQICell { Value = cpu, DisplayValue = cpu == -1 ? "N/A" : Convert.ToString(cpu) + " %" }, // CPU
                     new GQICell { Value = -1d, DisplayValue = "N/A" }, // Temperature
-                    new GQICell { Value = Convert.ToString(deviceRow[25]), DisplayValue = CheckValue(Convert.ToDouble(deviceRow[25])) }, // Clock Offset
+                    new GQICell { Value = $"{Convert.ToDouble(deviceRow[25]).ToString("F6")} MHz"}, // Clock Offset
                     new GQICell { Value = Convert.ToString(deviceRow[2]) }, // Model
                     new GQICell { Value = Convert.ToString(memory), DisplayValue = memory == -1 ? "N/A" : Convert.ToString(memory) }, // Memory
                     new GQICell { Value = Convert.ToDouble(deviceRow[29]), DisplayValue = CheckValue(Convert.ToDouble(deviceRow[29])) }, // Used Outputs
@@ -272,7 +272,7 @@ namespace TAG_GQI_Infrastructure_1
                     new GQICell { Value = CheckUsage(deviceInfoRow, 12, 13) }, // Recordings
                     new GQICell { Value = CheckValue(Convert.ToString(deviceCpuRow[4]), out double cpuValue), DisplayValue = cpuValue == -1 ? "N/A" : cpuValue + " %" }, // CPU
                     new GQICell { Value = temperature, DisplayValue = CheckValue(temperature) }, // Temperature
-                    new GQICell { Value = Convert.ToString(deviceInfoRow[4]), DisplayValue = CheckValue(Convert.ToDouble(deviceInfoRow[4])) }, // Clock Offset
+                    new GQICell { Value = $"{Convert.ToDouble(deviceInfoRow[4]).ToString("F6")} MHz"}, // Clock Offset
                     new GQICell { Value = Convert.ToString(deviceHardwareRow[4]) }, // Model
                     new GQICell { Value = CheckUsageModified(deviceCpuRow, 2, 3, 1000) }, // Memory
                     new GQICell { Value = CheckValue(Convert.ToString(deviceInfoRow[14]), out double outputsUsed), DisplayValue = outputsUsed == -1 ? "N/A" : Convert.ToString(outputsUsed) }, // Used Outputs
