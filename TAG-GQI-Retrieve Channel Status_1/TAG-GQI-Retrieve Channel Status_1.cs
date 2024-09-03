@@ -258,7 +258,7 @@ namespace TAG_GQI_Retrieve_Channel_Details_1
                     new GQICell { Value = "N/A" }, // Thumbnail
                     new GQICell { Value = severity }, // Severity
                     new GQICell { Value = Convert.ToString(activeEvents) }, // Active Events
-                    new GQICell { Value = -1, DisplayValue = "N/A" }, // Bitrate
+                    new GQICell { Value = -1d, DisplayValue = "N/A" }, // Bitrate
                     new GQICell { Value = type}, // Type
                     new GQICell { Value = "N/A" }, // CPU Usage
                     new GQICell { Value = "N/A" }, // Memory Allocated

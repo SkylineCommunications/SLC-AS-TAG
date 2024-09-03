@@ -258,7 +258,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
             for (int i = 0; i < encoderConfigTable.Length; i++)
             {
                 var deviceEncoderConfigRow = encoderConfigTable[i];
-                var filteredDeviceRow = deviceRows.First(x => Convert.ToString(x[4]).Equals(Convert.ToString(deviceEncoderConfigRow[16])));
+
+                var filteredDeviceRow = deviceRows.FirstOrDefault(x => Convert.ToString(x[4]).Equals(Convert.ToString(deviceEncoderConfigRow[16])));
                 var deviceName = string.Empty;
                 deviceName = filteredDeviceRow == null ? "N/A" : Convert.ToString(filteredDeviceRow[0]);
 
@@ -333,20 +334,6 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 new GQICell { Value = null },
                 new GQICell { Value = null },
                 new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null },
-                new GQICell { Value = null },
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
-                new GQICell { Value = null},
             };
 
             var row = new GQIRow(debugCells);
