@@ -51,13 +51,14 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_IAS_Modify_Output_Layout_1
 {
-	using System;
-	using SharedMethods;
-	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
-	using Skyline.DataMiner.Core.DataMinerSystem.Common;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-	using TagLibrary_1;
+    using System;
+    using System.Threading;
+    using SharedMethods;
+    using Skyline.DataMiner.Automation;
+    using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+    using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+    using TagLibrary_1;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -121,6 +122,7 @@ namespace TAG_IAS_Modify_Output_Layout_1
         private static void UpdateLayout(IEngine engine, OutputDialog outputDialog, Element element, TAG tag)
         {
             outputDialog.SendLayoutUpdate(element, tag.StaticInfo.Outputs.LayoutsColumnId);
+            Thread.Sleep(3000);
             engine.ExitSuccess("Update finished");
         }
     }
