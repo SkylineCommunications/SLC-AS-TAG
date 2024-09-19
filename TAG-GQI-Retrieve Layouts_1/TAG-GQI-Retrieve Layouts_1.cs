@@ -123,7 +123,7 @@ namespace TAG_GQI_Retrieve_Layouts_1
         public void OnStopUpdates()
         {
             _dataProvider.SourceTable.Changed -= TableData_OnChanged;
-
+            StaticDataProvider.Reset();
             _updater = null;
         }
 
