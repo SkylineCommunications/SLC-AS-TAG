@@ -51,14 +51,17 @@ dd/mm/2024	1.0.0.1		XXX, Skyline	Initial version
 
 namespace TAG_GQI_Retrieve_Outputs_1
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Common.StaticData;
-	using SharedMethods;
-	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Messages;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Common.StaticData;
+
+    using SharedMethods;
+
+    using Skyline.DataMiner.Analytics.GenericInterface;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
     /// Represents a DataMiner Automation script.
@@ -182,6 +185,18 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 var elementMetadata = new ObjectRefMetadata { Object = elementID };
                 var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
 
+                string resolution = string.Empty;
+                if (!staticData.ResolutionDict.TryGetValue(Convert.ToString(deviceOutputConfigRow[9]), out resolution))
+                {
+                    resolution = "N/A";
+                }
+
+                string frameRate = string.Empty;
+                if (!staticData.FrameRateDict.TryGetValue(Convert.ToString(deviceOutputConfigRow[8]), out frameRate))
+                {
+                    frameRate = "N/A";
+                }
+
                 if (!isIndividualRowsLayout)
                 {
                     var layoutId = String.Join(";", layoutsInOutput.Select(x => x.LayoutId));
@@ -193,8 +208,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
                         new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
                         new GQICell { Value = outputName }, // Output
-                        new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                        new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                        new GQICell { Value = resolution }, // Resolution
+                        new GQICell { Value = frameRate }, // Frame Rate
                         new GQICell { Value = layoutName }, // Layout
                         new GQICell { Value = layoutId }, // Layout ID
                         new GQICell { Value = response.PollingIP }, // Device IP
@@ -217,8 +232,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                             new GQICell { Value = Convert.ToString(deviceOutputConfigRow[3]).Equals("Not Set") ? "N/A" : Convert.ToString(deviceOutputConfigRow[3])}, // Device
                             new GQICell { Value = Convert.ToString(deviceOutputConfigRow[0]) }, // Output ID
                             new GQICell { Value = outputName }, // Output
-                            new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceOutputConfigRow[9])] }, // Resolution
-                            new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceOutputConfigRow[8])] }, // Frame Rate
+                            new GQICell { Value = resolution }, // Resolution
+                            new GQICell { Value = frameRate }, // Frame Rate
                             new GQICell { Value = layout.LayoutName }, // Layout
                             new GQICell { Value = layout.LayoutId }, // Layout ID
                             new GQICell { Value = response.PollingIP }, // Device IP
@@ -268,6 +283,19 @@ namespace TAG_GQI_Retrieve_Outputs_1
                 var rowMetadata = new GenIfRowMetadata(new[] { elementMetadata });
 
                 GQICell[] cells = null;
+
+                string resolution = string.Empty;
+                if (!staticData.ResolutionDict.TryGetValue(Convert.ToString(deviceEncoderConfigRow[4]), out resolution))
+                {
+                    resolution = "N/A";
+                }
+
+                string frameRate = string.Empty;
+                if (!staticData.FrameRateDict.TryGetValue(Convert.ToString(deviceEncoderConfigRow[9]), out frameRate))
+                {
+                    frameRate = "N/A";
+                }
+
                 if (!isIndividualRowsLayout)
                 {
                     cells = new[]
@@ -276,8 +304,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                         new GQICell { Value = Convert.ToString(deviceName) }, // Device
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[0]) }, // Output ID
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                        new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
-                        new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
+                        new GQICell { Value = resolution }, // Resolution
+                        new GQICell { Value = frameRate }, // Frame Rate
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[11]) }, // Layout
                         new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[17]) }, // Layout ID
                         new GQICell { Value = response.PollingIP }, // Device IP
@@ -303,8 +331,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
                             new GQICell { Value = Convert.ToString(deviceName) }, // Device
                             new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[0]) }, // Output ID
                             new GQICell { Value = Convert.ToString(deviceEncoderConfigRow[1]) }, // Output
-                            new GQICell { Value = staticData.ResolutionDict[Convert.ToString(deviceEncoderConfigRow[4])] }, // Resolution
-                            new GQICell { Value = staticData.FrameRateDict[Convert.ToString(deviceEncoderConfigRow[9])] }, // Frame Rate
+                            new GQICell { Value = resolution }, // Resolution
+                            new GQICell { Value = frameRate }, // Frame Rate
                             new GQICell { Value = Convert.ToString(layoutNameList[j]) }, // Layout
                             new GQICell { Value = Convert.ToString(layoutIdList[j]) }, // Layout ID
                             new GQICell { Value = response.PollingIP }, // Device IP
@@ -325,8 +353,8 @@ namespace TAG_GQI_Retrieve_Outputs_1
         {
             var debugCells = new[]
             {
-                new GQICell { Value = message },
                 new GQICell { Value = null },
+                new GQICell { Value = message },
                 new GQICell { Value = null },
                 new GQICell { Value = null },
                 new GQICell { Value = null },
